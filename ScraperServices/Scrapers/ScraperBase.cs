@@ -198,11 +198,8 @@ namespace ScraperServices.Scrapers
                 result = JsonConvert.DeserializeObject<ParamsSelenoidConfigModel>(File.ReadAllText(filename));
                 _logBase($"file exists", state);
             }
-            //else
-            //{
-            //    result = new ParamsSelenoidConfigModel();
-            //    _saveConfig(result, state);
-            //}
+            else
+                _logBase($"no config file", state);
 
             return result;
         }

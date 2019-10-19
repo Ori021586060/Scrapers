@@ -149,32 +149,5 @@ namespace ScraperServices.Services
 
             return this;
         }
-        //private bool _connectToSite()
-        //{
-        //    var result = false;
-
-        //    try
-        //    {
-        //        _windowMain.Navigate().GoToUrl(UrlForSrapData);
-
-        //        _waitMain.Until(ExpectedConditions.ElementExists(By.Name("_username")));
-
-        //        var username = _windowMain.FindElementByName("_username");
-        //        username.SendKeys("LoginUsername");
-
-        //        var password = _windowMain.FindElementByName("_password");
-        //        password.SendKeys("LoginPassword");
-
-        //        var formLogin = _windowMain.FindElementByTagName("form");
-        //        formLogin.Submit();
-
-        //        _waitMain.Until(ExpectedConditions.ElementExists(By.Id("map")));
-
-        //        result = true;
-        //    }
-        //    catch { }
-
-        //    return result;
-        //}
     }
 }

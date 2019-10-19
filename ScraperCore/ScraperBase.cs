@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 
 namespace ScraperCore
 {
@@ -99,8 +100,6 @@ namespace ScraperCore
             var logMessage = $"{DateTime.UtcNow.ToString("dd.MM.yy HH:mm:ss")} | {state.TypeScraper.ToString(),-10} | {state.WorkPhase,-10} | {message}";
 
             Console.WriteLine(logMessage);
-
-            //File.AppendAllText(_logFile, $"{logMessage}\r\n");
         }
 
         protected void _initSelenoidBase(SelenoidStateModel selenoidState, IState state)
@@ -157,7 +156,7 @@ namespace ScraperCore
                 {
                     _logBase($"\tcountRepeat:{countRepeat}", state);
                     state.UsedSelenoidService++;
-                    //Thread.Sleep(TimeSpan.FromMinutes(10));
+                    Thread.Sleep(TimeSpan.FromMinutes(10));
                 }
 
             } while (doNeedRepeatRequest);
@@ -190,11 +189,8 @@ namespace ScraperCore
 
             if (File.Exists(filename))
                 result = JsonConvert.DeserializeObject<ParamsSelenoidConfigModel>(File.ReadAllText(filename));
-            //else
-            //{
-            //    result = new ParamsSelenoidConfigModel();
-            //    _saveConfig(result, state);
-            //}
+            else
+                _logBase($"no config file", state);
 
             return result;
         }

@@ -94,7 +94,7 @@ namespace ScraperServices.Scrapers
                 result = true;
             }
             catch (Exception exception) {
-                _log($"ERROR-ScraperInner-01");
+                _log($"ERROR-ScraperInner-01. {exception.Message}");
             }
 
             return result;
@@ -308,22 +308,15 @@ namespace ScraperServices.Scrapers
 
                     var netObjects = (Dictionary<string, object>)_selenoidState.WindowMain.ExecuteScript("return window.__data.propertyDetails.data;");
 
-                    //list.Add(key, netObjects);
                     _saveItem(netObjects, key, state);
                     listItems[key] = true;
                     indexOpenedPage++;
                     i++;
                     _log($"add file items/{key}.json");
-                    //_log($"Index ad {i}, id:{listObjects.Where(x=>x.Key==key).FirstOrDefault().Value.id}");
                 }
 
-            //File.WriteAllText(state.Phase2Filename, JsonConvert.SerializeObject(list, Formatting.Indented));
             _saveListItems(listItems, state);
             _log($"Done");
-            //else
-            //{
-            //    _log($"Phase-2 has data, no generate new data");
-            //}
         }
 
         private void _checkListItemsByPath(Dictionary<string, bool> listItems, ScraperOnmapStateModel state)
@@ -370,91 +363,6 @@ namespace ScraperServices.Scrapers
 
             return result;
         }
-
-        //private void _initSelenoid(ScraperOnmapStateModel state)
-        //{
-        //    var options = new FirefoxOptions();
-        //    options.SetPreference("permissions.default.image", 2);
-        //    //options.SetPreference("javascript.enabled", false);
-
-        //    bool doNeedRepeatRequest = false;
-        //    int countRepeat = 0;
-        //    int countRepeatMax = 10;
-
-        //    do
-        //    {
-        //        var selenoidService = _selectSelenoidService(state);
-        //        var selenoidUrl = $"{selenoidService.Protocol}://{selenoidService.Address}:4444/wd/hub";
-        //        _log($"\tTry use SelenoidService-{_usedSelenoidService}:{selenoidUrl}");
-
-        //        try
-        //        {
-        //            if (_windowMain != null)
-        //            {
-        //                _log($"SelenoidService isnt null");
-        //                _windowMain.Quit();
-        //                _log($"Quit SelenoidService done");
-        //            }
-
-        //            _printSelenoidServiceParams(selenoidService);
-
-        //            doNeedRepeatRequest = false;
-
-        //            _windowMain = new RemoteWebDriver(new Uri(selenoidUrl), options.ToCapabilities(), TimeSpan.FromMinutes(5));
-
-        //            _waitMain = new WebDriverWait(_windowMain, TimeSpan.FromSeconds(120));
-        //        }
-        //        catch
-        //        {
-        //            countRepeat++;
-        //            if (countRepeat < countRepeatMax)
-        //            {
-        //                doNeedRepeatRequest = true;
-        //                _log($"\t!!! Need change Selenoid Service !!!");
-        //                _log($"\tBad config SelenoidService-{_usedSelenoidService}:");
-        //                _printSelenoidServiceParams(selenoidService);
-        //            }
-        //        }
-
-        //        if (doNeedRepeatRequest)
-        //        {
-        //            _log($"\tcountRepeat:{countRepeat}");
-        //            _usedSelenoidService++;
-        //            //Thread.Sleep(TimeSpan.FromMinutes(10));
-        //        }
-
-        //    } while (doNeedRepeatRequest);
-
-        //}
-
-        //private void _printSelenoidServiceParams(SelenoidConfigModel service)
-        //{
-        //    _log($"\tParams Selenoid:");
-        //    _log($"\t\tDns:{service.Address}");
-        //    _log($"\t\tIp:{Dns.GetHostAddresses(service.Address).FirstOrDefault()}");
-        //    _log($"\t\tProtocol:{service.Protocol}");
-        //    _log($"\t\tIndex:{_usedSelenoidService}");
-        //}
-
-        //private SelenoidConfigModel _selectSelenoidService(ScraperOnmapStateModel state)
-        //{
-        //    _initConfig(state);
-
-        //    Func<SelenoidConfigModel> GetSelenoidService = () => _config.Selenoid
-        //                .Where(x=>x.Enabled)
-        //                .Skip(_usedSelenoidService)
-        //                .FirstOrDefault();
-
-        //    var selenoidService = GetSelenoidService();
-
-        //    if (selenoidService is null)
-        //    {
-        //        _usedSelenoidService = 0;
-        //        selenoidService = GetSelenoidService();
-        //    }
-
-        //    return selenoidService;
-        //}
 
         private void _initSelenoid(ScraperOnmapStateModel state)
         {
