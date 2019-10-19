@@ -1,0 +1,150 @@
+﻿@model WebScraperManager.ViewModels.ScrapersViewModel
+@{
+    ViewData["Title"] = "Scrape";
+}
+
+    <div class="card card-body">
+        <h4 class="card-title">@ViewData["Title"]</h4>
+
+        <label>Select city</label>
+        <div class="input-group mb-3">
+
+            @Html.DropDownListFor(model=>model.Cities
+                    , new SelectList(Model.Cities, "Key", "Value")
+                    , new { id="select-city", @class="form-control custom-select" })
+
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="button" id="button-start-scrape">Start</button>
+            </div>
+        </div>
+
+        <div style="margin:10px;"></div>
+
+        <label>Scrapers</label>
+
+        <div class="card-columns">
+            @foreach (var scraper in Model.Scrapers)
+            {
+                <div class="card scraper-card" data-scraper-id="@scraper.Id">
+                    <div class="card-header font-weight-bold">
+
+                    <div class="checkbox">
+                        <label style="font-size: 2.0em">
+                            <input type="checkbox" value="" checked class="checkbox-use-scraper" data-scraper-id="@scraper.Id">
+                            <span class="cr"><i class="cr-icon fa fa-check"></i></span>
+                            @scraper.Name
+                        </label>
+                    </div>
+                        
+                    </div>
+                        <div class="card-body">
+                            <div class="card-text">
+                                <div>
+                                    <div class="font-weight-bold">
+                                        @scraper.Description
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            }
+
+        </div>
+    </div>
+
+
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+
+            $("#button-start-scrape").click(() => {
+                formService.ClickButtonStartScrape()
+            })
+
+            $(".scraper-card").click(function (event) {
+                event.preventDefault()
+
+                formService.ChangeScrapeChecked(1)
+
+                formService.RenderScrapers()
+            })
+
+            $("#select-city").change(function (event) {
+                let cityId = $(this).val()
+                formService.SelectCity(cityId)
+            })
+
+            formService.RenderScrapers()
+
+        });
+
+        var formService = {
+            State: { 
+                SelectedItems: {
+                    UseScrapers: [
+                        {
+                            'id': '@String.Join(",", Model.Scrapers.Select(x=>x.Id).ToList())',
+                            'checked': true,
+                        }
+                    ],
+                    CityId: @Model.Cities.FirstOrDefault().Key,
+                }
+            },
+            RenderScrapers: () => {
+                formService.State.SelectedItems.UseScrapers.forEach(function (value, i){
+                    let scraper = $(".checkbox-use-scraper")
+                    scraper.prop("checked", value.checked ? "checked":"")
+                })
+            },
+            SelectCity: (cityId) => {
+                formService.State.SelectedItems.CityId = cityId
+            },
+            ChangeScrapeChecked: (scrapeId) => {
+                formService.State.SelectedItems.UseScrapers.forEach(function (value, i) {
+                    if (value.id == scrapeId) value.checked = !value.checked
+                })
+
+                formService.RenderScrapers()
+            },
+            ClickButtonStartScrape: () => {
+
+                let countSelectedScraper = formService.State.SelectedItems.UseScrapers.filter(x => x.checked)
+
+                if (countSelectedScraper.length > 0) {
+
+                    toastr.info(`Start scrape data`)
+
+                    let data = formService.State.SelectedItems
+                    $.post({
+                        type: 'POST',
+                        url: urls['Scraper_Scrape'],
+                        contentType: 'application/json',
+                        data: JSON.stringify(data),
+                        success: function (response, status, xhr) {
+                            let state = response || {}
+                            console.log("response:",response)
+
+                            if (state.isOk == true) {
+                                toastr.info(`Create file is complete. ${state.message}`)
+                                formService.DownloadScrapedExcelFile(state.payload)
+                            } else {
+                                toastr.info(`Create file had errors. ${state.message}`)
+                            }
+                        },
+                        dataType: 'json'
+                    })
+                } else toastr.info(`Please select a scraper`)
+            },
+            DownloadScrapedExcelFile: (filename) => {
+                let ext = ""
+                for (let i = 0; i < 10; i++) ext += `${Math.floor(Math.random() * 10)}`
+
+                let url = `@Url.Action("Index","Download",new { id="Airdna" })/${filename}?${ext}`
+
+                window.open(url, '_blank');
+            },
+        }
+        
+    </script>
+}

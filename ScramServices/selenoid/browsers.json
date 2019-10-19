@@ -1,0 +1,18 @@
+{
+"internet explorer": {
+"default": "11",
+"versions": {
+  "11": {
+    "image": ["C:\\selenoid\\IEDriverServer.exe"]
+  }
+}
+},
+"firefox": {
+"default": "64",
+"versions": {
+  "64": {
+    "image": ["C:\\selenoid\\geckodriver.exe"]
+  }
+}
+}
+}

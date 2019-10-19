@@ -1,0 +1,65 @@
+﻿@model WebScraperManager.ViewModels.ArchiveViewModel
+@{
+    ViewData["Title"] = "Archive";
+}
+
+@if (Model.Archive.Count() == 0)
+{
+    <h4 class="text-center">Archive is empty</h4>
+}
+
+
+<div class="card">
+    <div class="card-header">
+        <h4>Latest files</h4>
+    </div>
+    <div class="card-body">
+        @foreach (var scraper in Model.LatestFiles)
+        {
+            @foreach (var file in scraper.Value)
+            {
+                <h4>
+
+                @Html.ActionLink(file.FileName, "Index", "Download", new { id = scraper.Key.Name, filename = file.FileName, }, new { @class = "file xls-file" })
+
+                @{
+                    var dayleft = Math.Floor(file.TimeLeft.TotalDays);
+                    if (dayleft >= 1)
+                    {
+                        <span class="badge badge-@file.StateDateFile.ToString().ToLower() d-none d-sm-inline-block">
+                            Left
+                            @if (dayleft >= 2)
+                            {
+                                @dayleft @:days
+                            }
+                            else
+                            {
+                                @:a day
+                            }
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-@file.StateDateFile.ToString().ToLower() d-none d-sm-inline-block">Success</span>
+                    }
+                }
+        </h4>
+            }
+        }
+    </div>
+</div>
+
+@foreach (var scraper in Model.Archive)
+{
+    <div class="card">
+        <div class="card-header">
+            <h4>@scraper.Key.Name</h4>
+        </div>
+        <div class="card-body">
+            @foreach (var file in scraper.Value)
+            {
+                <h4>@Html.ActionLink(file.FileName, "Index", "Download", new { id = scraper.Key.Name, filename = file.FileName }, new { @class="file xls-file" })</h4>
+            }
+        </div>
+    </div>
+    }

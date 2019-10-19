@@ -1,0 +1,1 @@
+﻿curl -s https://aerokube.com/cm/bash | bash && ./cm selenoid start

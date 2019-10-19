@@ -1,0 +1,26 @@
+[
+  {
+    "Id": 1,
+    "CityOriginalName": "Ashdod",
+    "Airdna": {
+      "CityId": "84771",
+      "CityName": "ashdod"
+    }
+  },
+  {
+    "Id": 2,
+    "CityOriginalName": "Shoham",
+    "Airdna": {
+      "CityId": "103025",
+      "CityName": "shoham"
+    }
+  },
+  {
+    "Id": 3,
+    "CityOriginalName": "Bat Yam",
+    "Airdna": {
+      "CityId": "84809",
+      "CityName": "bat-yam"
+    }
+  }
+]

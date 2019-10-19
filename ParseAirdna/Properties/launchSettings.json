@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ParseAirdna": {
+      "commandName": "Project",
+      "commandLineArgs": "-city ramat-gan"
+    }
+  }
+}

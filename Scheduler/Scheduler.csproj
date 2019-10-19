@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ScramModels\ScrapModels.csproj" />
+    <ProjectReference Include="..\ScramServices\ScraperServices.csproj" />
+  </ItemGroup>
+
+</Project>
