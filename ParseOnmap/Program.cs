@@ -30,7 +30,7 @@ namespace ParseOnmap
 
         static void Scrape(ScraperOnmap scraper)
         {
-            var isOk = scraper.Scrape();
+            var isOk = scraper.Scrape().Result;
         }
 
         static void GetExcelFile(ScraperOnmap scraper)

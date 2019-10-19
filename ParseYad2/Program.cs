@@ -28,7 +28,7 @@ namespace ParseYad2
 
         static void Scrape(ScraperYad2 scraper)
         {
-            var isOk = scraper.Scrape();
+            var isOk = scraper.Scrape().Result;
         }
 
         static void GetExcelFile(ScraperYad2 scraper)

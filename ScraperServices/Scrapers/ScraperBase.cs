@@ -233,8 +233,16 @@ namespace ScraperServices.Scrapers
         protected DateTime _statusWorkspace_ScrapeDateBase(IState state)
         {
             var path = state.ItemsPath;
-            var listItems = new DirectoryInfo($"{path}").GetFiles();
-            var result = listItems[listItems.Length - 1].LastWriteTime;
+            DateTime result = default;
+
+            try
+            {
+                var listItems = new DirectoryInfo($"{path}").GetFiles();
+                result = listItems[listItems.Length - 1].LastWriteTime;
+            }catch(Exception exception)
+            {
+                _logBase($"No data. {exception.Message}", state);
+            }
 
             return result;
         }

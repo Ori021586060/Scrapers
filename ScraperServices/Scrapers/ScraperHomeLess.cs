@@ -606,7 +606,7 @@ namespace ScraperServices.Scrapers
                 needRepeat = false;
 
                 //ICredentials credentials = new NetworkCredential("lum-customer-hl_89055c51-zone-static-country-il", "y7ic12hyfl9b");
-                ICredentials credentials = new NetworkCredential("lum-customer-hl_89055c51-zone-static", "y7ic12hyfl9b");
+                ICredentials credentials = new NetworkCredential("lum-customer-hl_06910b7c-zone-static", "kbi4wb0h6yng");
                 client.Proxy = new WebProxy(new Uri("http://zproxy.lum-superproxy.io:22225"), true, null, credentials);
                 client.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0");
                 var url = $"https://nominatim.openstreetmap.org/search?q={item.Region} {item.City}&format=json";

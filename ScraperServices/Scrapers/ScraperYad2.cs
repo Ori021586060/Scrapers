@@ -87,7 +87,7 @@ namespace ScraperServices.Scrapers
 
                 _checkWorkspace(state);
 
-                _scraping(state);
+                await _scrapingAsync(state);
                 result = true;
             }
             catch (Exception exception){
@@ -118,36 +118,35 @@ namespace ScraperServices.Scrapers
             _logBase(message, state is null ? _state : state);
         }
 
-        private bool _scraping(ScraperYad2StateModel state)
+        private async Task<bool> _scrapingAsync(ScraperYad2StateModel state)
         {
             var result = false;
 
             try
             {
-                _scrapePhase1_GenerateListPreLoads(state);
-                _scrapePhase2_GetPreLoads(state);
-                _scrapePhase3_GenerateListItems(state);
-                _scrapePhase4_GetItems(state);
-                _scrapePhase5_GenerateListItemsContacts(state);
-                _scrapePhase6_GetItemsContacts(state);
+                await _scrapePhase1_GenerateListPreLoadsAsync(state);
+                await _scrapePhase2_GetPreLoads(state);
+                await _scrapePhase3_GenerateListItems(state);
+                await _scrapePhase4_GetItems(state);
+                await _scrapePhase5_GenerateListItemsContactsAsync(state);
+                await _scrapePhase6_GetItemsContacts(state);
 
                 result = true;
             }
             catch(Exception exception) {
                 _log($"Erro-x1. {exception.Message} / {exception.StackTrace}");
-                ;
             }
 
             return result;
         }
 
-        private List<ExcelRowYad2Model> _scrapePhase7_GenerateDomainModel(ScraperYad2StateModel state)
+        private async Task<List<ExcelRowYad2Model>> _scrapePhase7_GenerateDomainModel(ScraperYad2StateModel state)
         {
             List<ExcelRowYad2Model> result = null;
 
             _log($"Generate DomainModel");
 
-            var listItems = _loadListItems(state)?? new Dictionary<string, bool>();
+            var listItems = await _loadListItemsAsync(state)?? new Dictionary<string, bool>();
 
             if (listItems.Count>0) result = new List<ExcelRowYad2Model>();
             var sb = new StringBuilder(1000);
@@ -158,8 +157,8 @@ namespace ScraperServices.Scrapers
                 try
                 {
                     var key = itemId.Key;
-                    var item = JsonConvert.DeserializeObject<Phase3ObjectDto>(File.ReadAllText($"{state.ItemsPath}/item-{key}.json"));
-                    var itemContacts = JsonConvert.DeserializeObject<Phase3ObjectContactsDto>(File.ReadAllText($"{state.PathItemsContacts}/item-contacts-{key}.json"));
+                    var item = JsonConvert.DeserializeObject<Phase3ObjectDto>(await File.ReadAllTextAsync($"{state.ItemsPath}/item-{key}.json"));
+                    var itemContacts = JsonConvert.DeserializeObject<Phase3ObjectContactsDto>(await File.ReadAllTextAsync($"{state.PathItemsContacts}/item-contacts-{key}.json"));
 
                     var dateCreate = item?.date_added;
                     var dateUpdate = item?.date_of_entry?.Replace("/", ".");
@@ -238,7 +237,7 @@ namespace ScraperServices.Scrapers
                 }
                 catch (Exception exception)
                 {
-                    sb.Append($",{itemId.Key}=fail");
+                    sb.Append($",{itemId.Key}=fail, {exception.Message}");
                 }
 
                 indexParseItems++;
@@ -251,17 +250,17 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private bool _scrapePhase6_GetItemsContacts(ScraperYad2StateModel state)
+        private async Task<bool> _scrapePhase6_GetItemsContacts(ScraperYad2StateModel state)
         {
             var result = true;
 
             SetWorkPhaseBase($"GetItemsContacts", state);
 
-            var listItemsContacts = _loadListItemsContacts(state);
+            var listItemsContacts = await _loadListItemsContactsAsync(state);
 
             if (listItemsContacts != null)
             {
-                _scrapePhase6_DownloadsItemsContacts(listItemsContacts, state);
+                await _scrapePhase6_DownloadsItemsContactsAsync(listItemsContacts, state);
             }
             else
             {
@@ -272,7 +271,7 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private void _scrapePhase6_DownloadsItemsContacts(Dictionary<string, bool> list, ScraperYad2StateModel state)
+        private async Task _scrapePhase6_DownloadsItemsContactsAsync(Dictionary<string, bool> list, ScraperYad2StateModel state)
         {
             var hasError = false;
             var amount = 0;
@@ -293,9 +292,9 @@ namespace ScraperServices.Scrapers
                 var listToDo = toDoAll().Take(amountGetters).ToList();
 
                 foreach (var toDo in listToDo)
-                    arrayTask.Add(Task.Factory.StartNew(() => _downloadItemContact(toDo, state)));
+                    arrayTask.Add(Task.Run(async() => await _downloadItemContactAsync(toDo, state)));
 
-                _saveListItemsContacts(list, state);
+                await _saveListItemsContactsAsync(list, state);
 
                 hasError = false;
                 try
@@ -337,23 +336,23 @@ namespace ScraperServices.Scrapers
             }
 
             _log($"List items-contacts completed");
-            _saveListItemsContacts(list, state);
+            await _saveListItemsContactsAsync(list, state);
         }
 
-        private bool _downloadItemContact(string item, ScraperYad2StateModel state)
+        private async Task<bool> _downloadItemContactAsync(string item, ScraperYad2StateModel state)
         {
             var url = $"https://www.yad2.co.il/api/item/{item}/contactinfo";
             var filename = $"{state.PathItemsContacts}/item-contacts-{item}.json";
 
-            var isDoneGetObject = _downloadFilename(url, filename);
+            var isDoneGetObject = await _downloadFilenameAsync(url, filename);
 
             return isDoneGetObject;
         }
 
-        private void _scrapePhase5_GenerateListItemsContacts(ScraperYad2StateModel state)
+        private async Task _scrapePhase5_GenerateListItemsContactsAsync(ScraperYad2StateModel state)
         {
             SetWorkPhaseBase($"GenerateListItemsContacts", state);
-            var listItemsContacts = _loadListItemsContacts(state);
+            var listItemsContacts = await _loadListItemsContactsAsync(state);
 
             if (listItemsContacts == null)
             {
@@ -385,20 +384,20 @@ namespace ScraperServices.Scrapers
 
                 File.WriteAllText($"{state.ListItemsContactsDublicatesFilename}", JsonConvert.SerializeObject(dublicates, Formatting.Indented));
 
-                _saveListItemsContacts(listItemsContacts, state);
+                await _saveListItemsContactsAsync(listItemsContacts, state);
             }
             else
                 _log($"Generate list items-contacts is missing");
         }
 
-        private void _saveListItemsContacts(Dictionary<string, bool> list, ScraperYad2StateModel state)
+        private async Task _saveListItemsContactsAsync(Dictionary<string, bool> list, ScraperYad2StateModel state)
         {
             _log($"Save items-contacts {state.PathListItemsContacts}");
 
-            File.WriteAllText($"{state.PathListItemsContacts}", JsonConvert.SerializeObject(list, Formatting.Indented));
+            await File.WriteAllTextAsync($"{state.PathListItemsContacts}", JsonConvert.SerializeObject(list, Formatting.Indented));
         }
 
-        private Dictionary<string, bool> _loadListItemsContacts(ScraperYad2StateModel state)
+        private async Task<Dictionary<string, bool>> _loadListItemsContactsAsync(ScraperYad2StateModel state)
         {
             Dictionary<string, bool> result = null;
 
@@ -409,7 +408,7 @@ namespace ScraperServices.Scrapers
                 var filename = state.PathListItemsContacts;
                 if (File.Exists(filename))
                 {
-                    result = JsonConvert.DeserializeObject<Dictionary<string, bool>>(File.ReadAllText(filename));
+                    result = JsonConvert.DeserializeObject<Dictionary<string, bool>>(await File.ReadAllTextAsync(filename));
                     _log($"Load list-items-contacts done");
                 }
                 else
@@ -424,17 +423,17 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private bool _scrapePhase4_GetItems(ScraperYad2StateModel state)
+        private async Task<bool> _scrapePhase4_GetItems(ScraperYad2StateModel state)
         {
             var result = true;
 
             SetWorkPhaseBase($"GetItems", state);
 
-            var listItems = _loadListItems(state);
+            var listItems = await _loadListItemsAsync(state);
 
             if (listItems != null)
             {
-                _scrapePhase4_DownloadsItems(listItems, state);
+                await _scrapePhase4_DownloadsItemsAsync(listItems, state);
             }
             else
             {
@@ -445,7 +444,7 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private void _scrapePhase4_DownloadsItems(Dictionary<string, bool> list, ScraperYad2StateModel state)
+        private async Task _scrapePhase4_DownloadsItemsAsync(Dictionary<string, bool> list, ScraperYad2StateModel state)
         {
             var hasError = false;
             var amount = 0;
@@ -466,9 +465,9 @@ namespace ScraperServices.Scrapers
                 var listToDo = toDoAll().Take(amountGetters).ToList();
 
                 foreach (var toDo in listToDo)
-                    arrayTask.Add(Task.Factory.StartNew(() => _downloadItem(toDo, state)));
+                    arrayTask.Add(Task.Run(async() => await _downloadItemAsync(toDo, state)));
 
-                _saveListItems(list, state);
+                await _saveListItemsAsync(list, state);
 
                 hasError = false;
                 try
@@ -510,23 +509,23 @@ namespace ScraperServices.Scrapers
             }
 
             _log($"Download items completed");
-            _saveListItems(list, state);
+            await _saveListItemsAsync(list, state);
         }
 
-        private bool _downloadItem(string item, ScraperYad2StateModel state)
+        private async Task<bool> _downloadItemAsync(string item, ScraperYad2StateModel state)
         {
             var url = $"https://www.yad2.co.il/api/item/{item}";
             var filename = $"{state.ItemsPath}/item-{item}.json";
 
-            var isDoneGetObject = _downloadFilename(url, filename);
+            var isDoneGetObject = await _downloadFilenameAsync(url, filename);
 
             return isDoneGetObject;
         }
 
-        private void _scrapePhase3_GenerateListItems(ScraperYad2StateModel state)
+        private async Task _scrapePhase3_GenerateListItems(ScraperYad2StateModel state)
         {
             SetWorkPhaseBase($"GenerateListItems", state);
-            var listItems = _loadListItems(state);
+            var listItems = await _loadListItemsAsync(state);
 
             if (listItems == null)
             {
@@ -539,7 +538,7 @@ namespace ScraperServices.Scrapers
 
                 foreach (var file in files)
                 {
-                    var fileData = File.ReadAllText(file);
+                    var fileData = await File.ReadAllTextAsync(file);
 
                     var data = JsonConvert.DeserializeObject<PreloadDtoModel>(fileData);
 
@@ -552,23 +551,23 @@ namespace ScraperServices.Scrapers
                             listItems.Add(item, false);
                 }
 
-                Console.WriteLine($"done");
+                _log("Done");
 
                 Console.WriteLine($"Total uniq:{listItems.Count}, Dublicate:{dublicates.Count}, Total:{listItems.Count + dublicates.Count}");
 
-                File.WriteAllText($"{state.ListItemsDublicatesFilename}", JsonConvert.SerializeObject(dublicates, Formatting.Indented));
+                await File.WriteAllTextAsync($"{state.ListItemsDublicatesFilename}", JsonConvert.SerializeObject(dublicates, Formatting.Indented));
 
-                _saveListItems(listItems, state);
+                await _saveListItemsAsync(listItems, state);
             }
         }
 
-        private void _saveListItems(Dictionary<string, bool> list, ScraperYad2StateModel state)
+        private async Task _saveListItemsAsync(Dictionary<string, bool> list, ScraperYad2StateModel state)
         {
             _log($"Save {state.PathListItems}");
-            File.WriteAllText($"{state.PathListItems}", JsonConvert.SerializeObject(list, Formatting.Indented));
+            await File.WriteAllTextAsync($"{state.PathListItems}", JsonConvert.SerializeObject(list, Formatting.Indented));
         }
 
-        private Dictionary<string, bool> _loadListItems(ScraperYad2StateModel state)
+        private async Task<Dictionary<string, bool>> _loadListItemsAsync(ScraperYad2StateModel state)
         {
             Dictionary<string, bool> result = null;
 
@@ -579,7 +578,7 @@ namespace ScraperServices.Scrapers
                 var filename = state.PathListItems;
                 if (File.Exists(filename))
                 {
-                    result = JsonConvert.DeserializeObject<Dictionary<string, bool>>(File.ReadAllText(filename));
+                    result = JsonConvert.DeserializeObject<Dictionary<string, bool>>(await File.ReadAllTextAsync(filename));
                     _log($"Load list-items is completed");
                 }
                 else
@@ -594,10 +593,10 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private void _scrapePhase1_GenerateListPreLoads(ScraperYad2StateModel state)
+        private async Task _scrapePhase1_GenerateListPreLoadsAsync(ScraperYad2StateModel state)
         {
             SetWorkPhaseBase($"GenerateListPreLoads", state);
-            var listPreLoads = _loadListPreLoads(state);
+            var listPreLoads = await _loadListPreLoadsAsync(state);
 
             if (listPreLoads == null)
             {
@@ -609,7 +608,7 @@ namespace ScraperServices.Scrapers
                 do
                 {
                     doNeedTry = false;
-                    var isDoneGetPage1 = _downloadPreLoad(page: 1, state: state);
+                    var isDoneGetPage1 = await _downloadPreLoadAsync(page: 1, state: state);
 
                     if (isDoneGetPage1)
                     {
@@ -623,7 +622,7 @@ namespace ScraperServices.Scrapers
                         foreach (var i in Enumerable.Range(1, lastPage)) list.Add(i, false);
                         list[1] = true;
 
-                        _saveListPreLoads(list, state);
+                        await _saveListPreLoadsAsync(list, state);
                     }
                     else
                     {
@@ -643,14 +642,14 @@ namespace ScraperServices.Scrapers
                 _log($"Generate list-pre-loads is missing");
         }
 
-        private void _saveListPreLoads(Dictionary<int, bool> list, ScraperYad2StateModel state)
+        private async Task _saveListPreLoadsAsync(Dictionary<int, bool> list, ScraperYad2StateModel state)
         {
             _log($"Save list-pre-loads: {state.PathListPreLoads}");
 
-            File.WriteAllText($"{state.PathListPreLoads}", JsonConvert.SerializeObject(list, Formatting.Indented));
+            await File.WriteAllTextAsync($"{state.PathListPreLoads}", JsonConvert.SerializeObject(list, Formatting.Indented));
         }
 
-        private Dictionary<int,bool> _loadListPreLoads(ScraperYad2StateModel state)
+        private async Task<Dictionary<int,bool>> _loadListPreLoadsAsync(ScraperYad2StateModel state)
         {
             Dictionary<int, bool> result = null;
 
@@ -660,7 +659,7 @@ namespace ScraperServices.Scrapers
             {
                 if (File.Exists(state.PathListPreLoads))
                 {
-                    result = JsonConvert.DeserializeObject<Dictionary<int, bool>>(File.ReadAllText(state.PathListPreLoads));
+                    result = JsonConvert.DeserializeObject<Dictionary<int, bool>>(await File.ReadAllTextAsync(state.PathListPreLoads));
                     _log($"Load list-pre-loads is complete");
                 }
                 else
@@ -682,16 +681,16 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private bool _downloadPreLoad(int page, ScraperYad2StateModel state)
+        private async Task<bool> _downloadPreLoadAsync(int page, ScraperYad2StateModel state)
         {
             var url = $"https://www.yad2.co.il/api/pre-load/getFeedIndex/realestate/rent?page={page}&compact-req=1";
             var filename = $"{state.PathPreLoads}/page-{page}.json";
 
-            var isDoneGetPage = _downloadFilename(url, filename);
+            var isDoneGetPage = await _downloadFilenameAsync(url, filename);
 
             return isDoneGetPage;
         }
-        private bool _downloadFilename(string url, string filename)
+        private async Task<bool> _downloadFilenameAsync(string url, string filename)
         {
             bool result = true;
             var guid = Guid.NewGuid();
@@ -707,9 +706,9 @@ namespace ScraperServices.Scrapers
             var response = "";
             try
             {
-                response = client.DownloadString(new Uri(url));
+                response = await client.DownloadStringTaskAsync(new Uri(url));
                 var json = JsonConvert.DeserializeObject<object>(response);
-                File.WriteAllText(filename, response);
+                await File.WriteAllTextAsync(filename, response);
                 _log($"Download {guid} is complete");
             }
             catch (Exception exception)
@@ -723,17 +722,17 @@ namespace ScraperServices.Scrapers
 
             return result;
         }
-        private bool _scrapePhase2_GetPreLoads(ScraperYad2StateModel state)
+        private async Task<bool> _scrapePhase2_GetPreLoads(ScraperYad2StateModel state)
         {
             var result = true;
 
             SetWorkPhaseBase($"GetPreLoads", state);
 
-            var listPreLoads = _loadListPreLoads(state);
+            var listPreLoads = await _loadListPreLoadsAsync(state);
 
             if (listPreLoads != null)
             {
-                _scrapePhase2_DownloadsPreLoads(listPreLoads, state);
+                await _scrapePhase2_DownloadsPreLoadsAsync(listPreLoads, state);
             }
             else
             {
@@ -744,7 +743,7 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private void _scrapePhase2_DownloadsPreLoads(Dictionary<int, bool> list, ScraperYad2StateModel state)
+        private async Task _scrapePhase2_DownloadsPreLoadsAsync(Dictionary<int, bool> list, ScraperYad2StateModel state)
         {
             var hasError = false;
             var amount = 0;
@@ -765,9 +764,9 @@ namespace ScraperServices.Scrapers
                 var listToDo = toDoAll().Take(amountGetters).ToList();
 
                 foreach (var toDo in listToDo)
-                    arrayTask.Add(Task.Factory.StartNew(() => _downloadPreLoad(toDo, state)));
+                    arrayTask.Add(Task.Run(async() => await _downloadPreLoadAsync(toDo, state)));
 
-                _saveListPreLoads(list, state);
+                await _saveListPreLoadsAsync(list, state);
 
                 hasError = false;
                 try
@@ -809,7 +808,7 @@ namespace ScraperServices.Scrapers
             }
 
             _log($"List pre-loads completed");
-            _saveListPreLoads(list, state);
+            await _saveListPreLoadsAsync(list, state);
         }
 
         protected override void _clearWorkspaceInner(IState state)
