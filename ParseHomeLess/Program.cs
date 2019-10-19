@@ -26,7 +26,7 @@ namespace ParseHomeLess
 
         static void Scrape(ScraperHomeLess scraper)
         {
-            var isOk = scraper.Scrape();
+            var isOk = scraper.Scrape().Result;
         }
 
         static void GetExcelFile(ScraperHomeLess scraper)

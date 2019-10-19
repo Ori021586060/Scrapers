@@ -24,9 +24,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ScramModels\ScrapModels.csproj" />
-    <ProjectReference Include="..\ScramServices\ScraperServices.csproj" />
-    <ProjectReference Include="..\ScrapCore\ScraperCore.csproj" />
+    <ProjectReference Include="..\ScraperModels\ScraperModels.csproj" />
+    <ProjectReference Include="..\ScraperServices\ScraperServices.csproj" />
+    <ProjectReference Include="..\ScraperCore\ScraperCore.csproj" />
   </ItemGroup>
 
 </Project>

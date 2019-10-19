@@ -26,7 +26,7 @@ namespace ParseKomo
 
         static void Scrape(ScraperKomo scraper)
         {
-            var isOk = scraper.Scrape();
+            var isOk = scraper.Scrape().Result;
         }
 
         static void GetExcelFile(ScraperKomo scraper)

@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ScrapCore\ScraperCore.csproj" />
   </ItemGroup>
 
 </Project>

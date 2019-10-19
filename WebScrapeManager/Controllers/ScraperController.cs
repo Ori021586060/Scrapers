@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using ScraperCore.Repositories;
 using ScraperModels.Models;
 using ScraperServices.Services;
-using ScrapModels.Models;
+using ScraperModels.Models;
 using WebScraperManager.DtoModels;
 
 namespace WebScraperManager.Controllers

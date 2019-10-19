@@ -10,7 +10,7 @@ using ScraperCore.Repositories;
 using ScraperModels.Models;
 using ScraperServices.Models;
 using ScraperServices.Models.Yad2;
-using ScrapModels.Models;
+using ScraperModels.Models;
 using WebScraperManager.ViewModels;
 
 namespace WebScraperManager.Controllers

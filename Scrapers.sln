@@ -7,11 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParseAirdna", "ParseAirdna\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebScraperManager", "WebScrapeManager\WebScraperManager.csproj", "{D841B599-958E-49A3-B628-B5539B223188}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScraperCore", "ScrapCore\ScraperCore.csproj", "{8A36C13B-8400-40AF-A2B0-D6E03CAC9DAE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScraperCore", "ScraperCore\ScraperCore.csproj", "{8A36C13B-8400-40AF-A2B0-D6E03CAC9DAE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScrapModels", "ScramModels\ScrapModels.csproj", "{030D6E7A-93F3-40F0-BCB0-D15FA942F0C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScraperModels", "ScraperModels\ScraperModels.csproj", "{030D6E7A-93F3-40F0-BCB0-D15FA942F0C2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScraperServices", "ScramServices\ScraperServices.csproj", "{143DDEB2-503C-4926-9FDF-AA3F37DFF54B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScraperServices", "ScraperServices\ScraperServices.csproj", "{143DDEB2-503C-4926-9FDF-AA3F37DFF54B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D1A6866E-E9E9-49A9-9816-D0DD28561D08}"
 EndProject
