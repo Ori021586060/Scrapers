@@ -1,0 +1,53 @@
+﻿@model WebScraperManager.ViewModels.StatusViewModel
+@{
+    ViewData["Title"] = "States";
+}
+
+    <div class="card-columns">
+        @foreach (var status in Model.Statuses)
+        {
+            <div class="card">
+                <div class="card-header font-weight-bold" style="font-size: 2.0em">
+                    @status.Key.Name
+                </div>
+
+                <div class="card-body">
+                    <div class="card-text">
+                        <div>
+                            @if (status.Value is null)
+                            {
+                                <div class="font-weight-bold text-center">
+                                    Not available
+                                </div>
+                            }
+                            else
+                            {
+                        <ul>
+                            <li>
+                                Date UTC: @status.Value.ScrapeDate
+                            </li>
+                            <li>
+                                Items: @status.Value.AmountItemsFromPath
+                            </li>
+                            <li>
+                                Pages: @status.Value.AmountPages
+                            </li>
+                            <li>
+                                From Pages: @status.Value.AmountItemsFromPages
+                            </li>
+                            <li>
+                                Duplicates From Pages: @status.Value.AmountItemDuplicatesFromPages
+                            </li>
+                            <li>
+                                Uniques From Pages: @status.Value.AmountItemUniquesFromPages
+                            </li>
+                        </ul>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+

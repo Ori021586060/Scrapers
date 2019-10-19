@@ -1,0 +1,68 @@
+[
+  {
+    "Id": 1,
+    "AvailableScrapeByCity": true,
+    "Name": "Airdna",
+    "Description": "Collects data from a real estate site",
+    "ArchiveOrder": 30,
+    "Credentials": {
+      "Username": "goodluckori@gmail.com",
+      "Password": "021586060"
+    }
+  },
+  {
+    "Id": 2,
+    "AvailableScrapeByCity": false,
+    "Name": "Onmap",
+    "Description": "Collects data from a real estate site",
+    "ArchiveOrder": 1,
+    "Credentials": {
+      "Username": "goodluckori@gmail.com",
+      "Password": "021586060"
+    }
+  },
+  {
+    "Id": 3,
+    "AvailableScrapeByCity": false,
+    "Name": "Yad2",
+    "Description": "Collects data from a real estate site",
+    "ArchiveOrder": 2,
+    "Credentials": {
+      "Username": "goodluckori@gmail.com",
+      "Password": "021586060"
+    }
+  },
+  {
+    "Id": 4,
+    "AvailableScrapeByCity": false,
+    "Name": "HomeLess",
+    "Description": "Collects data from a real estate site",
+    "ArchiveOrder": 3,
+    "Credentials": {
+      "Username": "goodluckori@gmail.com",
+      "Password": "021586060"
+    }
+  },
+  {
+    "Id": 5,
+    "AvailableScrapeByCity": false,
+    "Name": "Komo",
+    "Description": "Collects data from a real estate site",
+    "ArchiveOrder": 4,
+    "Credentials": {
+      "Username": "goodluckori@gmail.com",
+      "Password": "021586060"
+    }
+  },
+  {
+    "Id": 6,
+    "AvailableScrapeByCity": false,
+    "Name": "WinWin",
+    "Description": "Collects data from a real estate site",
+    "ArchiveOrder": 3,
+    "Credentials": {
+      "Username": "goodluckori@gmail.com",
+      "Password": "021586060"
+    }
+  }
+]

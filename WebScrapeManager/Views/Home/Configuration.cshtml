@@ -1,0 +1,107 @@
+﻿@model WebScraperManager.ViewModels.ConfigurationViewModel
+@{
+    ViewData["Title"] = "Configuration";
+}
+
+    <div class="card card-body">
+        <h4 class="card-title">@ViewData["Title"]</h4>
+
+        <label for="url-airdna">URL</label>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" id="input-url-airdna" placeholder="URL from airdna.co" aria-label="URL from airdna.co" aria-describedby="button-url-airdna">
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="button" id="button-url-airdna">Parse</button>
+            </div>
+        </div>
+
+        <div style="margin:10px;"></div>
+
+        <div class="card-columns">
+            @foreach (var city in Model.Cities)
+            {
+            <div class="card">
+                <div class="card-header font-weight-bold" style="font-size: 2.0em">
+                    @city.CityOriginalName
+                </div>
+
+                <div class="card-body">
+                    <div class="card-text">
+                        <div>
+                            <div class="font-weight-bold">
+                                Airdna.co link
+                            </div>
+                            <ul>
+                                <li>
+                                    name: @city.Airdna.CityName
+                                </li>
+                                <li>
+                                    cityId: @city.Airdna.CityId
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col text-right">
+                        <button class="btn btn-outline-primary btn-circle btn-xl button-remove-city" data-city-id='@city.Id'>
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            }
+
+        </div>
+    </div>
+
+
+
+@section scripts {
+    <script src="~/js/repositories/city-repository.js"></script>
+    <script src="~/js/services/airdna-service.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            $("#button-url-airdna").click(() => {
+                airdnaService.ParseUrlForGetCityId($("#input-url-airdna").val())
+            })
+
+            $(".button-remove-city").click(function () {
+                let cityId = $(this).data("cityId")
+                formService.ClickButtonRemoveCity(cityId)
+            })
+
+        });
+
+        var formService = {
+            ClickButtonRemoveCity: (cityId) => {
+                cityRepository.Remove(cityId)
+            },
+            BlockWorkWithURL: function () {
+                this.SetCaptionButtonParseUrlAirdna("Parsing")
+                this.BlockButtonUrlAirdna()
+                this.BlockInputUrlAirdna()
+            },
+            UnBlockWorkWithURL: function () {
+                this.UnBlockButtonUrlAirdna()
+                this.UnBlockInputUrlAirdna()
+                this.SetCaptionButtonParseUrlAirdna("Parse")
+            },
+            BlockButtonUrlAirdna: function () { this.ChangeActiveButtonUrlAirdna(false) },
+            UnBlockButtonUrlAirdna: function () { this.ChangeActiveButtonUrlAirdna(true) },
+            BlockInputUrlAirdna: function () { this.ChangeActiveInputUrlAirdna(false) },
+            UnBlockInputUrlAirdna: function () { this.ChangeActiveInputUrlAirdna(true) },
+            ChangeActiveButtonUrlAirdna: (shown) => {
+                let element = $("#button-url-airdna")
+                shown == true ? element.removeAttr("disabled") : element.attr("disabled", "disables")
+            },
+            ChangeActiveInputUrlAirdna: (shown) => {
+                let element = $("#input-url-airdna")
+                shown == true ? element.removeAttr("disabled") : element.attr("disabled", "disables")
+            },
+            SetCaptionButtonParseUrlAirdna: (caption) => {
+                $("#button-url-airdna").button('value');
+            }
+        }
+
+    </script>
+}
