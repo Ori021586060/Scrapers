@@ -1,6 +1,6 @@
 ﻿using Scheduler.Models;
+using ScraperModels.Models;
 using ScraperServices.Services;
-using ScrapModels.Models;
 using System;
 using System.Globalization;
 using System.Linq;

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ScraperCore.Repositories;
-using ScrapModels.Models;
+using ScraperModels.Models;
 using WebScraperManager.Models;
 using WebScraperManager.ViewModels;
 

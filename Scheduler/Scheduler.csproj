@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ScramModels\ScrapModels.csproj" />
-    <ProjectReference Include="..\ScramServices\ScraperServices.csproj" />
+    <ProjectReference Include="..\ScraperModels\ScraperModels.csproj" />
+    <ProjectReference Include="..\ScraperServices\ScraperServices.csproj" />
   </ItemGroup>
 
 </Project>
