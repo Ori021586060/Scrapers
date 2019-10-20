@@ -13,7 +13,7 @@ namespace ParseWinWin
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
-            var state = new ScraperWinWinStateModel() { IsNew = false, };
+            var state = new ScraperWinWinStateModel() { IsNew = true, };
 
             var scraper = new ScraperWinWin(state);
 

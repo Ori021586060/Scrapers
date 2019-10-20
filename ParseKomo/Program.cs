@@ -13,7 +13,7 @@ namespace ParseKomo
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
-            var state = new ScraperKomoStateModel() { IsNew = false, };
+            var state = new ScraperKomoStateModel() { IsNew = true, };
 
             var scraper = new ScraperKomo(state);
 

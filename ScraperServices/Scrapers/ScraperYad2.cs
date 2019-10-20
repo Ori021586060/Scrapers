@@ -157,7 +157,7 @@ namespace ScraperServices.Scrapers
                 try
                 {
                     var key = itemId.Key;
-                    var item = JsonConvert.DeserializeObject<Phase3ObjectDto>(await File.ReadAllTextAsync($"{state.ItemsPath}/item-{key}.json"));
+                    var item = JsonConvert.DeserializeObject<Phase3ObjectDto>(await File.ReadAllTextAsync($"{state.ItemsPath}/{key}.json"));
                     var itemContacts = JsonConvert.DeserializeObject<Phase3ObjectContactsDto>(await File.ReadAllTextAsync($"{state.PathItemsContacts}/item-contacts-{key}.json"));
 
                     var dateCreate = item?.date_added;
@@ -515,7 +515,7 @@ namespace ScraperServices.Scrapers
         private async Task<bool> _downloadItemAsync(string item, ScraperYad2StateModel state)
         {
             var url = $"https://www.yad2.co.il/api/item/{item}";
-            var filename = $"{state.ItemsPath}/item-{item}.json";
+            var filename = $"{state.ItemsPath}/{item}.json";
 
             var isDoneGetObject = await _downloadFilenameAsync(url, filename);
 
@@ -813,8 +813,6 @@ namespace ScraperServices.Scrapers
 
         protected override void _clearWorkspaceInner(IState state)
         {
-            _log($"Start new process/clean workspace");
-
             _cleanDirectory($"{state.RootPath}");
 
             _cleanFile($"{state.LogFilename}");
@@ -831,9 +829,17 @@ namespace ScraperServices.Scrapers
 
         private void _cleanDirectory(string path)
         {
-            var dirInfo = new DirectoryInfo(path);
-
-            dirInfo.Delete(recursive: true);
+            try
+            {
+                if (Directory.Exists(path))
+                {
+                    var dirInfo = new DirectoryInfo(path);
+                    dirInfo.Delete(recursive: true);
+                }
+            }catch(Exception exception)
+            {
+                _log($"Error-e1. {exception.Message}");
+            }
 
             //if (Directory.Exists(dirInfo.FullName))
             //{

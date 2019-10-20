@@ -49,7 +49,7 @@ namespace ScraperServices.Scrapers
 
             _checkWorkspaceInner(state);
 
-            _logBase($"Check workspace done", state);
+            _logBase($"Done", state);
         }
 
         protected abstract void _checkWorkspaceInner(IState state);
@@ -60,7 +60,7 @@ namespace ScraperServices.Scrapers
 
             _clearWorkspaceInner(state);
 
-            _logBase($"Clear workspace done", state);
+            _logBase($"Done", state);
         }
 
         protected abstract void _clearWorkspaceInner(IState state);
@@ -95,6 +95,11 @@ namespace ScraperServices.Scrapers
                 foreach (var file in dirInfo.GetFiles()) file.Delete();
 
                 _logBase("Cleaning directory done", state);
+            }
+            else
+            {
+                Directory.CreateDirectory(path);
+                _logBase($"Created directory {path}", state);
             }
         }
 

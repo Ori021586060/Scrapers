@@ -47,11 +47,11 @@ namespace ScraperServices.Scrapers
             var state = _state;
             SetWorkPhaseBase("Scraper", state);
 
-            //_prepareToWorkBase(state);
+            _prepareToWorkBase(state);
 
-            //ScrapePhase1(state); // use Selenoid / generate list-regions.json
+            ScrapePhase1(state); // use Selenoid / generate list-regions.json
 
-            //await ScrapePhase2(state); // scrape to pages/region-[name_region]-page-[num_page].json
+            await ScrapePhase2(state); // scrape to pages/region-[name_region]-page-[num_page].json
 
             await ScrapePhase2_GenerateListItems(state); // generate list-items.json
 
@@ -183,8 +183,9 @@ namespace ScraperServices.Scrapers
             {
                 foreach (var shortItem in needToDo)
                 {
-                    shortItem.Done = true;
-                    task.Add(Task.Run( async() => shortItem.Done = await _downloadItemAsync(shortItem, state)));
+                    var item = shortItem;
+                    item.Done = true;
+                    task.Add(Task.Run( async() => item.Done = await _downloadItemAsync(shortItem, state)));
                 }
 
                 Thread.Sleep(1000 * 3);

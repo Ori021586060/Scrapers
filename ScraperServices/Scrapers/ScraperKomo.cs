@@ -38,12 +38,12 @@ namespace ScraperServices.Scrapers
             _config = _initConfig(state);
         }
 
-        private void _initSelenoid(ScraperKomoStateModel state)
-        {
-            if (_selenoidState is null) _selenoidState = new SelenoidStateModel();
+        //private void _initSelenoid(ScraperKomoStateModel state)
+        //{
+        //    if (_selenoidState is null) _selenoidState = new SelenoidStateModel();
 
-            _initSelenoidBase(_selenoidState, state);
-        }
+        //    _initSelenoidBase(_selenoidState, state);
+        //}
 
         public DataScrapeModel GetDomainModel()
         {
@@ -78,9 +78,9 @@ namespace ScraperServices.Scrapers
 
                 await _getSessionSerial(_state);
 
-                ScrapePhase1_GenerateListCities(_state);
+                await ScrapePhase1_GenerateListCitiesAsync(_state);
 
-                ScrapePhase2_GenerateListStreets(_state);
+                await ScrapePhase2_GenerateListStreetsAsync(_state);
 
                 ScrapePhase3_DownloadPages(_state);
 
@@ -204,7 +204,7 @@ namespace ScraperServices.Scrapers
         {
             state.WorkPhase = "phase-5";
             _log($"Start");
-            //_initSelenoid(state);
+            _initSelenoid(state);
             if (string.IsNullOrEmpty(state.SessionSerial))
             {
                 _log($"Wait SessionSerial");
@@ -276,6 +276,12 @@ namespace ScraperServices.Scrapers
 
             _saveListItems(listItems, state);
             _log($"End");
+        }
+
+        private void _initSelenoid(ScraperKomoStateModel state)
+        {
+            if (_selenoidState is null) _selenoidState = new SelenoidStateModel();
+            _initSelenoidBase(_selenoidState, state);
         }
 
         private async Task<DataCoordinatesDtoModel> _downloadItemCoordinates_WebClient(HtmlDocument page, ScraperKomoStateModel state)
@@ -884,7 +890,7 @@ namespace ScraperServices.Scrapers
 
         private void ScrapePhase3_DownloadPages(ScraperKomoStateModel state)
         {
-            state.WorkPhase = "Phase-3";
+            SetWorkPhaseBase($"Phase-3", state);
             var files = new DirectoryInfo(state.CitiesPath).GetFiles(); // cities/city-[id]-streets.json
             List<Task> tasks = new List<Task>();
             var countTask = 0;
@@ -937,7 +943,7 @@ namespace ScraperServices.Scrapers
             }
 
             if (needToDo.Count>0)
-                _saveListStreetsByCity(listStreets, cityId, state);
+                await _saveListStreetsByCityAsync(listStreets, cityId, state);
 
             return result;
         }
@@ -1021,43 +1027,86 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private void ScrapePhase2_GenerateListStreets(ScraperKomoStateModel state)
+        private async Task ScrapePhase2_GenerateListStreetsAsync(ScraperKomoStateModel state)
         {
-            state.WorkPhase = "Phase-2";
+            SetWorkPhaseBase($"GenerateListStreets", state);
             _log($"Start generate list-streets (isNew:{_state.IsNew})");
 
-            var listCities = _loadListCities(state); // list-cities.json
+            var listCities = await _loadListCitiesAsync(state); // list-cities.json
+            fixListCities(listCities, state);
+
             var ads = listCities.Sum(x => int.Parse(x.Value.counter));
-
             _log($"Total ads {ads}");
+            var tasks = new List<Task<bool>>();
+            var maxTasks = 100;
 
-            var listNeedToDo = listCities.Where(x => !x.Value.Scraped || state.IsNew).Select(x=>x.Key).ToList();
+            Func<int,List<string>> NeedToDo = (i) => listCities.Where(x => !x.Value.Scraped).Select(x => x.Key).Take(i).ToList();
+            var needToDo = NeedToDo(maxTasks);
 
-            _log($"Need download {listNeedToDo.Count()} params of cities");
+            do {
+                foreach (var cityId in needToDo)
+                {
+                    var id = cityId;
+                    listCities[id].Scraped = true;
+                    tasks.Add(Task.Run(async () => listCities[id].Scraped = await LoadSaveListStreetsAsync(id, state)));
+                }
 
-            foreach (var cityId in listNeedToDo)
-            {
-                var listStreetsByCity = _downloadListStreetsByCityId(cityId, state);
-                
-                _saveListStreetsByCity(listStreetsByCity, cityId, state);
+                Thread.Sleep(1000 * 7);
+                Task.WaitAny(tasks.ToArray());
 
-                listCities[cityId].Scraped = true;
-
-                _saveListCities(listCities, state);
-            }
+                tasks.RemoveAll(x => x.IsCompleted);
+                await _saveListCitiesAsync(listCities, state);
+                needToDo = NeedToDo(maxTasks - tasks.Count());
+            } while (needToDo.Count()>0);
 
             _log($"Generate list-streets done");
         }
 
-        private void _saveListStreetsByCity(Dictionary<string, StreetsDataDtoModel> list, string cityId, ScraperKomoStateModel state)
+        private async Task<bool> LoadSaveListStreetsAsync(string cityId, ScraperKomoStateModel state)
+        {
+            var result = false;
+
+            try
+            {
+                var listStreetsByCity = await _downloadListStreetsByCityIdAsync(cityId, state);
+                await _saveListStreetsByCityAsync(listStreetsByCity, cityId, state);
+                result = true;
+            } catch(Exception exception)
+            {
+                result = false;
+                _log($"Error-p1. {exception.Message}");
+            }
+
+            return result;
+        }
+
+        private void fixListCities(Dictionary<string, CitiesDataDtoModel> listCities, ScraperKomoStateModel state)
+        {
+            var path = $"{state.CitiesPath}";
+            var listfiles = new DirectoryInfo(path).GetFiles();
+            var fixedFiles = 0;
+            foreach (var city in listCities) city.Value.Scraped = false;
+
+            foreach (var file in listfiles)
+            {
+                var cityId = Path.GetFileNameWithoutExtension(file.Name).Split("-")[1];
+                if (listCities.ContainsKey(cityId) && !listCities[cityId].Scraped)
+                {
+                    listCities[cityId].Scraped = true;
+                    fixedFiles++;
+                }
+            }
+
+            _log($"Fixed {fixedFiles} files");
+        }
+
+        private async Task _saveListStreetsByCityAsync(Dictionary<string, StreetsDataDtoModel> list, string cityId, ScraperKomoStateModel state)
         {
             var filename = $"{state.CitiesPath}/city-{cityId}-streets.json";
 
-            _log($"Saving list-streets: {filename}");
+            //_log($"Saving list-streets: {filename}");
 
-            File.WriteAllText($"{filename}", JsonConvert.SerializeObject(list, Newtonsoft.Json.Formatting.Indented));
-
-            _log($"Save list-streets done");
+            await File.WriteAllTextAsync($"{filename}", JsonConvert.SerializeObject(list, Newtonsoft.Json.Formatting.Indented));
         }
 
         private async Task<Dictionary<string, StreetsDataDtoModel>> _loadListStreetsByCityAsync(string cityId, ScraperKomoStateModel state)
@@ -1073,16 +1122,15 @@ namespace ScraperServices.Scrapers
             return listStreets;
         }
 
-        private Dictionary<string, StreetsDataDtoModel> _downloadListStreetsByCityId(string cityId, ScraperKomoStateModel state)
+        private async Task<Dictionary<string, StreetsDataDtoModel>> _downloadListStreetsByCityIdAsync(string cityId, ScraperKomoStateModel state)
         {
-            _log($"Downlaod streets by city {cityId}");
+            _log($"Download streets by city {cityId}");
 
             Dictionary<string, StreetsDataDtoModel> result = new Dictionary<string, StreetsDataDtoModel>();
 
-            // https://www.komo.co.il/api/nadlan/list-streets.api.asp?limit=5000&hideAlter=y&showCounters=y&subLuachNum=1&cityNum=1155
             var url = $"https://www.komo.co.il/api/nadlan/list-streets.api.asp?limit=5000&hideAlter=y&showCounters=y&subLuachNum=1&cityNum={cityId}";
 
-            var listCitiesRawJson = _downloadObject(url, state);
+            var listCitiesRawJson = await _downloadObjectAsync(url, state);
             var mark = "%$#_";
             var listCitiesJson = listCitiesRawJson.Replace("\"\\", mark).Replace($":{mark}", ":\"").Replace(mark, "\\");
 
@@ -1096,34 +1144,33 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private void ScrapePhase1_GenerateListCities(ScraperKomoStateModel state)
+        private async Task ScrapePhase1_GenerateListCitiesAsync(ScraperKomoStateModel state)
         {
-            state.WorkPhase = "Phase-1";
+            SetWorkPhaseBase($"GenerateListCities", state);
 
-            var listCities = _loadListCities(state); // list-cities.json
+            var listCities = await _loadListCitiesAsync(state); 
 
             if (listCities == null || listCities.Count == 0 || state.IsNew)
             {
                 _log($"Generating new list-cities (isNew:{state.IsNew}), filename:{state.ListCitiesFilename}");
 
-                listCities = _downloadListCities(state);
+                listCities = await _downloadListCitiesAsync(state);
 
                 _log($"Generate new list-cities done");
 
-                _saveListCities(listCities, state);
+                await _saveListCitiesAsync(listCities, state);
             }
             else
                 _log($"Generate list-cities not need (missing, isNew:{state.IsNew})");
         }
 
-        private Dictionary<string,CitiesDataDtoModel> _downloadListCities(ScraperKomoStateModel state)
+        private async Task<Dictionary<string,CitiesDataDtoModel>> _downloadListCitiesAsync(ScraperKomoStateModel state)
         {
             Dictionary<string, CitiesDataDtoModel> result = new Dictionary<string, CitiesDataDtoModel>();
 
-            // https://www.komo.co.il/api/nadlan/list-cities.api.asp?limit=5000&hideAlter=y&showCounters=y&subLuachNum=1
             var url = "https://www.komo.co.il/api/nadlan/list-cities.api.asp?limit=5000&hideAlter=y&showCounters=y&subLuachNum=1";
 
-            var listCitiesRawJson = _downloadObject(url, state);
+            var listCitiesRawJson = await _downloadObjectAsync(url, state);
             var mark = "%$#_";
             var listCitiesJson = listCitiesRawJson.Replace("\"\\",mark).Replace($":{mark}",":\"").Replace(mark,"\\");
 
@@ -1135,69 +1182,65 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private string _downloadObject(string url, ScraperKomoStateModel state)
+        private async Task<string> _downloadObjectAsync(string url, ScraperKomoStateModel state)
         {
             var result = "";
 
-            _log($"Download object url:{url}");
-
             try
             {
-                var request = url.GetStringAsync();
+                var request = await url.GetStringAsync();
 
-                result = request.Result;
+                result = request;
             }
             catch (Exception exception)
             {
                 result = "";
-                _log($"Exception-1");
+                _log($"Exception-1. {exception.Message}");
             }
-
-            _log($"Download object done");
 
             return result;
         }
 
-        private T _downloadObject<T>(string url, ScraperKomoStateModel state)
+        private async Task<T> _downloadObject<T>(string url, ScraperKomoStateModel state)
         {
             T result;
 
             try
             {
-                var request = url.GetJsonAsync<T>();
+                var request = await url.GetJsonAsync<T>();
 
-                result = request.Result;
+                result = request;
             }
             catch (Exception exception)
             {
                 result = default(T);
-                _log($"Exception-3");
+                _log($"Exception-3. {exception.Message}");
             }
 
             return result;
         }
 
-        private void _saveListCities(Dictionary<string, CitiesDataDtoModel> list, ScraperKomoStateModel state)
+        private async Task _saveListCitiesAsync(Dictionary<string, CitiesDataDtoModel> list, ScraperKomoStateModel state)
         {
             var filename = state.ListCitiesFilename;
 
             _log($"Saving list-cities: {filename}");
 
-            File.WriteAllText($"{filename}", JsonConvert.SerializeObject(list, Newtonsoft.Json.Formatting.Indented));
+            await File.WriteAllTextAsync($"{filename}", JsonConvert.SerializeObject(list, Newtonsoft.Json.Formatting.Indented));
 
             _log($"Save list-cities done");
         }
 
-        private Dictionary<string, CitiesDataDtoModel> _loadListCities(ScraperKomoStateModel state)
+        private async Task<Dictionary<string, CitiesDataDtoModel>> _loadListCitiesAsync(ScraperKomoStateModel state)
         {
             Dictionary<string, CitiesDataDtoModel> result = null;
 
-            var filename = state.ListCitiesFilename; // list-cities.json
+            var filename = state.ListCitiesFilename; 
 
             _log($"Loading list-cities: {filename}");
 
             if (File.Exists(filename))
-                result = JsonConvert.DeserializeObject<Dictionary<string, CitiesDataDtoModel>>(File.ReadAllText(filename));
+                result = JsonConvert.DeserializeObject<Dictionary<string, CitiesDataDtoModel>>(await File.ReadAllTextAsync(filename));
 
             _log($"Load list-cities done");
 

@@ -40,8 +40,11 @@ namespace ScraperServices.Services
                 var col = 1;
 
                 // head line
+                sheet.Cells[row, col++].Value = "Id";
                 sheet.Cells[row, col++].Value = "DateCreate";
                 sheet.Cells[row, col++].Value = "DateUpdate";
+                sheet.Cells[row, col++].Value = "Latitude";
+                sheet.Cells[row, col++].Value = "Longitude";
                 sheet.Cells[row, col++].Value = "EnCity";
                 sheet.Cells[row, col++].Value = "EnHouseNumber";
                 sheet.Cells[row, col++].Value = "EnNeighborhood";
@@ -78,10 +81,11 @@ namespace ScraperServices.Services
                 foreach (var item in items)
                 {
                     col = 1;
-
+                    sheet.Cells[row, col++].Value = item.TagId_;
                     _addCellDate(sheet.Cells[row, col], item.DateCreate); col++;
                     _addCellDate(sheet.Cells[row, col], item.DateUpdate); col++;
-
+                    sheet.Cells[row, col++].Value = item.Latitude;
+                    sheet.Cells[row, col++].Value = item.Longitude;
                     sheet.Cells[row, col++].Value = item.EnCity;
 
                     _addCellInt(sheet.Cells[row, col], item.EnHouseNumber); col++;

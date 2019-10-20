@@ -606,7 +606,7 @@ namespace ScraperServices.Scrapers
                 needRepeat = false;
 
                 //ICredentials credentials = new NetworkCredential("lum-customer-hl_89055c51-zone-static-country-il", "y7ic12hyfl9b");
-                ICredentials credentials = new NetworkCredential("lum-customer-hl_06910b7c-zone-static", "kbi4wb0h6yng");
+                ICredentials credentials = new NetworkCredential("lum-customer-hl_89055c51-zone-static", "y7ic12hyfl9b");
                 client.Proxy = new WebProxy(new Uri("http://zproxy.lum-superproxy.io:22225"), true, null, credentials);
                 client.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0");
                 var url = $"https://nominatim.openstreetmap.org/search?q={item.Region} {item.City}&format=json";
@@ -618,9 +618,9 @@ namespace ScraperServices.Scrapers
                 }
                 catch (Exception exception)
                 {
-                    _log($"Error g1. Coordinates. Wait 2 sec. {exception.Message}");
+                    _log($"Error g1. Coordinates. Wait 20 sec. {exception.Message}");
                     needRepeat = true;
-                    Thread.Sleep(1000 * 2);
+                    Thread.Sleep(1000 * 20);
                 }
             } while (needRepeat);
 

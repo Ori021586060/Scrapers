@@ -17,7 +17,7 @@ namespace ParseOnmap
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
-            var state = new ScraperOnmapStateModel() { IsNew = true, };
+            var state = new ScraperOnmapStateModel() { IsNew = false, };
 
             var scraper = new ScraperOnmap(state);
 

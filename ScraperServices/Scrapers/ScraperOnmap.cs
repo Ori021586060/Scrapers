@@ -21,6 +21,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ScraperModels;
+using System.Text.RegularExpressions;
 
 namespace ScraperServices.Scrapers
 {
@@ -87,9 +88,11 @@ namespace ScraperServices.Scrapers
 
                 ScrapePhase1(state);
 
-                ScrapePhase1_GenerateListItems(state);
+                await ScrapePhase1_GenerateListItemsAsync(state);
 
-                ScrapePhase2(state);
+                //await ScrapePhase2_Selenoid(state);
+
+                await ScrapePhase2_WebClient(state);
 
                 result = true;
             }
@@ -100,8 +103,120 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private void ScrapePhase1_GenerateListItems(ScraperOnmapStateModel state)
+        private async Task ScrapePhase2_WebClient(ScraperOnmapStateModel state)
         {
+            SetWorkPhaseBase($"Phase-2/W", state);
+
+            var listItems = await _loadListItemsAsync(state);
+            await fixListItemsByPathAsync(listItems, state);
+
+            var maxTasks = 50;
+            var tasks = new List<Task<bool>>();
+            Func<int,List<string>> NeedToDo = (i) => listItems.Where(x => x.Value == false).Select(x => x.Key).Take(i).ToList();
+            var needToDo = NeedToDo(maxTasks);
+
+            do
+            {
+                foreach(var itemId in needToDo)
+                {
+                    listItems[itemId] = true;
+                    tasks.Add(Task.Run(async()=> listItems[itemId] = await DownloadItem_WebClient(itemId, state)));
+                }
+
+                Thread.Sleep(1000 * 1);
+                Task.WaitAny(tasks.ToArray());
+
+                tasks.RemoveAll(x => x.IsCompleted);
+
+                needToDo = NeedToDo(maxTasks - tasks.Count());
+
+            } while (needToDo.Count() > 0);
+
+            Task.WaitAll(tasks.ToArray());
+        }
+
+        private async Task<bool> DownloadItem_WebClient(string itemId, ScraperOnmapStateModel state)
+        {
+            var result = false;
+
+            try
+            {
+                var page = await DownloadPage_WebClient(itemId);
+                var json = ParseObjectFromPage(page);
+                var item = DeserializeJson(json);
+                await SaveItemToStore(itemId, item.propertyDetails.data, state);
+
+                result = true;
+            }catch (Exception exception)
+            {
+                _log($"Error p1. {exception.Message}");
+            }
+
+            return result;
+        }
+
+        private async Task<string> DownloadPage_WebClient(string itemId)
+        {
+            var page = "";
+            var url = $"https://www.onmap.co.il/home_details/{itemId}";
+            
+            try
+            {
+                page = await url
+                    .WithHeaders(new
+                    {
+                        User_Agent = "Wow browsaer",
+                    })
+                    .GetStringAsync();
+            }
+            catch (Exception exception)
+            {
+                _log($"Error x4. {exception.Message}");
+            }
+
+            return page;
+        }
+
+        private async Task SaveItemToStore(string itemId, object item, ScraperOnmapStateModel state)
+        {
+            var filename = $"{state.ItemsPath}/{itemId}.json";
+
+            await File.WriteAllTextAsync(filename, JsonConvert.SerializeObject(item, Formatting.Indented));
+
+            _log($"Save item into file {filename}");
+        }
+
+        private Phase3ItemDto DeserializeJson(string json)
+        {
+            var obj = JsonConvert.DeserializeObject<Phase3ItemDto>(json);
+
+            return obj;
+        }
+
+        private string ParseObjectFromPage(string page)
+        {
+            var result = "";
+            Regex regex = new Regex(@"window\.__data=(.*)}};<");
+            MatchCollection matches = regex.Matches(page);
+            if (matches.Count > 0)
+            {
+                result = CleanDataFromPage(matches[0].Value);
+            }
+
+            return result;
+        }
+
+        private string CleanDataFromPage(string value)
+        {
+            var result = value.Replace("window.__data=", "").Replace(";<", "");
+
+            return result;
+        }
+
+        private async Task ScrapePhase1_GenerateListItemsAsync(ScraperOnmapStateModel state)
+        {
+            SetWorkPhaseBase($"ScrapePhase1_GenerateListItems", state);
+
             var listObjects = _loadListObjects(state);
 
             var list = new Dictionary<string, bool>();
@@ -116,28 +231,31 @@ namespace ScraperServices.Scrapers
             }
             _log($"Has {duplicates} duplicates");
 
-            _saveListItems(list, state);
+            await _saveListItemsAsync(list, state);
+            _log("Done");
         }
 
-        private void _saveListItems(Dictionary<string, bool> list, ScraperOnmapStateModel state)
+        private async Task _saveListItemsAsync(Dictionary<string, bool> list, ScraperOnmapStateModel state)
         {
             var filename = $"{state.PathListItems}";
-            File.WriteAllText(filename, JsonConvert.SerializeObject(list, Formatting.Indented));
+            await File.WriteAllTextAsync(filename, JsonConvert.SerializeObject(list, Formatting.Indented));
         }
 
-        private Dictionary<string, bool> _loadListItems(ScraperOnmapStateModel state)
+        private async Task<Dictionary<string, bool>> _loadListItemsAsync(ScraperOnmapStateModel state)
         {
             Dictionary<string, bool> result = null;
             var filename = $"{state.PathListItems}";
             if (File.Exists(filename))
-                result = JsonConvert.DeserializeObject<Dictionary<string, bool>>(File.ReadAllText(filename));
+                result = JsonConvert.DeserializeObject<Dictionary<string, bool>>(await File.ReadAllTextAsync(filename));
 
             return result;
         }
 
         public DataScrapeModel GetDomainModel()
         {
-            var list = ScrapePhase3(_state);
+            var state = _state;
+            SetWorkPhaseBase($"DomainModel", state);
+            var list = ScrapePhase3(state);
 
             var result = new DataScrapeModel()
             {
@@ -145,22 +263,22 @@ namespace ScraperServices.Scrapers
                 Data = list,
             };
 
+            _log($"Done");
+
             return result;
         }
 
         protected override void _clearWorkspaceInner(IState state)
         {
-            _log($"Start clearing workspace");
+            _cleanDirectory($"{state.RootPath}", state);
+            //var files = new DirectoryInfo(state.RootPath).GetFiles();
 
-            var files = new DirectoryInfo(state.RootPath).GetFiles();
+            //foreach (var dir in new DirectoryInfo(state.RootPath).GetDirectories()) dir.Delete(recursive:true);
 
-            foreach (var dir in new DirectoryInfo(state.RootPath).GetDirectories()) dir.Delete(recursive:true);
-
-            foreach (var file in files) File.Delete(file.FullName);
+            //foreach (var file in files) File.Delete(file.FullName);
 
             _cleanFile($"{state.LogFilename}");
 
-            _log($"Clear workspace done");
         }
 
         private void _log(string message, IState state = null)
@@ -175,7 +293,7 @@ namespace ScraperServices.Scrapers
 
         public void ScrapePhase1(ScraperOnmapStateModel state)
         {
-            state.WorkPhase = "phase-1";
+            state.WorkPhase = "Phase-1";
             CultureInfo ci = new CultureInfo("en-US", true);
             Thread.CurrentThread.CurrentCulture = ci;
 
@@ -251,7 +369,7 @@ namespace ScraperServices.Scrapers
 
                 File.WriteAllText(state.Phase1Filename, JsonConvert.SerializeObject(list, Formatting.Indented));
 
-                _log($"Phase-1 done");
+                _log($"Done");
             }
             else
             {
@@ -259,15 +377,12 @@ namespace ScraperServices.Scrapers
             }
         }
 
-        public void ScrapePhase2(ScraperOnmapStateModel state)
+        public async Task ScrapePhase2_Selenoid(ScraperOnmapStateModel state)
         {
-            state.WorkPhase = "phase-2";
-                _log($"Start");
+            SetWorkPhaseBase($"Phase-2", state);
 
-                //var listObjects = JsonConvert.DeserializeObject<Dictionary<string, DataRow>>(File.ReadAllText(state.Phase1Filename));
-                //var listObjects = _loadListObjects(state);
-                var listItems = _loadListItems(state);
-            _checkListItemsByPath(listItems, state);
+            var listItems = await _loadListItemsAsync(state);
+            await fixListItemsByPathAsync(listItems, state);
                 var needToDo = listItems.Where(x => x.Value == false).Select(x => x.Key).ToList();
 
                 _initSelenoid(state);
@@ -282,7 +397,7 @@ namespace ScraperServices.Scrapers
                 {
                     if (indexOpenedPage > limitOpenPage)
                     {
-                        _saveListItems(listItems, state);
+                        await _saveListItemsAsync(listItems, state);
                         Thread.Sleep(1000 * 20);
                         indexOpenedPage = 0;
                     }
@@ -315,11 +430,11 @@ namespace ScraperServices.Scrapers
                     _log($"add file items/{key}.json");
                 }
 
-            _saveListItems(listItems, state);
+            await _saveListItemsAsync(listItems, state);
             _log($"Done");
         }
 
-        private void _checkListItemsByPath(Dictionary<string, bool> listItems, ScraperOnmapStateModel state)
+        private async Task fixListItemsByPathAsync(Dictionary<string, bool> listItems, ScraperOnmapStateModel state)
         {
             var itemFiles = _loadItemsFromPath(state);
             var amountFixedFiles = 0;
@@ -336,7 +451,7 @@ namespace ScraperServices.Scrapers
 
             _log($"Fixed {amountFixedFiles} files");
 
-            _saveListItems(listItems, state);
+            await _saveListItemsAsync(listItems, state);
         }
 
         private FileInfo[] _loadItemsFromPath(ScraperOnmapStateModel state)
@@ -373,8 +488,6 @@ namespace ScraperServices.Scrapers
 
         public List<ExcelRowOnmapModel> ScrapePhase3(ScraperOnmapStateModel state)
         {
-            _log($"Generate domain model.");
-
             var listItemFiles = _loadItemsFromPath(state);
             var list = new List<ExcelRowOnmapModel>();
 
@@ -423,8 +536,6 @@ namespace ScraperServices.Scrapers
                     list.Add(row);
                 }
             }
-
-            _log($"Generate domain model done");
 
             return list;
         }
