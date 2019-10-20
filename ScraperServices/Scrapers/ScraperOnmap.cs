@@ -69,12 +69,7 @@ namespace ScraperServices.Scrapers
             _checkDirectory($"{state.ItemsPath}");
         }
 
-        //private void _checkDirectory(string directory)
-        //{
-        //    if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
-        //}
-
-        protected override async Task<bool> ScrapeInner()
+        protected override async Task<bool> ScrapeInnerAsync()
         {
             var result = false;
 
@@ -251,19 +246,19 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        public DataScrapeModel GetDomainModel()
+        public async override Task<DataScrapeModel> GetDomainModelAsync()
         {
             var state = _state;
             SetWorkPhaseBase($"DomainModel", state);
-            var list = ScrapePhase3(state);
+            var domainModel = ScrapePhase3Async(state);
 
             var result = new DataScrapeModel()
             {
                 Scraper = EnumScrapers.Onmap,
-                Data = list,
+                Data = await domainModel,
             };
 
-            _log($"Done");
+            LogDone(state);
 
             return result;
         }
@@ -436,7 +431,7 @@ namespace ScraperServices.Scrapers
 
         private async Task fixListItemsByPathAsync(Dictionary<string, bool> listItems, ScraperOnmapStateModel state)
         {
-            var itemFiles = _loadItemsFromPath(state);
+            var itemFiles = GetListItemFiles(state);
             var amountFixedFiles = 0;
 
             foreach(var itemFile in itemFiles)
@@ -452,14 +447,6 @@ namespace ScraperServices.Scrapers
             _log($"Fixed {amountFixedFiles} files");
 
             await _saveListItemsAsync(listItems, state);
-        }
-
-        private FileInfo[] _loadItemsFromPath(ScraperOnmapStateModel state)
-        {
-            var path = $"{state.ItemsPath}";
-            var itemFiles = new DirectoryInfo(path).GetFiles();
-
-            return itemFiles;
         }
 
         private void _saveItem(Dictionary<string, object> netObjects, string key, ScraperOnmapStateModel state)
@@ -486,67 +473,28 @@ namespace ScraperServices.Scrapers
             _initSelenoidBase(_selenoidState, state);
         }
 
-        public List<ExcelRowOnmapModel> ScrapePhase3(ScraperOnmapStateModel state)
+        public async Task<List<ExcelRowOnmapModel>> ScrapePhase3Async(ScraperOnmapStateModel state)
         {
-            var listItemFiles = _loadItemsFromPath(state);
-            var list = new List<ExcelRowOnmapModel>();
+            var listRowsDomainModel = new List<ExcelRowOnmapModel>();
+            var files = GetListItemFiles(state);
 
-            foreach(var itemFile in listItemFiles)
+            foreach (var itemFile in files)
             {
-                var item = _loadItemFromPath(itemFile);
-                var rowObj = item;
-                var itemId = Path.GetFileNameWithoutExtension(itemFile.Name);
-
-                if (rowObj != null)
-                {
-                    var row = new ExcelRowOnmapModel()
-                    {
-                        TagId_ = itemId,
-                        DateCreate = rowObj?.created_at,
-                        DateUpdate = rowObj?.updated_at,
-                        EnCity = rowObj?.address.en?.city_name,
-                        EnHouseNumber = rowObj?.address.en?.house_number,
-                        EnNeighborhood = rowObj?.address.en?.neighborhood,
-                        EnStreetName = rowObj?.address.en?.street_name,
-                        HeCity = rowObj?.address.he?.city_name,
-                        HeHouseNumber = rowObj?.address.he?.house_number,
-                        HeNeighborhood = rowObj?.address.he?.neighborhood,
-                        HeStreetName = rowObj?.address.he?.street_name,
-                        Latitude = rowObj?.address.location?.lat,
-                        Longitude = rowObj?.address.location?.lon,
-                        AriaBase = rowObj?.additional_info.area.@base,
-                        Balconies = rowObj?.additional_info.balconies,
-                        Bathrooms = rowObj?.additional_info.bathrooms,
-                        Elevators = rowObj?.additional_info.elevators,
-                        FloorOn = rowObj?.additional_info.floor.on_the,
-                        FloorOf = rowObj?.additional_info.floor.out_of,
-                        Rooms = rowObj?.additional_info.rooms,
-                        Toilets = rowObj?.additional_info.toilets,
-                        ContactEmail = rowObj?.contacts.primary.email,
-                        ContactName = rowObj?.contacts.primary.name,
-                        ContactPhone = rowObj?.contacts.primary.phone,
-                        Description = rowObj?.description,
-                        Price = rowObj?.price,
-                        PropertyType = rowObj?.property_type,
-                        Section = rowObj?.section,
-                        Images = rowObj?.images?.Select(x => new ExcelImageModel(x)).ToList(),
-                        Videos = rowObj?.videos?.Select(x => new ExcelVideoModel(x)).ToList(),
-                    };
-
-                    list.Add(row);
-                }
+                var dto = LoadDtoItemFromPathAsync(itemFile);
+                var rowDomainModel = new ExcelRowOnmapModel().FromDto(await dto);
+                listRowsDomainModel.Add(rowDomainModel);
             }
 
-            return list;
+            return listRowsDomainModel;
         }
 
-        private Phase3ObjectDto _loadItemFromPath(FileInfo itemFile)
+        private async Task<Phase3ObjectDto> LoadDtoItemFromPathAsync(FileInfo itemFile)
         {
             Phase3ObjectDto result = null;
             var filename = $"{itemFile.FullName}";
 
             if (File.Exists(filename))
-                result = JsonConvert.DeserializeObject<Phase3ObjectDto>(File.ReadAllText(filename));
+                result = JsonConvert.DeserializeObject<Phase3ObjectDto>(await File.ReadAllTextAsync(filename));
 
             return result;
         }

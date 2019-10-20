@@ -42,7 +42,7 @@ namespace ScraperServices.Services
 
             var scraper = new ScraperOnmap(state);
 
-            if (needScrape) scraper.Scrape().Wait();
+            if (needScrape) scraper.Scrape();
 
             var dataOfScrape = scraper.GetDomainModel();
 
@@ -91,7 +91,7 @@ namespace ScraperServices.Services
 
             var scraper = new ScraperYad2(state);
 
-            if (needScrape) scraper.Scrape().Wait();
+            if (needScrape) scraper.Scrape();
 
             var dataOfScrape = scraper.GetDomainModel();
 
@@ -147,7 +147,7 @@ namespace ScraperServices.Services
 
             var scraper = new ScraperHomeLess(state);
 
-            if (needScrape) scraper.Scrape().Wait();
+            if (needScrape) scraper.Scrape();
 
             var dataOfScrape = scraper.GetDomainModel();
 
@@ -187,7 +187,7 @@ namespace ScraperServices.Services
 
             var scraper = new ScraperWinWin(state);
 
-            if (needScrape) scraper.Scrape().Wait();
+            if (needScrape) scraper.Scrape();
 
             var dataOfScrape = scraper.GetDomainModel();
 
@@ -236,7 +236,7 @@ namespace ScraperServices.Services
 
             var scraper = new ScraperKomo(state);
 
-            if (needScrape) scraper.Scrape().Wait();
+            if (needScrape) scraper.Scrape();
 
             var dataOfScrape = scraper.GetDomainModel();
 

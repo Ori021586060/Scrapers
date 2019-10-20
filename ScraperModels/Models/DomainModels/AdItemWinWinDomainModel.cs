@@ -1,12 +1,13 @@
-﻿using ScraperModels.Models.WinWinDto;
+﻿using ScraperModels.Models.Excel;
+using ScraperModels.Models.WinWinDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ScraperModels.Models.Excel
+namespace ScraperModels.Models.Domain
 {
-    public class ExcelRowWinWinModel
+    public class AdItemWinWinDomainModel
     {
         public string TagId_ { get; set; }
         public string DateUpdate { get; set; }
@@ -30,11 +31,11 @@ namespace ScraperModels.Models.Excel
         public string Phone2 { get; set; }
         public List<ExcelImageModel> Images { get; set; }
 
-        public ExcelRowWinWinModel()
+        public AdItemWinWinDomainModel()
         {
         }
 
-        public ExcelRowWinWinModel FromDto(ItemWinWinDtoModel itemDto)
+        public AdItemWinWinDomainModel FromDto(AdItemWinWinDtoModel itemDto)
         {
             TagId_ = itemDto.ItemId;
             DateUpdate = itemDto.DateUpdate;

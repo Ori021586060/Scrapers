@@ -57,7 +57,7 @@ namespace ScraperServices.Scrapers
             return new ExcelHomeLessService(_state);
         }
 
-        protected override async Task<bool> ScrapeInner()
+        protected override async Task<bool> ScrapeInnerAsync()
         {
             var result = true;
             var state = _state;
@@ -266,14 +266,18 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        public DataScrapeModel GetDomainModel()
+        public override async Task<DataScrapeModel> GetDomainModelAsync()
         {
-            var list = ScrapePhase4(_state);
+            var state = _state;
+            SetWorkPhaseBase($"DomainModel", state);
+            var listDomainItems = ScrapePhase4Async(state);
 
             var result = new DataScrapeModel(){
-                Scraper = _state.TypeScraper,
-                Data = list,
+                Scraper = state.TypeScraper,
+                Data = await listDomainItems,
             };
+
+            LogDone(state);
 
             return result;
         }
@@ -580,23 +584,13 @@ namespace ScraperServices.Scrapers
         private async Task<List<CoordinateDtoModel>> _getCoordinatesFromService(AdDtoModel item)
         {
             List<CoordinateDtoModel> coordinates = null;
-            //var url = $"https://nominatim.openstreetmap.org/search?q={item.Region} {item.City}&format=json";
-            //var request = url
-            //    .WithTimeout(60)
-            //    .WithHeaders(new
-            //    {
-            //        User_Agent = "wow hackers, I need your money",
-            //    })
-            //    .GetJsonAsync<List<CoordinateDtoModel>>();
-
-            //var coordinates = await request;
 
             var client = new WebClient();
 
-            //ICredentials credentials = new NetworkCredential("lum-customer-hl_87223775-zone-static", "fntl9hhiw7g5");
-            //client.Proxy = new WebProxy(new Uri("http://zproxy.lum-superproxy.io:22225"), true, null, credentials);
-            //client.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0");
-            //var url = $"https://nominatim.openstreetmap.org/search?q={item.Region} {item.City}&format=json";
+            ICredentials credentials = new NetworkCredential("lum-customer-hl_89055c51-zone-static", "y7ic12hyfl9b");
+            client.Proxy = new WebProxy(new Uri("http://zproxy.lum-superproxy.io:22225"), true, null, credentials);
+            client.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0");
+            var url = $"https://nominatim.openstreetmap.org/search?q={item.Region} {item.City}&format=json";
 
             var response = "";
             var needRepeat = false;
@@ -605,12 +599,6 @@ namespace ScraperServices.Scrapers
             {
                 needRepeat = false;
 
-                //ICredentials credentials = new NetworkCredential("lum-customer-hl_89055c51-zone-static-country-il", "y7ic12hyfl9b");
-                ICredentials credentials = new NetworkCredential("lum-customer-hl_89055c51-zone-static", "y7ic12hyfl9b");
-                client.Proxy = new WebProxy(new Uri("http://zproxy.lum-superproxy.io:22225"), true, null, credentials);
-                client.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0");
-                var url = $"https://nominatim.openstreetmap.org/search?q={item.Region} {item.City}&format=json";
-
                 try
                 {
                     response = await client.DownloadStringTaskAsync(new Uri(url));
@@ -618,7 +606,7 @@ namespace ScraperServices.Scrapers
                 }
                 catch (Exception exception)
                 {
-                    _log($"Error g1. Coordinates. Wait 20 sec. {exception.Message}");
+                    _log($"Error g1. Coordinates. Wait 20 sec. {exception.Message} / URL: {url}");
                     needRepeat = true;
                     Thread.Sleep(1000 * 20);
                 }
@@ -657,27 +645,34 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private List<ExcelRowHomeLessModel> ScrapePhase4(ScraperHomeLessStateModel state)
+        private async Task<List<ExcelRowHomeLessModel>> ScrapePhase4Async(ScraperHomeLessStateModel state)
         {
-            var listRows = new List<ExcelRowHomeLessModel>();
-            var files = new DirectoryInfo($"{state.ItemsPath}").GetFiles();
-            var listPages = _loadPages(state);
+            var listDomainItems = new List<ExcelRowHomeLessModel>();
+            var files = GetListItemFiles(state);
+            var listPages = _loadPagesAsync(state);
 
             foreach(var file in files)
             {
-                var id = Path.GetFileNameWithoutExtension(file.Name);
-                var itemDto = LoadItemFromStore<DetailsItemDtoModel>(file);
-                itemDto.RowDataFromPage = listPages.Where(x=>x.Key == id).Select(x=>x.Value).FirstOrDefault();
+                var itemDto = await LoadItemDtoFromStoreAsync<DetailsItemDtoModel>(file, state);
 
-                var item = new ExcelRowHomeLessModel().FromDto(itemDto);
+                itemDto.RowDataFromPage = GetRowDataFromPage(await listPages, file);
 
-                listRows.Add(item);
+                var itemDomain = new ExcelRowHomeLessModel().FromDto(itemDto);
+                listDomainItems.Add(itemDomain);
             }
 
-            return listRows;
+            return listDomainItems;
         }
 
-        private Dictionary<string, AdDtoModel> _loadPages(ScraperHomeLessStateModel state)
+        private AdDtoModel GetRowDataFromPage(Dictionary<string, AdDtoModel> listPages, FileInfo file)
+        {
+            var id = Path.GetFileNameWithoutExtension(file.Name);
+            var result = listPages.Where(x=>x.Key == id).Select(x=>x.Value).FirstOrDefault();
+
+            return result;
+        }
+
+        private async Task<Dictionary<string, AdDtoModel>> _loadPagesAsync(ScraperHomeLessStateModel state)
         {
             var result = new Dictionary<string, AdDtoModel>();
 
@@ -686,7 +681,7 @@ namespace ScraperServices.Scrapers
 
             foreach(var pageFile in listPageFiles)
             {
-                var listAdDto = JsonConvert.DeserializeObject<List<AdDtoModel>>(File.ReadAllText(pageFile.FullName));
+                var listAdDto = JsonConvert.DeserializeObject<List<AdDtoModel>>(await File.ReadAllTextAsync(pageFile.FullName));
                 foreach(var adDto in listAdDto)
                 {
                     if (!result.ContainsKey(adDto.Id))

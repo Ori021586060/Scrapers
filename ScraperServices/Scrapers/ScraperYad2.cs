@@ -70,7 +70,7 @@ namespace ScraperServices.Scrapers
             _log($"Save config:{configFilename} is done");
         }
 
-        protected override async Task<bool> ScrapeInner()
+        protected override async Task<bool> ScrapeInnerAsync()
         {
             var result = false;
             var state = _state;
@@ -97,18 +97,19 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        public DataScrapeModel GetDomainModel()
+        public override async Task<DataScrapeModel> GetDomainModelAsync()
         {
             var state = _state;
-            SetWorkPhaseBase($"GetDomainModel", state);
-
-            var list = _scrapePhase7_GenerateDomainModel(_state);
+            SetWorkPhaseBase($"DomainModel", state);
+            var domainModel = _scrapePhase7_GenerateDomainModelAsync(state);
 
             DataScrapeModel result = new DataScrapeModel()
             {
                 Scraper = EnumScrapers.Yad2,
-                Data = list,
+                Data = await domainModel,
             };
+
+            LogDone(state);
 
             return result;
         }
@@ -140,11 +141,9 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private async Task<List<ExcelRowYad2Model>> _scrapePhase7_GenerateDomainModel(ScraperYad2StateModel state)
+        private async Task<List<ExcelRowYad2Model>> _scrapePhase7_GenerateDomainModelAsync(ScraperYad2StateModel state)
         {
             List<ExcelRowYad2Model> result = null;
-
-            _log($"Generate DomainModel");
 
             var listItems = await _loadListItemsAsync(state)?? new Dictionary<string, bool>();
 

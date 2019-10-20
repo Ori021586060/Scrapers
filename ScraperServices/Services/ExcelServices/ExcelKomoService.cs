@@ -3,7 +3,6 @@ using OfficeOpenXml.Style;
 using ScraperModels.Models;
 using ScraperModels.Models.Excel;
 using ScraperServices.Models.Komo;
-using ScraperModels.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -42,6 +41,7 @@ namespace ScraperServices.Services
 
                 col = 1;
                 // head line
+                sheet.Cells[row, col++].Value = "ItemId";
                 sheet.Cells[row, col++].Value = "Updated";
                 sheet.Cells[row, col++].Value = "Latitude";
                 sheet.Cells[row, col++].Value = "Longitude";
@@ -68,7 +68,7 @@ namespace ScraperServices.Services
                 foreach (var item in items)
                 {
                     col = 1;
-
+                    sheet.Cells[row, col++].Value = item.TagId_;
                     _addCellDate(sheet.Cells[row, col++], item.Updated);
 
                     sheet.Cells[row, col++].Value = item.Latitude;

@@ -38,21 +38,14 @@ namespace ScraperServices.Scrapers
             _config = _initConfig(state);
         }
 
-        //private void _initSelenoid(ScraperKomoStateModel state)
-        //{
-        //    if (_selenoidState is null) _selenoidState = new SelenoidStateModel();
-
-        //    _initSelenoidBase(_selenoidState, state);
-        //}
-
-        public DataScrapeModel GetDomainModel()
+        public override async Task<DataScrapeModel> GetDomainModelAsync()
         {
-            var list = ScrapePhase5(_state);
+            var domainModel = ScrapePhase5Async(_state);
 
             var result = new DataScrapeModel()
             {
                 Scraper = EnumScrapers.Komo,
-                Data = list,
+                Data = await domainModel,
             };
 
             return result;
@@ -63,32 +56,32 @@ namespace ScraperServices.Scrapers
             return new ExcelKomoService(_state);
         }
 
-        protected override async Task<bool> ScrapeInner()
+        protected override async Task<bool> ScrapeInnerAsync()
         {
-            _state.WorkPhase = "init";
-            _log($"Start scraper Komo (isNew:{_state.IsNew})");
+            var state = _state;
+            SetWorkPhaseBase($"Scraper", state);
 
             var result = false;
 
             try
             {
-                if (_state.IsNew) _clearWorkspace(_state);
+                if (_state.IsNew) _clearWorkspace(state);
 
-                _checkWorkspace(_state);
+                _checkWorkspace(state);
 
-                await _getSessionSerial(_state);
+                await _getSessionSerial(state);
 
-                await ScrapePhase1_GenerateListCitiesAsync(_state);
+                await ScrapePhase1_GenerateListCitiesAsync(state);
 
-                await ScrapePhase2_GenerateListStreetsAsync(_state);
+                await ScrapePhase2_GenerateListStreetsAsync(state);
 
-                ScrapePhase3_DownloadPages(_state);
+                ScrapePhase3_DownloadPages(state);
 
-                ScrapePhase4_GenerateListItems(_state);
+                ScrapePhase4_GenerateListItems(state);
 
-                ScrapePhase5_DownloadItems(_state);
+                ScrapePhase5_DownloadItems(state);
 
-                _log($"Scraper Komo done (isNew:{_state.IsNew})");
+                _log($"Scraper Komo done (isNew:{state.IsNew})");
 
                 result = true;
             }
@@ -99,28 +92,31 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private List<ExcelRowKomoModel> ScrapePhase5(ScraperKomoStateModel state)
+        private async Task<List<ExcelRowKomoModel>> ScrapePhase5Async(ScraperKomoStateModel state)
         {
-            state.WorkPhase = "Ph5.Model";
-            _log($"Start generate DomainModel");
+            SetWorkPhaseBase($"DomainModel", state);
             var listRowsDomainModel = new List<ExcelRowKomoModel>();
+            var files = GetListItemFiles(state);
 
-            var files = new DirectoryInfo(state.ItemsPath).GetFiles();
-            //var listItems = _loadListItems(state);
-
-            foreach(var file in files)
+            foreach (var file in files)
             {
-                var key = file.Name;
                 var filename = file.FullName;
-                var data = JsonConvert.DeserializeObject<ItemKomoDtoModel>(File.ReadAllText(filename));
+                var data = JsonConvert.DeserializeObject<ItemKomoDtoModel>(await File.ReadAllTextAsync(filename));
                 var rowDomainModel = new ExcelRowKomoModel().FromDto(data);
                 listRowsDomainModel.Add(rowDomainModel);
             }
 
-            _log($"Done generate DomainModel");
+            _log($"Done");
 
             return listRowsDomainModel;
         }
+
+        //private FileInfo[] GetListItemFiles(ScraperKomoStateModel state)
+        //{
+        //    var files = new DirectoryInfo(state.ItemsPath).GetFiles();
+
+        //    return files;
+        //}
 
         private Dictionary<string, bool> _loadListItems(ScraperKomoStateModel state)
         {
@@ -1162,6 +1158,8 @@ namespace ScraperServices.Scrapers
             }
             else
                 _log($"Generate list-cities not need (missing, isNew:{state.IsNew})");
+
+            LogDone(state);
         }
 
         private async Task<Dictionary<string,CitiesDataDtoModel>> _downloadListCitiesAsync(ScraperKomoStateModel state)

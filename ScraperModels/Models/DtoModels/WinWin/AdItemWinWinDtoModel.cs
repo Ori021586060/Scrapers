@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ScraperModels.Models.WinWinDto
 {
-    public class ItemWinWinDtoModel
+    public class AdItemWinWinDtoModel
     {
         public string ItemId { get; set; }
         public string DateUpdate { get; set; }

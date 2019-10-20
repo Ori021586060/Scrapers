@@ -18,14 +18,23 @@ namespace ScraperServices.Scrapers
 {
     public abstract class ScraperBase
     {
-        public async Task<bool> Scrape()
+        protected IState _state { get; set; }
+        public bool Scrape()
         {
-            var result = await ScrapeInner();
+            var scrape = ScrapeAsync();
+            var result = scrape.Result;
 
             return result;
         }
 
-        protected abstract Task<bool> ScrapeInner();
+        public async Task<bool> ScrapeAsync()
+        {
+            var result = await ScrapeInnerAsync();
+
+            return result;
+        }
+
+        protected abstract Task<bool> ScrapeInnerAsync();
 
         protected void _prepareToWorkBase(IState state)
         {
@@ -289,7 +298,14 @@ namespace ScraperServices.Scrapers
             if (string.IsNullOrEmpty(text)) text = "Start";
             _logBase(text, state);
 
+            PrintShortState(state);
+
             UpdateStateFile($"{phaseText}", state);
+        }
+
+        private void PrintShortState(IState state)
+        {
+            _logBase($"Is new: {state.IsNew}", state);
         }
 
         protected void UpdateStateFile(string text, IState state)
@@ -299,12 +315,20 @@ namespace ScraperServices.Scrapers
             //File.WriteAllText(filename, text);
         }
 
-        protected T LoadItemFromStore<T>(FileInfo file)
+        protected async Task<T> LoadItemDtoFromStoreAsync<T>(FileInfo file, IState state)
+        {
+            var result = DeserializeFileAsync<T>(file);
+            _logBase($"Load ItemDto: {file.Name}", state);
+
+            return await result;
+        }
+
+        protected async Task<T> DeserializeFileAsync<T>(FileInfo file)
         {
             T result = default;
 
             if (File.Exists(file.FullName))
-                result = JsonConvert.DeserializeObject<T>(File.ReadAllText(file.FullName));
+                result = JsonConvert.DeserializeObject<T>(await File.ReadAllTextAsync(file.FullName));
 
             return result;
         }
@@ -324,6 +348,51 @@ namespace ScraperServices.Scrapers
             }
 
             return page;
+        }
+
+        protected void LogDone(IState state)
+        {
+            _logBase($"Done", state);
+        }
+
+        protected FileInfo[] GetListItemFiles(IState state)
+        {
+            var path = $"{state.ItemsPath}";
+            var itemFiles = new DirectoryInfo(path).GetFiles();
+
+            return itemFiles;
+        }
+
+        public DataScrapeModel GetDomainModel()
+        {
+            var model = GetDomainModelAsync();
+            var result = model.Result;
+
+            return result;
+        }
+
+        protected async Task<DataScrapeModel> GetTypeDomainModelAsync<T>()
+        {
+            var state = _state;
+            SetWorkPhaseBase($"DomainModel", state);
+            var listDomainItems = await ScrapePhase_GetDomainModelAsync<T>(state);
+
+            var result = new DataScrapeModel()
+            {
+                Scraper = state.TypeScraper,
+                Data = listDomainItems,
+            };
+
+            _logBase($"DomainModel has {listDomainItems.Count()} AdItems", state);
+            LogDone(state);
+
+            return result;
+        }
+
+        public abstract Task<DataScrapeModel> GetDomainModelAsync();
+
+        protected virtual async Task<List<T>> ScrapePhase_GetDomainModelAsync<T>(IState state) {
+            return await Task.Run(()=>new List<T>());
         }
     }
 }

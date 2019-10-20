@@ -1,5 +1,7 @@
-﻿using System;
+﻿using ScraperModels.Models.OnmapDto;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace ScraperModels.Models.Excel
@@ -36,5 +38,41 @@ namespace ScraperModels.Models.Excel
         public string Section { get; set; }
         public List<ExcelImageModel> Images { get; set; }
         public List<ExcelVideoModel> Videos { get; set; }
+
+        public ExcelRowOnmapModel FromDto(Phase3ObjectDto rowObj)
+        {
+            TagId_ = rowObj.id;
+            DateCreate = rowObj?.created_at;
+            DateUpdate = rowObj?.updated_at;
+            EnCity = rowObj?.address.en?.city_name;
+            EnHouseNumber = rowObj?.address.en?.house_number;
+            EnNeighborhood = rowObj?.address.en?.neighborhood;
+            EnStreetName = rowObj?.address.en?.street_name;
+            HeCity = rowObj?.address.he?.city_name;
+            HeHouseNumber = rowObj?.address.he?.house_number;
+            HeNeighborhood = rowObj?.address.he?.neighborhood;
+            HeStreetName = rowObj?.address.he?.street_name;
+            Latitude = rowObj?.address.location?.lat;
+            Longitude = rowObj?.address.location?.lon;
+            AriaBase = rowObj?.additional_info.area.@base;
+            Balconies = rowObj?.additional_info.balconies;
+            Bathrooms = rowObj?.additional_info.bathrooms;
+            Elevators = rowObj?.additional_info.elevators;
+            FloorOn = rowObj?.additional_info.floor.on_the;
+            FloorOf = rowObj?.additional_info.floor.out_of;
+            Rooms = rowObj?.additional_info.rooms;
+            Toilets = rowObj?.additional_info.toilets;
+            ContactEmail = rowObj?.contacts.primary.email;
+            ContactName = rowObj?.contacts.primary.name;
+            ContactPhone = rowObj?.contacts.primary.phone;
+            Description = rowObj?.description;
+            Price = rowObj?.price;
+            PropertyType = rowObj?.property_type;
+            Section = rowObj?.section;
+            Images = rowObj?.images?.Select(x => new ExcelImageModel(x)).ToList();
+            Videos = rowObj?.videos?.Select(x => new ExcelVideoModel(x)).ToList();
+
+            return this;
+        }
     }
 }

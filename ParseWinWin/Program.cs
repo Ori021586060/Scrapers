@@ -13,7 +13,7 @@ namespace ParseWinWin
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
-            var state = new ScraperWinWinStateModel() { IsNew = true, };
+            var state = new ScraperWinWinStateModel() { IsNew = false, };
 
             var scraper = new ScraperWinWin(state);
 
@@ -26,16 +26,16 @@ namespace ParseWinWin
 
         static void Scrape(ScraperWinWin scraper)
         {
-            var isOk = scraper.Scrape().Result;
+            var isOk = scraper.Scrape();
         }
 
         static void GetExcelFile(ScraperWinWin scraper)
         {
-            var dataOfScrape = scraper.GetDomainModel();
+            var model = scraper.GetDomainModel();
 
             var excelService = scraper.GetExcelService();
 
-            var excelData = excelService.CreateExcel(dataOfScrape);
+            var excelData = excelService.CreateExcel(model);
 
             var filename = excelService.SaveToFile(excelData);
         }

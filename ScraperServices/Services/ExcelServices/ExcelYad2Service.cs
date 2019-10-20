@@ -38,6 +38,7 @@ namespace ScraperServices.Services
                 var col = 1;
 
                 // head line
+                sheet.Cells[row, col++].Value = "ItemId";
                 sheet.Cells[row, col++].Value = "Date Create";
                 sheet.Cells[row, col++].Value = "Date Update";
                 sheet.Cells[row, col++].Value = "City";
@@ -72,7 +73,7 @@ namespace ScraperServices.Services
                 foreach (var item in items)
                 {
                     col = 1;
-
+                    sheet.Cells[row, col++].Value = item.Id;
                     _addCellDate(sheet.Cells[row, col], item.DateCreate); col++;
 
                     _addCellDate(sheet.Cells[row, col], item.DateUpdate); col++;

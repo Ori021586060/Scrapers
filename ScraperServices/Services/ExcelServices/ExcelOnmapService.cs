@@ -3,7 +3,6 @@ using OfficeOpenXml.Style;
 using ScraperModels.Models;
 using ScraperModels.Models.Excel;
 using ScraperServices.Models.Onmap;
-using ScraperModels.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -40,7 +39,7 @@ namespace ScraperServices.Services
                 var col = 1;
 
                 // head line
-                sheet.Cells[row, col++].Value = "Id";
+                sheet.Cells[row, col++].Value = "ItemId";
                 sheet.Cells[row, col++].Value = "DateCreate";
                 sheet.Cells[row, col++].Value = "DateUpdate";
                 sheet.Cells[row, col++].Value = "Latitude";
@@ -53,8 +52,6 @@ namespace ScraperServices.Services
                 sheet.Cells[row, col++].Value = "HeHouseNumber";
                 sheet.Cells[row, col++].Value = "HeNeighborhood";
                 sheet.Cells[row, col++].Value = "HeStreetName";
-                sheet.Cells[row, col++].Value = "Latitude";
-                sheet.Cells[row, col++].Value = "Longitude";
                 sheet.Cells[row, col++].Value = "AriaBase";
                 sheet.Cells[row, col++].Value = "Balconies";
                 sheet.Cells[row, col++].Value = "Bathrooms";
@@ -95,40 +92,29 @@ namespace ScraperServices.Services
                     sheet.Cells[row, col++].Value = item.HeCity;
 
                     _addCellInt(sheet.Cells[row, col], item.HeHouseNumber); col++;
-                    //sheet.Cells[row, col++].Value = item.HeHouseNumber;
 
                     sheet.Cells[row, col++].Value = item.HeNeighborhood;
                     sheet.Cells[row, col++].Value = item.HeStreetName;
-                    sheet.Cells[row, col++].Value = item.Latitude;
-                    sheet.Cells[row, col++].Value = item.Longitude;
 
                     _addCellInt(sheet.Cells[row, col], item.AriaBase); col++;
-                    //sheet.Cells[row, col++].Value = item.AriaBase;
 
                     _addCellInt(sheet.Cells[row, col], item.Balconies); col++;
-                    //sheet.Cells[row, col++].Value = item.Balconies;
 
                     _addCellInt(sheet.Cells[row, col], item.Bathrooms); col++;
-                    //sheet.Cells[row, col++].Value = item.Bathrooms;
 
                     _addCellInt(sheet.Cells[row, col], item.Elevators); col++;
-                    //sheet.Cells[row, col++].Value = item.Elevators;
 
                     _addCellInt(sheet.Cells[row, col], item.FloorOn); col++;
-                    //sheet.Cells[row, col++].Value = item.FloorOn;
 
                     _addCellInt(sheet.Cells[row, col], item.FloorOf); col++;
-                    //sheet.Cells[row, col++].Value = item.FloorOf;
 
                     _addCellFloat(sheet.Cells[row, col], item.Rooms); col++;
-                    //sheet.Cells[row, col++].Value = item.Rooms;
 
                     sheet.Cells[row, col++].Value = item.ContactEmail;
                     sheet.Cells[row, col++].Value = item.ContactName;
                     sheet.Cells[row, col++].Value = item.ContactPhone;
 
                     _addCellInt(sheet.Cells[row, col], item.Price); col++;
-                    //sheet.Cells[row, col++].Value = item.Price;
                     sheet.Cells[row, col++].Value = item.Description;
                     sheet.Cells[row, col++].Value = item.PropertyType;
                     sheet.Cells[row, col++].Value = item.Section;
@@ -167,7 +153,6 @@ namespace ScraperServices.Services
 
                 foreach (var i in Enumerable.Range(startPositionOnFileLinks, hasAmountImages))
                 {
-                    //sheet.Column(i).Width = 5;
                     sheet.Cells[1, i].Value = $"Images {i-startPositionOnFileLinks+1}";
                 }
 

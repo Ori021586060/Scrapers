@@ -30,16 +30,16 @@ namespace ParseOnmap
 
         static void Scrape(ScraperOnmap scraper)
         {
-            var isOk = scraper.Scrape().Result;
+            var isOk = scraper.Scrape();
         }
 
         static void GetExcelFile(ScraperOnmap scraper)
         {
-            var dataOfScrape = scraper.GetDomainModel();
+            var model = scraper.GetDomainModel();
 
             var excelService = scraper.GetExcelService();
 
-            var excelData = excelService.CreateExcel(dataOfScrape);
+            var excelData = excelService.CreateExcel(model);
 
             var filename = excelService.SaveToFile(excelData);
         }

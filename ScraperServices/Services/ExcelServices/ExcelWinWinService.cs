@@ -5,6 +5,7 @@ using System.Linq;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using ScraperModels.Models;
+using ScraperModels.Models.Domain;
 using ScraperModels.Models.Excel;
 using ScraperServices.Services;
 
@@ -21,7 +22,11 @@ namespace ScraperServices.Services
 
             MemoryStream result = null;
 
-            var items = (List<ExcelRowWinWinModel>)data.Data;
+            var itemsDomainModel = (List<AdItemWinWinDomainModel>)data.Data;
+            var items = new List<AdItemWinWinExcelModel>();
+            foreach (var item in itemsDomainModel) items.Add(new AdItemWinWinExcelModel().FromDomain(item));
+
+
             var amountDataCols = 0;
             var hasAmountImages = 1;
             _log($"Amount input items: {items.Count}");
@@ -38,6 +43,7 @@ namespace ScraperServices.Services
                 var col = 1;
 
                 // head line
+                sheet.Cells[row, col++].Value = "ItemId";
                 sheet.Cells[row, col++].Value = "Date Update";
                 sheet.Cells[row, col++].Value = "Longitude";
                 sheet.Cells[row, col++].Value = "Latitude";
@@ -69,7 +75,7 @@ namespace ScraperServices.Services
                 foreach (var item in items)
                 {
                     col = 1;
-
+                    sheet.Cells[row, col++].Value = item.TagId_;
                     _addCellDate(sheet.Cells[row, col], item.DateUpdate); col++;
                     
                     sheet.Cells[row, col++].Value = item.Latitude;

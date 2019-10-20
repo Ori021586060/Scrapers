@@ -14,30 +14,29 @@ namespace ParseYad2
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
-            var state = new ScraperYad2StateModel() { IsNew = true, };
+            var state = new ScraperYad2StateModel() { IsNew = false, };
 
             var scraper = new ScraperYad2(state);
 
-            Scrape(scraper);
+            //Scrape(scraper);
 
             GetExcelFile(scraper);
 
             PrintSaveStatus(scraper);
-
         }
 
         static void Scrape(ScraperYad2 scraper)
         {
-            var isOk = scraper.Scrape().Result;
+            var isOk = scraper.Scrape();
         }
 
         static void GetExcelFile(ScraperYad2 scraper)
         {
-            var dataOfScrape = scraper.GetDomainModel();
+            var model = scraper.GetDomainModel();
 
             var excelService = scraper.GetExcelService();
 
-            var excelData = excelService.CreateExcel(dataOfScrape);
+            var excelData = excelService.CreateExcel(model);
 
             var filename = excelService.SaveToFile(excelData);
         }

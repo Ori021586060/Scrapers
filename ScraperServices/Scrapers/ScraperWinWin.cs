@@ -19,51 +19,47 @@ using ScraperServices.Models.WinWin;
 using ScraperServices.Services;
 using ScrapySharp.Extensions;
 using ScraperModels;
+using ScraperModels.Models.Domain;
 
 namespace ScraperServices.Scrapers
 {
     public class ScraperWinWin: ScraperBase
     {
-        private ScraperWinWinStateModel _state { get; set; } = new ScraperWinWinStateModel();
-        private ScraperWinWinConfigModel _config { get; set; }
-        private SelenoidStateModel _selenoidState { get; set; } = new SelenoidStateModel();
-
         public ScraperWinWin(ScraperWinWinStateModel state = null)
         {
             if (state is null) state = new ScraperWinWinStateModel();
 
             _state = state;
 
-            _config = _loadScraperConfig(state);
+            //_config = _loadScraperConfig(state);
         }
 
         public ExcelWinWinService GetExcelService()
         {
-            return new ExcelWinWinService(_state);
+            return new ExcelWinWinService((IStateExcelService)_state);
         }
 
-        protected override async Task<bool> ScrapeInner()
+        protected override async Task<bool> ScrapeInnerAsync()
         {
-            var state = _state;
-            SetWorkPhaseBase("Scraper", state);
+            var state = (ScraperWinWinStateModel)_state;
 
             _prepareToWorkBase(state);
 
-            ScrapePhase1(state); // use Selenoid / generate list-regions.json
+            await ScrapePhase1Async(state); // use Selenoid / generate list-regions.json
 
-            await ScrapePhase2(state); // scrape to pages/region-[name_region]-page-[num_page].json
+            await ScrapePhase2Async(state); // scrape to pages/region-[name_region]-page-[num_page].json
 
-            await ScrapePhase2_GenerateListItems(state); // generate list-items.json
+            await ScrapePhase2_GenerateListItemsAsync(state); // generate list-items.json
 
-            await ScrapePhase3(state); // scrape to items/[item-id].json
-
-            SetWorkPhaseBase("Scraper", state, "Done");
+            await ScrapePhase3Async(state); // scrape to items/[item-id].json
 
             return true;
         }
 
-        private async Task ScrapePhase2_GenerateListItems(ScraperWinWinStateModel state)
+        private async Task ScrapePhase2_GenerateListItemsAsync(ScraperWinWinStateModel state)
         {
+            SetWorkPhaseBase("GenerateListItems", state);
+
             var listFilePages = _loadListPages(state);
             var listItems = await _loadListItemsAsync(state);
 
@@ -83,6 +79,8 @@ namespace ScraperServices.Scrapers
             }
 
             await _saveListItemsAsync(listItems, state);
+
+            LogDone(state);
         }
 
         private async Task<Dictionary<string, ShortItemDtoModel>> _loadListItemsAsync(ScraperWinWinStateModel state)
@@ -108,52 +106,33 @@ namespace ScraperServices.Scrapers
             await File.WriteAllTextAsync(filename, JsonConvert.SerializeObject(list, Newtonsoft.Json.Formatting.Indented));
         }
 
-        public DataScrapeModel GetDomainModel()
+        public override Task<DataScrapeModel> GetDomainModelAsync()
         {
-            var list = ScrapePhase4(_state);
-
-            var result = new DataScrapeModel()
-            {
-                Scraper = EnumScrapers.WinWin,
-                Data = list,
-            };
+            var result = GetTypeDomainModelAsync<AdItemWinWinDomainModel>();
 
             return result;
         }
 
-        private List<ExcelRowWinWinModel> ScrapePhase4(ScraperWinWinStateModel state)
+        protected new async Task<List<T>> ScrapePhase_GetDomainModelAsync<T>(IState state) where T: AdItemWinWinDomainModel, new()
         {
-            _setWorkPhaseBase("phase-4", state);
-            _log("Start phase");
+            var listDomainItems = new List<T>();
+            var files = GetListItemFiles(state);
 
-            var result = _scrapePhase4Inner(state);
-
-            _log("End phase");
-
-            return result;
-        }
-
-        private List<ExcelRowWinWinModel> _scrapePhase4Inner(ScraperWinWinStateModel state)
-        {
-            var list = new List<ExcelRowWinWinModel>();
-
-            var files = new DirectoryInfo($"{state.ItemsPath}").GetFiles();
-
-            foreach(var file in files)
+            foreach (var file in files)
             {
-                var itemDto = _loadItemDtoAsync(file.FullName, state).Result;
-                var itemDomain = new ExcelRowWinWinModel().FromDto(itemDto);
-                list.Add(itemDomain);
+                var itemDto = LoadItemDtoFromStoreAsync<AdItemWinWinDtoModel>(file, state);
+                var itemDomain = new T().FromDto(await itemDto);
+                listDomainItems.Add((T)itemDomain);
             }
 
-            return list;
+            return listDomainItems;
         }
 
-        private async Task<ItemWinWinDtoModel> _loadItemDtoAsync(string file, ScraperWinWinStateModel state)
+        private async Task<AdItemWinWinDtoModel> _loadItemDtoAsync(string file, ScraperWinWinStateModel state)
         {
             var filename = $"{file}";
 
-            var itemDto = JsonConvert.DeserializeObject<ItemWinWinDtoModel>(await File.ReadAllTextAsync(filename));
+            var itemDto = JsonConvert.DeserializeObject<AdItemWinWinDtoModel>(await File.ReadAllTextAsync(filename));
 
             var filenameShort = Path.GetFileName(filename);
             _log($"Load itemDto from filename:{filenameShort}");
@@ -161,13 +140,13 @@ namespace ScraperServices.Scrapers
             return itemDto;
         }
 
-        private async Task ScrapePhase3(ScraperWinWinStateModel state)
+        private async Task ScrapePhase3Async(ScraperWinWinStateModel state)
         {
-            _setWorkPhaseBase("DownloadItems", state);
+            SetWorkPhaseBase("DownloadItems", state);
 
             await _scrapePhase3Inner(state);
 
-            _log("Done");
+            LogDone(state);
         }
 
         private async Task _scrapePhase3Inner(ScraperWinWinStateModel state)
@@ -297,7 +276,7 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private async Task _saveItemDtoAsync(ItemWinWinDtoModel item, ScraperWinWinStateModel state)
+        private async Task _saveItemDtoAsync(AdItemWinWinDtoModel item, ScraperWinWinStateModel state)
         {
             var filename = $"{state.ItemsPath}/{item.ItemId}.json";
 
@@ -320,13 +299,13 @@ namespace ScraperServices.Scrapers
             return list;
         }
 
-        private async Task ScrapePhase2(ScraperWinWinStateModel state)
+        private async Task ScrapePhase2Async(ScraperWinWinStateModel state)
         {
-            _setWorkPhaseBase("phase-2", state);
+            SetWorkPhaseBase("Phase-2", state);
 
             await _scrapePhase2Inner(state);
 
-            _log("Done");
+            LogDone(state);
         }
 
         private async Task _scrapePhase2Inner(ScraperWinWinStateModel state)
@@ -392,17 +371,16 @@ namespace ScraperServices.Scrapers
             return list;
         }
 
-        private void ScrapePhase1(ScraperWinWinStateModel state)
+        private async Task ScrapePhase1Async(ScraperWinWinStateModel state)
         {
-            _setWorkPhaseBase("phase-1", state);
-            _log("Start phase");
+            SetWorkPhaseBase("Phase-1", state);
 
-            _scrapePhase1Inner(state).Wait();
+            await _scrapePhase1InnerAsync(state);
 
-            _log("End phase");
+            LogDone(state);
         }
 
-        private async Task _scrapePhase1Inner(ScraperWinWinStateModel state)
+        private async Task _scrapePhase1InnerAsync(ScraperWinWinStateModel state)
         {
             var hasError = false;
             var selenoidState = new SelenoidStateModel() {
@@ -598,7 +576,7 @@ namespace ScraperServices.Scrapers
 
         }
 
-        private async Task<ItemWinWinDtoModel> _parseItemPageAsync(HtmlDocument itemPage, ShortItemDtoModel shortItem)
+        private async Task<AdItemWinWinDtoModel> _parseItemPageAsync(HtmlDocument itemPage, ShortItemDtoModel shortItem)
         {
             DataCoordinatesLatLng coordinates = new DataCoordinatesLatLng();
 
@@ -642,7 +620,7 @@ namespace ScraperServices.Scrapers
 
             var images = _parseItemPage_GetImages(iframe);
 
-            var result = new ItemWinWinDtoModel() {
+            var result = new AdItemWinWinDtoModel() {
                 ItemId = itemId,
                 DateUpdate = dateUpdate,
                 Longitude = coordinates.lng,
@@ -1157,7 +1135,7 @@ namespace ScraperServices.Scrapers
 
         public ScraperWinWinStatusModel StatusWorkspace()
         {
-            var state = _state;
+            var state = (ScraperWinWinStateModel)_state;
 
             state.WorkPhase = "StatusWorkspace";
 

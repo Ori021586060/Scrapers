@@ -26,16 +26,16 @@ namespace ParseKomo
 
         static void Scrape(ScraperKomo scraper)
         {
-            var isOk = scraper.Scrape().Result;
+            var isOk = scraper.Scrape();
         }
 
         static void GetExcelFile(ScraperKomo scraper)
         {
-            var dataOfScrape = scraper.GetDomainModel();
+            var model = scraper.GetDomainModel();
 
             var excelService = scraper.GetExcelService();
 
-            var excelData = excelService.CreateExcel(dataOfScrape);
+            var excelData = excelService.CreateExcel(model);
 
             var filename = excelService.SaveToFile(excelData);
         }

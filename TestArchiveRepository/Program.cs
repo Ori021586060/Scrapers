@@ -1,5 +1,4 @@
 ﻿using ScraperCore.Repositories;
-using ScraperModels.Models;
 using System;
 
 namespace TestArchiveRepository
