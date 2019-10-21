@@ -30,7 +30,7 @@ namespace ScraperServices.Scrapers
     public class ScraperOnmap: ScraperBase
     {
         private ScraperOnmapConfigModel _config { get; set; }
-        private ScraperOnmapStateModel _state { get; set; } = new ScraperOnmapStateModel();
+        //private ScraperOnmapStateModel _state { get; set; } = new ScraperOnmapStateModel();
         private int _usedSelenoidService { get; set; } = 0;
         private SelenoidStateModel _selenoidState { get; set; }
 
@@ -43,7 +43,7 @@ namespace ScraperServices.Scrapers
 
         public ExcelOnmapService GetExcelService()
         {
-            return new ExcelOnmapService(_state);
+            return new ExcelOnmapService((ScraperOnmapStateModel)_state);
         }
 
         private void _initConfig(ScraperOnmapStateModel state)
@@ -77,7 +77,7 @@ namespace ScraperServices.Scrapers
 
             try
             {
-                var state = _state;
+                var state = (ScraperOnmapStateModel)_state;
 
                 if (state.IsNew) _clearWorkspace(state);
 
@@ -250,7 +250,7 @@ namespace ScraperServices.Scrapers
 
         public async override Task<DataDomainModel> GetDomainModelAsync()
         {
-            var state = _state;
+            var state = (ScraperOnmapStateModel)_state;
             SetWorkPhaseBase($"DomainModel", state);
             var domainModel = ScrapePhase3Async(state);
 

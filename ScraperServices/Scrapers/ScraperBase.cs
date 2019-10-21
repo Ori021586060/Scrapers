@@ -372,5 +372,16 @@ namespace ScraperServices.Scrapers
         }
 
         public abstract Task<DataDomainModel> GetDomainModelAsync();
+
+        public DataDomainModel SaveDomainModel()
+        {
+            var state = _state;
+            var model = GetDomainModelAsync().Result;
+            var filename = $"{state.RootPath}/domain-model.json";
+
+            File.WriteAllText(filename, JsonConvert.SerializeObject(model, Formatting.Indented));
+
+            return model;
+        }
     }
 }

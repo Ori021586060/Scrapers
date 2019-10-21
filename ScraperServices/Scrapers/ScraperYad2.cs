@@ -30,7 +30,7 @@ namespace ScraperServices.Scrapers
 {
     public class ScraperYad2: ScraperBase
     {
-        private ScraperYad2StateModel _state { get; set; }
+        //private ScraperYad2StateModel _state { get; set; }
         private ScraperYad2ConfigModel _config { get; set; }
 
         public ScraperYad2(ScraperYad2StateModel state = null)
@@ -39,12 +39,12 @@ namespace ScraperServices.Scrapers
 
             _state = state;
 
-            _config = _loadConfig(_state);
+            _config = _loadConfig((ScraperYad2StateModel)_state);
         }
 
         public ExcelYad2Service GetExcelService()
         {
-            return new ExcelYad2Service(_state);
+            return new ExcelYad2Service((ScraperYad2StateModel)_state);
         }
         private ScraperYad2ConfigModel _loadConfig(ScraperYad2StateModel state)
         {
@@ -75,7 +75,7 @@ namespace ScraperServices.Scrapers
         protected override async Task<bool> ScrapeInnerAsync()
         {
             var result = false;
-            var state = _state;
+            var state = (ScraperYad2StateModel)_state;
 
             _log($"Start scraper Yad2 (isNew:{state.IsNew})");
             try
@@ -101,7 +101,7 @@ namespace ScraperServices.Scrapers
 
         public override async Task<DataDomainModel> GetDomainModelAsync()
         {
-            var state = _state;
+            var state = (ScraperYad2StateModel)_state;
             SetWorkPhaseBase($"DomainModel", state);
             var domainModel = _scrapePhase7_GenerateDomainModelAsync(state);
 
@@ -810,7 +810,7 @@ namespace ScraperServices.Scrapers
 
         public ScraperYad2StatusModel StatusWorkspace()
         {
-            var state = _state;
+            var state = (ScraperYad2StateModel)_state;
 
             state.WorkPhase = "StatusWorkspace";
 

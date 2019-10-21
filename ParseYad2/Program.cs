@@ -19,13 +19,13 @@ namespace ParseYad2
 
             var scraper = new ScraperYad2(state);
 
-            UpdateRepository(scraper);
+            //UpdateRepository(scraper);
 
             //Scrape(scraper);
 
-            //GetExcelFile(scraper);
+            GetExcelFile(scraper);
 
-            //PrintSaveStatus(scraper);
+            PrintSaveStatus(scraper);
         }
 
         static void UpdateRepository(ScraperYad2 scraper)

@@ -31,7 +31,7 @@ namespace ScraperServices.Scrapers
 {
     public class ScraperHomeLess : ScraperBase
     {
-        private ScraperHomeLessStateModel _state { get; set; }
+        //private ScraperHomeLessStateModel _state { get; set; }
         private int _usedSelenoidService { get; set; } = 0;
         private ScraperHomeLessConfigModel _config { get; set; }
         private SelenoidStateModel _selenoidState { get; set; }
@@ -40,9 +40,9 @@ namespace ScraperServices.Scrapers
         {
             if (state is null) state = new ScraperHomeLessStateModel();
 
-            _state = state;
+            _state = (ScraperHomeLessStateModel)state;
 
-            _loadScraperConfig(_state);
+            _loadScraperConfig((ScraperHomeLessStateModel)_state);
 
             _checkDirectory(_state.RootPath);
         }
@@ -56,13 +56,13 @@ namespace ScraperServices.Scrapers
 
         public ExcelHomeLessService GetExcelService()
         {
-            return new ExcelHomeLessService(_state);
+            return new ExcelHomeLessService((ScraperHomeLessStateModel)_state);
         }
 
         protected override async Task<bool> ScrapeInnerAsync()
         {
             var result = true;
-            var state = _state;
+            var state = (ScraperHomeLessStateModel)_state;
 
             SetWorkPhaseBase("Scrape", state, $"Start scraper HomeLess (isNew:{_state.IsNew})");
 
@@ -270,7 +270,7 @@ namespace ScraperServices.Scrapers
 
         public override async Task<DataDomainModel> GetDomainModelAsync()
         {
-            var state = _state;
+            var state = (ScraperHomeLessStateModel)_state;
             SetWorkPhaseBase($"DomainModel", state);
             var listDomainItems = ScrapePhase4Async(state);
 
@@ -1160,7 +1160,7 @@ namespace ScraperServices.Scrapers
 
         public ScraperHomeLessStatusModel StatusWorkspace()
         {
-            var state = _state;
+            var state = (ScraperHomeLessStateModel)_state;
 
             state.WorkPhase = "StatusWorkspace";
 

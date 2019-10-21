@@ -20,7 +20,7 @@
             {
                 <h4>
 
-                @Html.ActionLink(file.FileName, "Index", "Download", new { id = scraper.Key.Name, filename = file.FileName, }, new { @class = "file xls-file" })
+                @Html.ActionLink(file.FileName, "Index", "Download", new { id = scraper.Key.Name, filename = file.FileName, d=Guid.NewGuid() }, new { @class = "file xls-file" })
 
                 @{
                     var dayleft = Math.Floor(file.TimeLeft.TotalDays);
@@ -58,7 +58,7 @@
         <div class="card-body">
             @foreach (var file in scraper.Value)
             {
-                <h4>@Html.ActionLink(file.FileName, "Index", "Download", new { id = scraper.Key.Name, filename = file.FileName }, new { @class="file xls-file" })</h4>
+                <h4>@Html.ActionLink(file.FileName, "Index", "Download", new { id = scraper.Key.Name, filename = file.FileName, d=Guid.NewGuid() }, new { @class="file xls-file" })</h4>
             }
         </div>
     </div>

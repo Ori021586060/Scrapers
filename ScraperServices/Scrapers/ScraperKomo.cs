@@ -27,7 +27,7 @@ namespace ScraperServices.Scrapers
 {
     public class ScraperKomo: ScraperBase
     {
-        private ScraperKomoStateModel _state { get; set; }
+        //private ScraperKomoStateModel _state { get; set; }
         private ScraperKomoConfigModel _config { get; set; }
         private SelenoidStateModel _selenoidState { get; set; }
 
@@ -37,12 +37,12 @@ namespace ScraperServices.Scrapers
 
             _state = state;
 
-            _config = _initConfig(state);
+            _config = _initConfig((ScraperKomoStateModel)state);
         }
 
         public override async Task<DataDomainModel> GetDomainModelAsync()
         {
-            var domainModel = ScrapePhase5Async(_state);
+            var domainModel = ScrapePhase5Async((ScraperKomoStateModel)_state);
 
             var result = new DataDomainModel()
             {
@@ -55,12 +55,12 @@ namespace ScraperServices.Scrapers
 
         public ExcelKomoService GetExcelService()
         {
-            return new ExcelKomoService(_state);
+            return new ExcelKomoService((ScraperKomoStateModel)_state);
         }
 
         protected override async Task<bool> ScrapeInnerAsync()
         {
-            var state = _state;
+            var state = (ScraperKomoStateModel)_state;
             SetWorkPhaseBase($"Scraper", state);
 
             var result = false;
@@ -438,7 +438,7 @@ namespace ScraperServices.Scrapers
 
         public ScraperKomoStatusModel StatusWorkspace()
         {
-            var state = _state;
+            var state = (ScraperKomoStateModel)_state;
             ScraperKomoStatusModel status = null;
 
             state.WorkPhase = "StatusWorkspace";
