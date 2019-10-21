@@ -8,6 +8,9 @@ namespace ScraperDAL
 {
     public class ScrapersContext : DbContext
     {
+        public DbSet<AdItemHomeLessDbModel> DataHomeLess { get; set; }
+        public DbSet<AdItemKomoDbModel> DataKomo { get; set; }
+        public DbSet<AdItemOnmapDbModel> DataOnmap { get; set; }
         public DbSet<AdItemYad2DbModel> DataYad2 { get; set; }
         public DbSet<AdItemWinWinDbModel> DataWinWin { get; set; }
 
