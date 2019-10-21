@@ -2,6 +2,8 @@
 using ScraperModels.Models.OnmapDto;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 
@@ -9,7 +11,9 @@ namespace ScraperModels.Models.Db
 {
     public class AdItemOnmapDbModel
     {
-        public string TagId_ { get; set; }
+        [Key]
+        public int Id { get; set; }
+        public string AdItemId { get; set; }
         public string DateCreate { get; set; }
         public string DateUpdate { get; set; }
         public string EnCity { get; set; }
@@ -37,12 +41,14 @@ namespace ScraperModels.Models.Db
         public string Price { get; set; }
         public string PropertyType { get; set; }
         public string Section { get; set; }
+        [NotMapped]
         public List<ExcelImageModel> Images { get; set; }
+        [NotMapped]
         public List<ExcelVideoModel> Videos { get; set; }
 
         public AdItemOnmapDbModel FromDomain(AdItemOnmapDomainModel item)
         {
-            TagId_ = item.TagId_;
+            AdItemId = item.Id;
             DateCreate = item.DateCreate;
             DateUpdate = item.DateUpdate;
             EnCity = item.EnCity;

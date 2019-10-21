@@ -9,7 +9,7 @@ namespace ScraperModels.Models.Domain
 {
     public class AdItemWinWinDomainModel
     {
-        public string TagId_ { get; set; }
+        public string Id { get; set; }
         public string DateUpdate { get; set; }
         public string Longitude { get; set; }
         public string Latitude { get; set; }
@@ -33,7 +33,7 @@ namespace ScraperModels.Models.Domain
 
         public AdItemWinWinDomainModel FromDto(AdItemWinWinDtoModel itemDto)
         {
-            TagId_ = itemDto.ItemId;
+            Id = itemDto.ItemId;
             DateUpdate = itemDto.DateUpdate;
             Longitude = itemDto.Longitude;
             Latitude = itemDto.Latitude;

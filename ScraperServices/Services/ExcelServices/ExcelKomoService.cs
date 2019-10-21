@@ -72,7 +72,7 @@ namespace ScraperServices.Services
                 foreach (var item in items)
                 {
                     col = 1;
-                    sheet.Cells[row, col++].Value = item.TagId_;
+                    sheet.Cells[row, col++].Value = item.ItemId;
                     _addCellDate(sheet.Cells[row, col++], item.Updated);
 
                     sheet.Cells[row, col++].Value = item.Latitude;
@@ -90,7 +90,7 @@ namespace ScraperServices.Services
                     sheet.Cells[row, col++].Value = item.CheckHour;
                     sheet.Cells[row, col++].Value = item.Extras;
                     // link
-                    var url = $"https://www.komo.co.il/code/nadlan/?modaaNum={item.TagId_}";
+                    var url = $"https://www.komo.co.il/code/nadlan/?modaaNum={item.ItemId}";
                     sheet.Cells[row, col].Value = url;
                     sheet.Cells[row, col].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                     sheet.Cells[row, col].Hyperlink = new Uri(url);

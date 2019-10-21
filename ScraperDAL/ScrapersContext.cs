@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using ScraperModels.Models.Db;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace ScraperDAL
@@ -27,7 +29,16 @@ namespace ScraperDAL
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=dev1-sonar;Username=dev1-sonar;Password=Zx123456");
+            var builder = new ConfigurationBuilder();
+            builder.SetBasePath(Directory.GetCurrentDirectory());
+            builder.AddJsonFile("appsettings.json");
+
+            var config = builder.Build();
+            string connectionString = config.GetConnectionString("DefaultConnection");
+
+            optionsBuilder.UseNpgsql(connectionString);
+
+            //optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=dev1-sonar;Username=dev1-sonar;Password=Zx123456");
         }
     }
 }

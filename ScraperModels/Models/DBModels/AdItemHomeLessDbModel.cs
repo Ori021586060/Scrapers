@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using ScraperModels.Models.Domain;
@@ -9,13 +11,16 @@ namespace ScraperModels.Models.Db
 {
     public class AdItemHomeLessDbModel
     {
-        public string ItemId { get; set; }
+        [Key]
+        public int Id { get; set; }
+        public string AdItemId { get; set; }
         public string DateUpdated { get; set; }
         public string City { get; set; }
         public string Region { get; set; }
         public string Phone { get; set; }
         public string Latitude { get; set; }
         public string Longitude { get; set; }
+        [NotMapped]
         public List<ExcelImageModel> Images { get; set; }
         public string Description { get; set; }
         public string Field0 { get; set; }
@@ -36,7 +41,7 @@ namespace ScraperModels.Models.Db
 
         public AdItemHomeLessDbModel FromDomain(AdItemHomeLessDomainModel item)
         {
-            ItemId = item.ItemId;
+            AdItemId = item.Id;
             DateUpdated = item.DateUpdated;
             City = item.City;
             Region = item.Region;

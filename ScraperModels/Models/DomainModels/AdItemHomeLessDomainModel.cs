@@ -8,7 +8,7 @@ namespace ScraperModels.Models.Domain
 {
     public class AdItemHomeLessDomainModel
     {
-        public string ItemId { get; set; }
+        public string Id { get; set; }
         public string DateUpdated { get; set; }
         public string City { get; set; }
         public string Region { get; set; }
@@ -35,12 +35,11 @@ namespace ScraperModels.Models.Domain
 
         public AdItemHomeLessDomainModel FromDto(DetailsItemDtoModel dto)
         {
-            var noData = "-";
             var values = dto.AdDetails?.BoolValues;
             var extraValues = dto.AdDetails?.ExtraValues;
             var itemId = dto.AdDetails.ID;
 
-            ItemId = itemId;
+            Id = itemId;
             DateUpdated = dto.RowDataFromPage.DateUpdated;
             City = dto.RowDataFromPage?.City;
             Region = dto.RowDataFromPage?.Region;

@@ -9,7 +9,7 @@ namespace ScraperModels.Models.Domain
 {
     public class AdItemKomoDomainModel
     {
-        public string TagId_ { get; set; }
+        public string Id { get; set; }
         public string Updated { get; set; }
         public string Latitude { get; set; }
         public string Longitude { get; set; }
@@ -30,7 +30,7 @@ namespace ScraperModels.Models.Domain
         {
             var location = itemDto?.DataCoordinates?.results?.FirstOrDefault()?.geometry?.location;
 
-            TagId_ = itemDto.Id;
+            Id = itemDto.Id;
             Updated = itemDto?.DataPage?.Updated.ClearSymbols().ClearFullTrim();
             Latitude = location?.lat;
             Longitude = location?.lng;

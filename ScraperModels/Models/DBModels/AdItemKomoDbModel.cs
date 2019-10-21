@@ -2,6 +2,8 @@
 using ScraperModels.Models.KomoDto;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 
@@ -9,7 +11,9 @@ namespace ScraperModels.Models.Db
 {
     public class AdItemKomoDbModel
     {
-        public string TagId_ { get; set; }
+        [Key]
+        public int Id { get; set; }
+        public string AdItemId { get; set; }
         public string Updated { get; set; }
         public string Latitude { get; set; }
         public string Longitude { get; set; }
@@ -24,11 +28,12 @@ namespace ScraperModels.Models.Db
         public string Square { get; set; }
         public string CheckHour { get; set; }
         public string Extras { get; set; }
+        [NotMapped]
         public List<ExcelImageModel> Images { get; set; }
 
         public AdItemKomoDbModel FromDomain(AdItemKomoDomainModel item)
         {
-            TagId_ = item.TagId_;
+            AdItemId = item.Id;
             Updated = item.Updated;
             Latitude = item.Latitude;
             Longitude = item.Longitude;

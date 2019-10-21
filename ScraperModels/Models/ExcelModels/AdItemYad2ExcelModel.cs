@@ -7,7 +7,7 @@ namespace ScraperModels.Models.Excel
 {
     public class AdItemYad2ExcelModel
     {
-        public string Id { get; set; }
+        public string ItemId { get; set; }
         public string DateCreate { get; set; }
         public string DateUpdate { get; set; }
         public string HeCity { get; set; }
@@ -33,32 +33,33 @@ namespace ScraperModels.Models.Excel
         public string AirConditioner { get; set; }
         public List<string> Images { get; set; }
 
-        public AdItemYad2ExcelModel FromDomain(AdItemYad2DomainModel itemDomain) {
-            Id = itemDomain.Id;
-            DateCreate = itemDomain.DateCreate;
-            DateUpdate = itemDomain.DateUpdate;
-            HeCity = itemDomain.HeCity;
-            HeHouseNumber = itemDomain.HeHouseNumber;
-            HeNeighborhood = itemDomain.HeNeighborhood;
-            HeStreetName = itemDomain.HeStreetName;
-            Latitude = itemDomain.Latitude;
-            Longitude = itemDomain.Longitude;
-            AriaBase = itemDomain.AriaBase;
-            Balconies = itemDomain.Balconies;
-            Pets = itemDomain.Pets;
-            Elevators = itemDomain.Elevators;
-            FloorOn = itemDomain.FloorOn;
-            FloorOf = itemDomain.FloorOf;
-            Rooms = itemDomain.Rooms;
-            Parking = itemDomain.Parking;
-            ContactEmail = itemDomain.ContactEmail;
-            ContactName = itemDomain.ContactName;
-            ContactPhone = itemDomain.ContactPhone;
-            Description = itemDomain.Description;
-            Price = itemDomain.Price;
-            PropertyType = itemDomain.PropertyType;
-            AirConditioner = itemDomain.AirConditioner;
-            Images = itemDomain.Images;
+        public AdItemYad2ExcelModel FromDomain(AdItemYad2DomainModel item) {
+            ItemId = item.Id;
+            DateCreate = item.DateCreate;
+            DateUpdate = item.DateUpdate;
+            HeCity = item.HeCity;
+            HeHouseNumber = item.HeHouseNumber;
+            HeNeighborhood = item.HeNeighborhood;
+            HeStreetName = item.HeStreetName;
+            Latitude = item.Latitude;
+            Longitude = item.Longitude;
+            AriaBase = item.AriaBase;
+            Balconies = item.Balconies;
+            Pets = item.Pets;
+            Elevators = item.Elevators;
+            FloorOn = item.FloorOn;
+            FloorOf = item.FloorOf;
+            Rooms = item.Rooms;
+            Parking = item.Parking;
+            ContactEmail = item.ContactEmail;
+            ContactName = item.ContactName;
+            ContactPhone = item.ContactPhone;
+            Description = item.Description;
+            Price = item.Price;
+            PropertyType = item.PropertyType;
+            AirConditioner = item.AirConditioner;
+            Images = item.Images;
+
             return this;
         }
     }

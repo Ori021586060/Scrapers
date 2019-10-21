@@ -9,7 +9,7 @@ namespace ScraperModels.Models.Excel
 {
     public class AdItemWinWinExcelModel
     {
-        public string TagId_ { get; set; }
+        public string ItemId { get; set; }
         public string DateUpdate { get; set; }
         public string Longitude { get; set; }
         public string Latitude { get; set; }
@@ -37,7 +37,7 @@ namespace ScraperModels.Models.Excel
 
         public AdItemWinWinExcelModel FromDomain(AdItemWinWinDomainModel itemDto)
         {
-            TagId_ = itemDto.TagId_;
+            ItemId = itemDto.Id;
             DateUpdate = itemDto.DateUpdate;
             Longitude = itemDto.Longitude;
             Latitude = itemDto.Latitude;

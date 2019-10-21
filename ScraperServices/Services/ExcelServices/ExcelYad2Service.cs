@@ -77,7 +77,7 @@ namespace ScraperServices.Services
                 foreach (var item in items)
                 {
                     col = 1;
-                    sheet.Cells[row, col++].Value = item.Id;
+                    sheet.Cells[row, col++].Value = item.ItemId;
                     _addCellDate(sheet.Cells[row, col], item.DateCreate); col++;
 
                     _addCellDate(sheet.Cells[row, col], item.DateUpdate); col++;
@@ -113,7 +113,7 @@ namespace ScraperServices.Services
                     sheet.Cells[row, col++].Value = item.PropertyType;
                     sheet.Cells[row, col++].Value = item.AirConditioner;
                     // link
-                    var url = $"https://www.yad2.co.il/item/{item.Id}";
+                    var url = $"https://www.yad2.co.il/item/{item.ItemId}";
                     sheet.Cells[row, col].Value = url;
                     sheet.Cells[row, col].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                     sheet.Cells[row, col].Hyperlink = new Uri(url);

@@ -9,7 +9,7 @@ namespace ScraperModels.Models.Excel
 {
     public class AdItemOnmapExcelModel
     {
-        public string TagId_ { get; set; }
+        public string ItemId { get; set; }
         public string DateCreate { get; set; }
         public string DateUpdate { get; set; }
         public string EnCity { get; set; }
@@ -42,7 +42,7 @@ namespace ScraperModels.Models.Excel
 
         public AdItemOnmapExcelModel FromDomain(AdItemOnmapDomainModel item)
         {
-            TagId_ = item.TagId_;
+            ItemId = item.Id;
             DateCreate = item.DateCreate;
             DateUpdate = item.DateUpdate;
             EnCity = item.EnCity;

@@ -82,7 +82,7 @@ namespace ScraperServices.Services
                 foreach (var item in items)
                 {
                     col = 1;
-                    sheet.Cells[row, col++].Value = item.TagId_;
+                    sheet.Cells[row, col++].Value = item.ItemId;
                     _addCellDate(sheet.Cells[row, col], item.DateCreate); col++;
                     _addCellDate(sheet.Cells[row, col], item.DateUpdate); col++;
                     sheet.Cells[row, col++].Value = item.Latitude;
@@ -122,10 +122,11 @@ namespace ScraperServices.Services
                     sheet.Cells[row, col++].Value = item.Description;
                     sheet.Cells[row, col++].Value = item.PropertyType;
                     sheet.Cells[row, col++].Value = item.Section;
-
-                    sheet.Cells[row, col].Value = $"https://www.onmap.co.il/?id=property_{item.TagId_}";
+                    //Link
+                    var url = $"https://www.onmap.co.il/?id=property_{item.ItemId}";
+                    sheet.Cells[row, col].Value = $"https://www.onmap.co.il/?id=property_{item.ItemId}";
                     sheet.Cells[row, col].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                    sheet.Cells[row, col].Hyperlink = new Uri($"https://www.onmap.co.il/?id=property_{item.TagId_}");
+                    sheet.Cells[row, col].Hyperlink = new Uri($"https://www.onmap.co.il/?id=property_{item.ItemId}");
                     col++;
 
                     var i = 1;

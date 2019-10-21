@@ -75,7 +75,7 @@ namespace ScraperServices.Services
                 foreach (var item in items)
                 {
                     col = 1;
-                    sheet.Cells[row, col++].Value = item.TagId_;
+                    sheet.Cells[row, col++].Value = item.ItemId;
                     _addCellDate(sheet.Cells[row, col], item.DateUpdate); col++;
                     
                     sheet.Cells[row, col++].Value = item.Latitude;
@@ -100,7 +100,7 @@ namespace ScraperServices.Services
                     sheet.Cells[row, col++].Value = item.Phone1;
                     sheet.Cells[row, col++].Value = item.Phone2;
                     // link
-                    var url = $"https://www.winwin.co.il/RealEstate/ForRent/Ads/RealEstateAds,{item.TagId_}.aspx";
+                    var url = $"https://www.winwin.co.il/RealEstate/ForRent/Ads/RealEstateAds,{item.ItemId}.aspx";
                     sheet.Cells[row, col].Value = url;
                     sheet.Cells[row, col].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                     sheet.Cells[row, col].Hyperlink = new Uri(url);

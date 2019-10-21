@@ -8,7 +8,7 @@ namespace ScraperModels.Models.Domain
 {
     public class AdItemOnmapDomainModel
     {
-        public string TagId_ { get; set; }
+        public string Id { get; set; }
         public string DateCreate { get; set; }
         public string DateUpdate { get; set; }
         public string EnCity { get; set; }
@@ -41,7 +41,7 @@ namespace ScraperModels.Models.Domain
 
         public AdItemOnmapDomainModel FromDto(Phase3ObjectDto rowObj)
         {
-            TagId_ = rowObj.id;
+            Id = rowObj.id;
             DateCreate = rowObj?.created_at;
             DateUpdate = rowObj?.updated_at;
             EnCity = rowObj?.address.en?.city_name;

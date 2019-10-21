@@ -9,7 +9,7 @@ namespace ScraperModels.Models.Excel
 {
     public class AdItemKomoExcelModel
     {
-        public string TagId_ { get; set; }
+        public string ItemId { get; set; }
         public string Updated { get; set; }
         public string Latitude { get; set; }
         public string Longitude { get; set; }
@@ -28,7 +28,7 @@ namespace ScraperModels.Models.Excel
 
         public AdItemKomoExcelModel FromDomain(AdItemKomoDomainModel item)
         {
-            TagId_ = item.TagId_;
+            ItemId = item.Id;
             Updated = item.Updated;
             Latitude = item.Latitude;
             Longitude = item.Longitude;

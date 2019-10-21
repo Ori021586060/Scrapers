@@ -36,7 +36,7 @@ namespace ScraperModels.Models.Excel
 
         public AdItemHomeLessExcelModel FromDomain(AdItemHomeLessDomainModel item)
         {
-            ItemId = item.ItemId;
+            ItemId = item.Id;
             DateUpdated = item.DateUpdated;
             City = item.City;
             Region = item.Region;

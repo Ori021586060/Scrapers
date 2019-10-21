@@ -3,6 +3,7 @@ using ScraperModels.Models.WinWinDto;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 
@@ -33,11 +34,12 @@ namespace ScraperModels.Models.Db
         public string ContactName { get; set; }
         public string Phone1 { get; set; }
         public string Phone2 { get; set; }
-        //public List<ExcelImageModel> Images { get; set; }
+        [NotMapped]
+        public List<ExcelImageModel> Images { get; set; }
 
         public AdItemWinWinDbModel FromDomain(AdItemWinWinDomainModel item)
         {
-            AdItemId = item.TagId_;
+            AdItemId = item.Id;
             DateUpdate = item.DateUpdate;
             Longitude = item.Longitude;
             Latitude = item.Latitude;
