@@ -18,7 +18,7 @@ namespace ScraperServices.Services
         {
         }
 
-        public MemoryStream CreateExcel(DataScrapeModel data)
+        public MemoryStream CreateExcel(DataDomainModel data)
         {
             _log($"Start create excel data");
 

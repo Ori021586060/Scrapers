@@ -17,7 +17,7 @@ namespace ScraperServices.Services
         public ExcelYad2Service(IStateExcelService state) : base(state)
         {
         }
-        public MemoryStream CreateExcel(DataScrapeModel data)
+        public MemoryStream CreateExcel(DataDomainModel data)
         {
             MemoryStream result = null;
 

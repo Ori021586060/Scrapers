@@ -19,7 +19,7 @@ namespace ScraperServices.Services
         public ExcelOnmapService(IStateExcelService state):base(state)
         {
         }
-        public MemoryStream CreateExcel(DataScrapeModel data)
+        public MemoryStream CreateExcel(DataDomainModel data)
         {
             MemoryStream result = null;
 

@@ -12,7 +12,7 @@ namespace ScraperServices.Services
 {
     public class ExcelService
     {
-        public Stream DataToExcel(List<DataScrapeModel> listDataScrape)
+        public Stream DataToExcel(List<DataDomainModel> listDataScrape)
         {
             MemoryStream result = null;
 

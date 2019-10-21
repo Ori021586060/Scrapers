@@ -11,7 +11,7 @@ using ScraperRepositories;
 namespace ScraperRepositories.Migrations
 {
     [DbContext(typeof(ScrapersContext))]
-    [Migration("20191021005526_Yad2")]
+    [Migration("1_Add_DataYad2")]
     partial class Yad2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

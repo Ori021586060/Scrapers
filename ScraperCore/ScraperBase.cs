@@ -15,12 +15,12 @@ namespace ScraperCore
 {
     public abstract class ScraperBase
     {
-        public virtual DataScrapeModel Scrape()
+        public virtual DataDomainModel Scrape()
         {
             return ScrapeInner();
         }
 
-        protected abstract DataScrapeModel ScrapeInner();
+        protected abstract DataDomainModel ScrapeInner();
 
         protected void _prepareToWorkBase(IState state)
         {

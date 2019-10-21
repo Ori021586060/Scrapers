@@ -29,7 +29,7 @@ namespace WebScraperManager.Controllers
         {
             var result = new ResponseStateModel();
 
-            var list = new List<DataScrapeModel>();
+            var list = new List<DataDomainModel>();
 
             foreach (var scraper in request.UseScrapers.Where(x=>x.Checked))
             {

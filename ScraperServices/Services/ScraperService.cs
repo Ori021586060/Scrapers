@@ -18,9 +18,9 @@ namespace ScraperServices.Services
             return scrapers;
         }
 
-        public DataScrapeModel GetDataFromScraper(RequestDataScrape request)
+        public DataDomainModel GetDataFromScraper(RequestDataScrape request)
         {
-            var result = new DataScrapeModel();
+            var result = new DataDomainModel();
 
             switch (request.ScrapeId)
             {

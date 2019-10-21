@@ -20,7 +20,7 @@ namespace ScraperServices.Scrapers
         {
             _initScraper();
         }
-        public DataScrapeModel Scrape(int cityId)
+        public DataDomainModel Scrape(int cityId)
         {
             var loginUrl = "https://www.airdna.co/api/v1/account/login";
             var loginPost = loginUrl
@@ -41,7 +41,7 @@ namespace ScraperServices.Scrapers
 
             var data = url.GetJsonAsync<AirdnaScrapeDataModel>().Result;
 
-            var result = new DataScrapeModel() {
+            var result = new DataDomainModel() {
                 Scraper = _scraperId,
                 Data = data
             };

@@ -363,7 +363,7 @@ namespace ScraperServices.Scrapers
             return itemFiles;
         }
 
-        public DataScrapeModel GetDomainModel()
+        public DataDomainModel GetDomainModel()
         {
             var model = GetDomainModelAsync();
             var result = model.Result;
@@ -371,6 +371,6 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        public abstract Task<DataScrapeModel> GetDomainModelAsync();
+        public abstract Task<DataDomainModel> GetDomainModelAsync();
     }
 }

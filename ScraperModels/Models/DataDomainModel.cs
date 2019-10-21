@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ScraperModels.Models
 {
-    public class DataScrapeModel
+    public class DataDomainModel
     {
         public EnumScrapers Scraper { get; set; }
         public object Data { get; set; }

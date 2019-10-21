@@ -268,13 +268,13 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        public override async Task<DataScrapeModel> GetDomainModelAsync()
+        public override async Task<DataDomainModel> GetDomainModelAsync()
         {
             var state = _state;
             SetWorkPhaseBase($"DomainModel", state);
             var listDomainItems = ScrapePhase4Async(state);
 
-            var result = new DataScrapeModel(){
+            var result = new DataDomainModel(){
                 Scraper = state.TypeScraper,
                 Data = await listDomainItems,
             };

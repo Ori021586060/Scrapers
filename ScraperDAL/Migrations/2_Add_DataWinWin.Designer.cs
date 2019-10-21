@@ -10,7 +10,7 @@ using ScraperDAL;
 namespace ScraperRepositories.Migrations
 {
     [DbContext(typeof(ScrapersContext))]
-    [Migration("20191021101053_WinWin")]
+    [Migration("2_Add_DataWinWin")]
     partial class WinWin
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

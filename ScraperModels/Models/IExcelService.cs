@@ -8,6 +8,6 @@ namespace ScraperModels.Models
 {
     public interface IExcelService
     {
-        MemoryStream CreateExcel(DataScrapeModel data);
+        MemoryStream CreateExcel(DataDomainModel data);
     }
 }

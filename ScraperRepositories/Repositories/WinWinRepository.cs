@@ -9,7 +9,7 @@ namespace ScraperRepositories.Repositories
 {
     public class WinWinRepository: RepositoryBase
     {
-        public bool UpdateData(DataScrapeModel data)
+        public bool UpdateData(DataDomainModel data)
         {
             var result = true;
 

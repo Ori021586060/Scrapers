@@ -40,11 +40,11 @@ namespace ScraperServices.Scrapers
             _config = _initConfig(state);
         }
 
-        public override async Task<DataScrapeModel> GetDomainModelAsync()
+        public override async Task<DataDomainModel> GetDomainModelAsync()
         {
             var domainModel = ScrapePhase5Async(_state);
 
-            var result = new DataScrapeModel()
+            var result = new DataDomainModel()
             {
                 Scraper = EnumScrapers.Komo,
                 Data = await domainModel,
