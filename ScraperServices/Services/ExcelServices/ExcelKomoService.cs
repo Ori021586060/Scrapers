@@ -1,6 +1,7 @@
 ﻿using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using ScraperModels.Models;
+using ScraperModels.Models.Domain;
 using ScraperModels.Models.Excel;
 using ScraperServices.Models.Komo;
 using System;
@@ -23,7 +24,10 @@ namespace ScraperServices.Services
 
             MemoryStream result = null;
 
-            var items = (List<ExcelRowKomoModel>)data.Data;
+            var itemsDomainModel = (List<AdItemKomoDomainModel>)data.Data;
+            var items = new List<AdItemKomoExcelModel>();
+            foreach (var item in itemsDomainModel) items.Add(new AdItemKomoExcelModel().FromDomain(item));
+
             var amountDataCols = 0;
             var hasAmountImages = 1;
             _log($"Amount input items: {items.Count}");

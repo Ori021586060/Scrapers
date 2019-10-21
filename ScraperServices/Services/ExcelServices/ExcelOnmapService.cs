@@ -1,6 +1,7 @@
 ﻿using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using ScraperModels.Models;
+using ScraperModels.Models.Domain;
 using ScraperModels.Models.Excel;
 using ScraperServices.Models.Onmap;
 using System;
@@ -22,7 +23,10 @@ namespace ScraperServices.Services
         {
             MemoryStream result = null;
 
-            var items = (List<ExcelRowOnmapModel>)data.Data;
+            var itemsDomainModel = (List<AdItemOnmapDomainModel>)data.Data;
+            var items = new List<AdItemOnmapExcelModel>();
+            foreach (var item in itemsDomainModel) items.Add(new AdItemOnmapExcelModel().FromDomain(item));
+
             var amountDataCols = 0;
             var hasAmountImages = 1;
             _log($"Amount input items: {items.Count}");

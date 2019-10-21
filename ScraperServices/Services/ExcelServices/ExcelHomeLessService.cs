@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using ScraperModels.Models.Domain;
 
 namespace ScraperServices.Services
 {
@@ -25,7 +26,10 @@ namespace ScraperServices.Services
 
             MemoryStream result = null;
 
-            var items = (List<ExcelRowHomeLessModel>)data.Data;
+            var itemsDomainModel = (List<AdItemHomeLessDomainModel>)data.Data;
+            var items = new List<AdItemHomeLessExcelModel>();
+            foreach (var item in itemsDomainModel) items.Add(new AdItemHomeLessExcelModel().FromDomain(item));
+
             var amountDataCols = 0;
             var hasAmountImages = 1;
             _log($"Amount input items: {items.Count}");
