@@ -67,7 +67,7 @@ namespace ScraperServices.Services
                 amountDataCols = col;
                 sheet.Cells[row, col++].Value = "Link";
 
-                sheet.Cells[row, 1, row, col - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                //sheet.Cells[row, 1, row, col - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                 sheet.Cells[1, 1, 1, amountDataCols - 1].AutoFilter = true;
 
                 row++; col = 1;

@@ -20,6 +20,8 @@ using ScraperServices.Services;
 using ScraperModels.Models;
 using ScrapySharp.Extensions;
 using ScraperModels;
+using ScraperRepositories.Repositories;
+using ScraperModels.Models.Domain;
 
 namespace ScraperServices.Scrapers
 {
@@ -92,17 +94,17 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private async Task<List<ExcelRowKomoModel>> ScrapePhase5Async(ScraperKomoStateModel state)
+        private async Task<List<AdItemKomoDomainModel>> ScrapePhase5Async(ScraperKomoStateModel state)
         {
             SetWorkPhaseBase($"DomainModel", state);
-            var listRowsDomainModel = new List<ExcelRowKomoModel>();
+            var listRowsDomainModel = new List<AdItemKomoDomainModel>();
             var files = GetListItemFiles(state);
 
             foreach (var file in files)
             {
                 var filename = file.FullName;
                 var data = JsonConvert.DeserializeObject<ItemKomoDtoModel>(await File.ReadAllTextAsync(filename));
-                var rowDomainModel = new ExcelRowKomoModel().FromDto(data);
+                var rowDomainModel = new AdItemKomoDomainModel().FromDto(data);
                 listRowsDomainModel.Add(rowDomainModel);
             }
 
@@ -1425,5 +1427,12 @@ namespace ScraperServices.Scrapers
         //    _log($"\t\tProtocol:{service.Protocol}");
         //    _log($"\t\tIndex:{state.UsedSelenoidService}");
         //}
+
+        public KomoRepository GetRepository()
+        {
+            var result = new KomoRepository();
+
+            return result;
+        }
     }
 }

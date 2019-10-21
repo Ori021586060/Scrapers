@@ -2,13 +2,13 @@
 using OfficeOpenXml.Style;
 using ScraperModels.Models;
 using ScraperModels.Models.Excel;
-using ScraperModels.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using ScraperModels.Models.Domain;
 
 namespace ScraperServices.Services
 {
@@ -21,7 +21,10 @@ namespace ScraperServices.Services
         {
             MemoryStream result = null;
 
-            var items = (List<ExcelRowYad2Model>)data.Data ?? new List<ExcelRowYad2Model>();
+            var itemsDomainModel = (List<AdItemYad2DomainModel>)data.Data;
+            var items = new List<AdItemYad2ExcelModel>();
+            foreach (var item in itemsDomainModel) items.Add(new AdItemYad2ExcelModel().FromDomain(item));
+
             var amountDataCols = 0;
             var hasAmountImages = 1;
             _log($"Amount input items: {items.Count}");
@@ -41,12 +44,12 @@ namespace ScraperServices.Services
                 sheet.Cells[row, col++].Value = "ItemId";
                 sheet.Cells[row, col++].Value = "Date Create";
                 sheet.Cells[row, col++].Value = "Date Update";
+                sheet.Cells[row, col++].Value = "Latitude";
+                sheet.Cells[row, col++].Value = "Longitude";
                 sheet.Cells[row, col++].Value = "City";
                 sheet.Cells[row, col++].Value = "HouseNumber";
                 sheet.Cells[row, col++].Value = "Neighborhood";
                 sheet.Cells[row, col++].Value = "StreetName";
-                sheet.Cells[row, col++].Value = "Latitude";
-                sheet.Cells[row, col++].Value = "Longitude";
                 sheet.Cells[row, col++].Value = "AriaBase";
                 sheet.Cells[row, col++].Value = "Balconies";
                 sheet.Cells[row, col++].Value = "Pets";
@@ -59,16 +62,17 @@ namespace ScraperServices.Services
                 sheet.Cells[row, col++].Value = "ContactName";
                 sheet.Cells[row, col++].Value = "ContactPhone";
                 sheet.Cells[row, col++].Value = "Price";
+                var descriptionDataCol = col;
                 sheet.Cells[row, col++].Value = "Description";
                 sheet.Cells[row, col++].Value = "PropertyType";
                 sheet.Cells[row, col++].Value = "AirConditioner";
-                sheet.Cells[row, col].Value = "Link";
+                amountDataCols = col;
+                sheet.Cells[row, col++].Value = "Link";
 
                 //sheet.Cells[row, 1, row, 23].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                sheet.Cells["A1:V1"].AutoFilter = true;
+                sheet.Cells[1, 1, 1, amountDataCols - 1].AutoFilter = true;
 
                 row++; col = 1;
-                
 
                 foreach (var item in items)
                 {
@@ -77,6 +81,8 @@ namespace ScraperServices.Services
                     _addCellDate(sheet.Cells[row, col], item.DateCreate); col++;
 
                     _addCellDate(sheet.Cells[row, col], item.DateUpdate); col++;
+                    sheet.Cells[row, col++].Value = item.Latitude;
+                    sheet.Cells[row, col++].Value = item.Longitude;
 
                     sheet.Cells[row, col++].Value = item.HeCity;
 
@@ -84,8 +90,6 @@ namespace ScraperServices.Services
 
                     sheet.Cells[row, col++].Value = item.HeNeighborhood;
                     sheet.Cells[row, col++].Value = item.HeStreetName;
-                    sheet.Cells[row, col++].Value = item.Latitude;
-                    sheet.Cells[row, col++].Value = item.Longitude;
 
                     _addCellInt(sheet.Cells[row, col], item.AriaBase); col++;
 
@@ -113,8 +117,7 @@ namespace ScraperServices.Services
                     sheet.Cells[row, col].Value = url;
                     sheet.Cells[row, col].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                     sheet.Cells[row, col].Hyperlink = new Uri(url);
-
-                    amountDataCols = col++;
+                    col++;
 
                     if (item?.Images != null)
                     {
@@ -141,17 +144,17 @@ namespace ScraperServices.Services
                     cells.AutoFitColumns();
                 }
 
-                sheet.Column(20).Width = 50;
+                sheet.Column(descriptionDataCol).Width = 50;
 
-                var startPositionOnFileLinks = 24;
-                var endPositionOnFileLinks = startPositionOnFileLinks + hasAmountImages - 1;
+                var startPositionOnFileLinks = amountDataCols + 1;
+                var endPositionOnFileLinks = startPositionOnFileLinks + hasAmountImages;
 
                 foreach (var i in Enumerable.Range(startPositionOnFileLinks, hasAmountImages))
                 {
                     sheet.Cells[1, i].Value = $"Images {i - startPositionOnFileLinks + 1}";
                 }
 
-                foreach (var i in Enumerable.Range(2, row)) sheet.Row(i).Height = 15;
+                foreach (var i in Enumerable.Range(3, row)) sheet.Row(i).Height = 15;
 
                 result = new MemoryStream(eP.GetAsByteArray());
             }

@@ -1,12 +1,13 @@
-﻿using ScraperModels.Models.KomoDto;
+﻿using ScraperModels.Models.Excel;
+using ScraperModels.Models.KomoDto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ScraperModels.Models.Excel
+namespace ScraperModels.Models.Domain
 {
-    public class ExcelRowKomoModel
+    public class AdItemKomoDomainModel
     {
         public string TagId_ { get; set; }
         public string Updated { get; set; }
@@ -25,11 +26,7 @@ namespace ScraperModels.Models.Excel
         public string Extras { get; set; }
         public List<ExcelImageModel> Images { get; set; }
 
-        public ExcelRowKomoModel()
-        {
-        }
-
-        public ExcelRowKomoModel FromDto(ItemKomoDtoModel itemDto)
+        public AdItemKomoDomainModel FromDto(ItemKomoDtoModel itemDto)
         {
             var location = itemDto?.DataCoordinates?.results?.FirstOrDefault()?.geometry?.location;
 

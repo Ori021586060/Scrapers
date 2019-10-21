@@ -20,6 +20,7 @@ using ScraperServices.Services;
 using ScrapySharp.Extensions;
 using ScraperModels;
 using ScraperModels.Models.Domain;
+using ScraperRepositories.Repositories;
 
 namespace ScraperServices.Scrapers
 {
@@ -106,27 +107,39 @@ namespace ScraperServices.Scrapers
             await File.WriteAllTextAsync(filename, JsonConvert.SerializeObject(list, Newtonsoft.Json.Formatting.Indented));
         }
 
-        public override Task<DataScrapeModel> GetDomainModelAsync()
+        protected async Task<List<AdItemWinWinDomainModel>> ScrapePhase_GetDomainModelAsync(IState state)
         {
-            var result = GetTypeDomainModelAsync<AdItemWinWinDomainModel>();
-
-            return result;
-        }
-
-        protected new async Task<List<T>> ScrapePhase_GetDomainModelAsync<T>(IState state) where T: AdItemWinWinDomainModel, new()
-        {
-            var listDomainItems = new List<T>();
+            var listDomainItems = new List<AdItemWinWinDomainModel>();
             var files = GetListItemFiles(state);
 
             foreach (var file in files)
             {
-                var itemDto = LoadItemDtoFromStoreAsync<AdItemWinWinDtoModel>(file, state);
-                var itemDomain = new T().FromDto(await itemDto);
-                listDomainItems.Add((T)itemDomain);
+                var itemDto = await LoadItemDtoFromStoreAsync<AdItemWinWinDtoModel>(file, state);
+                var itemDomain = new AdItemWinWinDomainModel().FromDto(itemDto);
+                listDomainItems.Add(itemDomain);
             }
 
             return listDomainItems;
         }
+
+        public async override Task<DataScrapeModel> GetDomainModelAsync()
+        {
+            var state = _state;
+            SetWorkPhaseBase($"DomainModel", state);
+            var listDomainItems = await ScrapePhase_GetDomainModelAsync(state);
+
+            var result = new DataScrapeModel()
+            {
+                Scraper = state.TypeScraper,
+                Data = listDomainItems,
+            };
+
+            _logBase($"DomainModel has {listDomainItems.Count()} AdItems", state);
+            LogDone(state);
+
+            return result;
+        }
+
 
         private async Task<AdItemWinWinDtoModel> _loadItemDtoAsync(string file, ScraperWinWinStateModel state)
         {
@@ -1211,6 +1224,13 @@ namespace ScraperServices.Scrapers
         public bool SaveStatus(object status)
         {
             var result = SaveStatusBase(status, _state);
+
+            return result;
+        }
+
+        public WinWinRepository GetRepository()
+        {
+            var result = new WinWinRepository();
 
             return result;
         }

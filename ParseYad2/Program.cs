@@ -1,4 +1,5 @@
-﻿using ScraperServices.Models.Yad2;
+﻿using ScraperRepositories.Repositories;
+using ScraperServices.Models.Yad2;
 using ScraperServices.Scrapers;
 using ScraperServices.Services;
 using System;
@@ -18,11 +19,22 @@ namespace ParseYad2
 
             var scraper = new ScraperYad2(state);
 
+            UpdateRepository(scraper);
+
             //Scrape(scraper);
 
-            GetExcelFile(scraper);
+            //GetExcelFile(scraper);
 
-            PrintSaveStatus(scraper);
+            //PrintSaveStatus(scraper);
+        }
+
+        static void UpdateRepository(ScraperYad2 scraper)
+        {
+            var repository = scraper.GetRepository();
+
+            var model = scraper.GetDomainModel();
+
+            var isOk = repository.UpdateData(model);
         }
 
         static void Scrape(ScraperYad2 scraper)

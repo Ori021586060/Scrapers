@@ -24,6 +24,8 @@ using System.Xml;
 using ScrapySharp.Extensions;
 using HtmlAgilityPack;
 using ScraperModels;
+using ScraperRepositories.Repositories;
+using ScraperModels.Models.Domain;
 
 namespace ScraperServices.Scrapers
 {
@@ -645,9 +647,9 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private async Task<List<ExcelRowHomeLessModel>> ScrapePhase4Async(ScraperHomeLessStateModel state)
+        private async Task<List<AdItemHomeLessDomainModel>> ScrapePhase4Async(ScraperHomeLessStateModel state)
         {
-            var listDomainItems = new List<ExcelRowHomeLessModel>();
+            var listDomainItems = new List<AdItemHomeLessDomainModel>();
             var files = GetListItemFiles(state);
             var listPages = _loadPagesAsync(state);
 
@@ -657,7 +659,7 @@ namespace ScraperServices.Scrapers
 
                 itemDto.RowDataFromPage = GetRowDataFromPage(await listPages, file);
 
-                var itemDomain = new ExcelRowHomeLessModel().FromDto(itemDto);
+                var itemDomain = new AdItemHomeLessDomainModel().FromDto(itemDto);
                 listDomainItems.Add(itemDomain);
             }
 
@@ -1235,6 +1237,13 @@ namespace ScraperServices.Scrapers
         public bool SaveStatus(object status)
         {
             var result = SaveStatusBase(status, _state);
+
+            return result;
+        }
+
+        public HomeLessRepository GetRepository()
+        {
+            var result = new HomeLessRepository();
 
             return result;
         }

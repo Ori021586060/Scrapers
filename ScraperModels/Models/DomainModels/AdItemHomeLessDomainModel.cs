@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using ScraperModels.Models.HomeLess;
 
-namespace ScraperModels.Models.Excel
+namespace ScraperModels.Models.Domain
 {
-    public class ExcelRowHomeLessModel
+    public class AdItemHomeLessDomainModel
     {
         public string ItemId { get; set; }
         public string DateUpdated { get; set; }
@@ -33,7 +33,7 @@ namespace ScraperModels.Models.Excel
         public string Address { get; set; }
         public string LinkToProfile { get; set; }
 
-        public ExcelRowHomeLessModel FromDto(DetailsItemDtoModel dto)
+        public AdItemHomeLessDomainModel FromDto(DetailsItemDtoModel dto)
         {
             var noData = "-";
             var values = dto.AdDetails?.BoolValues;

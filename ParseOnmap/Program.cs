@@ -21,11 +21,22 @@ namespace ParseOnmap
 
             var scraper = new ScraperOnmap(state);
 
+            UpdateRepository(scraper);
+
             //Scrape(scraper);
 
-            GetExcelFile(scraper);
+            //GetExcelFile(scraper);
 
-            PrintSaveStatus(scraper);
+            //PrintSaveStatus(scraper);
+        }
+
+        static void UpdateRepository(ScraperOnmap scraper)
+        {
+            var repository = scraper.GetRepository();
+
+            var model = scraper.GetDomainModel();
+
+            var isOk = repository.UpdateData(model);
         }
 
         static void Scrape(ScraperOnmap scraper)

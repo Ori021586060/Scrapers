@@ -22,6 +22,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using ScraperModels;
 using System.Text.RegularExpressions;
+using ScraperRepositories.Repositories;
+using ScraperModels.Models.Domain;
 
 namespace ScraperServices.Scrapers
 {
@@ -473,15 +475,15 @@ namespace ScraperServices.Scrapers
             _initSelenoidBase(_selenoidState, state);
         }
 
-        public async Task<List<ExcelRowOnmapModel>> ScrapePhase3Async(ScraperOnmapStateModel state)
+        public async Task<List<AdItemOnmapDomainModel>> ScrapePhase3Async(ScraperOnmapStateModel state)
         {
-            var listRowsDomainModel = new List<ExcelRowOnmapModel>();
+            var listRowsDomainModel = new List<AdItemOnmapDomainModel>();
             var files = GetListItemFiles(state);
 
             foreach (var itemFile in files)
             {
                 var dto = LoadDtoItemFromPathAsync(itemFile);
-                var rowDomainModel = new ExcelRowOnmapModel().FromDto(await dto);
+                var rowDomainModel = new AdItemOnmapDomainModel().FromDto(await dto);
                 listRowsDomainModel.Add(rowDomainModel);
             }
 
@@ -575,6 +577,13 @@ namespace ScraperServices.Scrapers
         public bool SaveStatus(object status)
         {
             var result = SaveStatusBase(status, _state);
+
+            return result;
+        }
+
+        public OnmapRepository GetRepository()
+        {
+            var result = new OnmapRepository();
 
             return result;
         }

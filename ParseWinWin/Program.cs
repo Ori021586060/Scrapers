@@ -17,11 +17,22 @@ namespace ParseWinWin
 
             var scraper = new ScraperWinWin(state);
 
-            Scrape(scraper);
+            UpdateRepository(scraper);
 
-            GetExcelFile(scraper);
+            //Scrape(scraper);
 
-            PrintSaveStatus(scraper);
+            //GetExcelFile(scraper);
+
+            //PrintSaveStatus(scraper);
+        }
+
+        static void UpdateRepository(ScraperWinWin scraper)
+        {
+            var repository = scraper.GetRepository();
+
+            var model = scraper.GetDomainModel();
+
+            var isOk = repository.UpdateData(model);
         }
 
         static void Scrape(ScraperWinWin scraper)

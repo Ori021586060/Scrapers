@@ -23,6 +23,8 @@ using ScraperModels.Models.Excel;
 using ScraperModels.Models.Yad2Dto;
 using ScraperServices.Services;
 using ScraperModels;
+using ScraperModels.Models.Domain;
+using ScraperRepositories.Repositories;
 
 namespace ScraperServices.Scrapers
 {
@@ -141,13 +143,13 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private async Task<List<ExcelRowYad2Model>> _scrapePhase7_GenerateDomainModelAsync(ScraperYad2StateModel state)
+        private async Task<List<AdItemYad2DomainModel>> _scrapePhase7_GenerateDomainModelAsync(ScraperYad2StateModel state)
         {
-            List<ExcelRowYad2Model> result = null;
+            List<AdItemYad2DomainModel> result = null;
 
             var listItems = await _loadListItemsAsync(state)?? new Dictionary<string, bool>();
 
-            if (listItems.Count>0) result = new List<ExcelRowYad2Model>();
+            if (listItems.Count>0) result = new List<AdItemYad2DomainModel>();
             var sb = new StringBuilder(1000);
             var indexParseItems = 0;
 
@@ -156,81 +158,12 @@ namespace ScraperServices.Scrapers
                 try
                 {
                     var key = itemId.Key;
-                    var item = JsonConvert.DeserializeObject<Phase3ObjectDto>(await File.ReadAllTextAsync($"{state.ItemsPath}/{key}.json"));
-                    var itemContacts = JsonConvert.DeserializeObject<Phase3ObjectContactsDto>(await File.ReadAllTextAsync($"{state.PathItemsContacts}/item-contacts-{key}.json"));
+                    var itemDto = JsonConvert.DeserializeObject<Phase3ObjectDto>(await File.ReadAllTextAsync($"{state.ItemsPath}/{key}.json"));
+                    var itemContactsDto = JsonConvert.DeserializeObject<Phase3ObjectContactsDto>(await File.ReadAllTextAsync($"{state.PathItemsContacts}/item-contacts-{key}.json"));
 
-                    var dateCreate = item?.date_added;
-                    var dateUpdate = item?.date_of_entry?.Replace("/", ".");
-                    var heCity = item?.city_text;
-                    var heHouseNumber = item?.address_home_number;
-                    var heNeighborhood = item?.neighborhood;
-                    var heStreetName = item?.street;
-                    var ariaBase = item?.square_meters;
-                    var balconies = item?.balconies?.Replace("0", "false");
-                    var pets = item?.additional_info_items_v2?.Where(x => x.key == "pets" && x.value == "true")
-                                .Select(x => x.value).FirstOrDefault();
-                    var elevators = item?.additional_info_items_v2?.Where(x => x.key == "elevator" && x.value == "true")
-                                .Select(x => x.value).FirstOrDefault();
-                    var floorOn = item?.info_bar_items?.Where(x => x.key == "floor").Select(x => x.titleWithoutLabel).FirstOrDefault();
-                    var floorOf = item?.TotalFloor_text;
-                    var rooms = item?.info_bar_items?.Where(x => x.key == "rooms").Select(x => x.titleWithoutLabel).FirstOrDefault();
-                    var parking = item?.additional_info_items_v2?.Where(x => x.key == "parking" && x.value == "true")
-                                .Select(x => x.value).FirstOrDefault();
-                    var contactEmail = itemContacts?.data.email;
-                    var contactName = itemContacts?.data.contact_name;
-                    var contactPhone = itemContacts?.data.phone_numbers?.FirstOrDefault()?.title;
-                    var description = item?.info_text;
-                    var price = item?.price;
-                    var propertyType = item?.media?.@params?.AppType;
-                    var airConditioner = item?.additional_info_items_v2?.Where(x => x.key == "air_conditioner" && x.value == "true")
-                                .Select(x => x.value).FirstOrDefault();
-                    var images = item?.images;
+                    var itemDomain = new AdItemYad2DomainModel().FromDto(itemDto, itemContactsDto);
 
-                    var row = new ExcelRowYad2Model()
-                    {
-                        Id = key,
-                        DateCreate = dateCreate,
-                        DateUpdate = dateUpdate,
-                        HeCity = heCity,
-                        HeHouseNumber = heHouseNumber,
-                        HeNeighborhood = heNeighborhood,
-                        HeStreetName = heStreetName,
-                        AriaBase = ariaBase,
-                        Balconies = balconies,
-                        Pets = pets,
-                        Elevators = elevators,
-                        FloorOn = floorOn,
-                        FloorOf = floorOf,
-                        Rooms = rooms,
-                        Parking = parking,
-                        ContactEmail = contactEmail,
-                        ContactName = contactName,
-                        ContactPhone = contactPhone,
-                        Description = description,
-                        Price = price,
-                        PropertyType = propertyType,
-                        AirConditioner = airConditioner,
-                        Images = images,
-                    };
-
-                    var coordinates = item.navigation_data;
-
-                    if (coordinates != null)
-                    {
-                        var json = JsonConvert.SerializeObject(coordinates);
-                        try
-                        {
-                            var navigationData = (Phase3NavigationData)JsonConvert.DeserializeObject(json, typeof(Phase3NavigationData));
-
-                            row.Latitude = navigationData.coordinates.latitude;
-                            row.Longitude = navigationData.coordinates.longitude;
-                        }
-                        catch (Exception exception) {
-                            _log($"Error s2. {exception.Message}");
-                        }
-                    }
-
-                    result.Add(row);
+                    result.Add(itemDomain);
 
                     sb.Append($",{itemId.Key}=ok");
                 }
@@ -977,6 +910,13 @@ namespace ScraperServices.Scrapers
         public bool SaveStatus(object status)
         {
             var result = SaveStatusBase(status, _state);
+
+            return result;
+        }
+
+        public Yad2Repository GetRepository()
+        {
+            var result = new Yad2Repository();
 
             return result;
         }

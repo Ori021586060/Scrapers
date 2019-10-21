@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ScraperModels.Models.Excel
+namespace ScraperModels.Models.Domain
 {
-    public class ExcelRowOnmapModel
+    public class AdItemOnmapDomainModel
     {
         public string TagId_ { get; set; }
         public string DateCreate { get; set; }
@@ -39,7 +39,7 @@ namespace ScraperModels.Models.Excel
         public List<ExcelImageModel> Images { get; set; }
         public List<ExcelVideoModel> Videos { get; set; }
 
-        public ExcelRowOnmapModel FromDto(Phase3ObjectDto rowObj)
+        public AdItemOnmapDomainModel FromDto(Phase3ObjectDto rowObj)
         {
             TagId_ = rowObj.id;
             DateCreate = rowObj?.created_at;

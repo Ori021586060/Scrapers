@@ -17,11 +17,22 @@ namespace ParseHomeLess
 
             var scraper = new ScraperHomeLess(state);
 
-            Scrape(scraper);
+            UpdateRepository(scraper);
 
-            GetExcelFile(scraper);
+            //Scrape(scraper);
 
-            PrintSaveStatus(scraper);
+            //GetExcelFile(scraper);
+
+            //PrintSaveStatus(scraper);
+        }
+
+        static void UpdateRepository(ScraperHomeLess scraper)
+        {
+            var repository = scraper.GetRepository();
+
+            var model = scraper.GetDomainModel();
+
+            var isOk = repository.UpdateData(model);
         }
 
         static void Scrape(ScraperHomeLess scraper)

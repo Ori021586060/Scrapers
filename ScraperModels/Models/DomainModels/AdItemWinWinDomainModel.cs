@@ -31,10 +31,6 @@ namespace ScraperModels.Models.Domain
         public string Phone2 { get; set; }
         public List<ExcelImageModel> Images { get; set; }
 
-        public AdItemWinWinDomainModel()
-        {
-        }
-
         public AdItemWinWinDomainModel FromDto(AdItemWinWinDtoModel itemDto)
         {
             TagId_ = itemDto.ItemId;

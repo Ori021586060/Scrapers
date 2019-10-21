@@ -371,28 +371,6 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        protected async Task<DataScrapeModel> GetTypeDomainModelAsync<T>()
-        {
-            var state = _state;
-            SetWorkPhaseBase($"DomainModel", state);
-            var listDomainItems = await ScrapePhase_GetDomainModelAsync<T>(state);
-
-            var result = new DataScrapeModel()
-            {
-                Scraper = state.TypeScraper,
-                Data = listDomainItems,
-            };
-
-            _logBase($"DomainModel has {listDomainItems.Count()} AdItems", state);
-            LogDone(state);
-
-            return result;
-        }
-
         public abstract Task<DataScrapeModel> GetDomainModelAsync();
-
-        protected virtual async Task<List<T>> ScrapePhase_GetDomainModelAsync<T>(IState state) {
-            return await Task.Run(()=>new List<T>());
-        }
     }
 }
