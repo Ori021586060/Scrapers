@@ -349,7 +349,7 @@ namespace ScraperServices.Scrapers
             catch(Exception exception)
             {
                 _log($"Load list-items-contacts fail");
-                _log($"Error s1. {exception.Message}");
+                _log($"Error s2. {exception.Message}");
             }
 
             return result;
@@ -409,7 +409,7 @@ namespace ScraperServices.Scrapers
                 catch (Exception exception)
                 {
                     hasError = true;
-                    _log($"Error s1. {exception.Message}");
+                    _log($"Error d1. {exception.Message}");
                 }
 
                 var i = 0;
@@ -519,7 +519,7 @@ namespace ScraperServices.Scrapers
             catch (Exception exception)
             {
                 _log($"Load list-items is fail");
-                _log($"Error s1. {exception.Message}");
+                _log($"Error L1. {exception.Message}");
             }
 
             return result;
@@ -600,7 +600,7 @@ namespace ScraperServices.Scrapers
             catch (Exception exception)
             {
                 _log($"Load list-pre-loads is fail");
-                _log($"Error s1. {exception.Message}");
+                _log($"Error L2. {exception.Message}");
             }
 
             return result;
@@ -649,7 +649,7 @@ namespace ScraperServices.Scrapers
                 client.Dispose();
                 result = false;
                 _log($"Download {guid} is fail");
-                _log($"Error s1. {exception.Message}");
+                _log($"Error D1. {exception.Message}");
             }
 
             return result;
@@ -708,7 +708,7 @@ namespace ScraperServices.Scrapers
                 catch (Exception exception)
                 {
                     hasError = true;
-                    _log($"Error s1. {exception.Message}");
+                    _log($"Error D2. {exception.Message}");
                 }
 
                 var i = 0;
@@ -852,7 +852,7 @@ namespace ScraperServices.Scrapers
                 catch (Exception exception)
                 {
                     amountItemsWithWrongData++;
-                    _log($"Error s1. {exception.Message}");
+                    _log($"Error w1. {exception.Message}");
                 }
             }
 

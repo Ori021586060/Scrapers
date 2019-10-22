@@ -439,7 +439,7 @@ namespace ScraperServices.Scrapers
             try
             {
                 var adDetails = _getAdDetailsFromService(item);
-                var coordinates = _getCoordinatesFromServiceAsync(item);
+                var coordinates = _getCoordinatesFromServiceAsync(item ,state);
                 var phones = _getPhonesFromService(item);
                 var details = _getDetailsFromService(item);
 
@@ -583,10 +583,13 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private async Task<List<CoordinateDtoModel>> _getCoordinatesFromServiceAsync(AdDtoModel item)
+        private async Task<List<CoordinateDtoModel>> _getCoordinatesFromServiceAsync(AdDtoModel item, ScraperHomeLessStateModel state)
         {
             List<CoordinateDtoModel> coordinates = await _getCoordinatesFromService_WebClientAsync(item);
             if (coordinates is null) coordinates = await _getCoordinatesFromService_ProxyAsync(item);
+
+            _log($"Wait 10 secs", state);
+            Thread.Sleep(1000 * 10);
 
             return coordinates;
         }
@@ -609,7 +612,7 @@ namespace ScraperServices.Scrapers
                 {
                     response = await url
                         .WithHeaders(new {
-                            User_Agent = "PostmanRuntime/7.18.0",
+                            User_Agent = "PostmanISC/Israel",
                         })
                         .GetStringAsync();
                     coordinates = JsonConvert.DeserializeObject<List<CoordinateDtoModel>>(response);
@@ -635,7 +638,7 @@ namespace ScraperServices.Scrapers
 
             ICredentials credentials = new NetworkCredential("lum-customer-hl_89055c51-zone-static", "y7ic12hyfl9b");
             client.Proxy = new WebProxy(new Uri("http://zproxy.lum-superproxy.io:22225"), true, null, credentials);
-            client.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0");
+            client.Headers.Add("User-Agent", "Mozilla/6.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20200101 Firefox/89.0");
             var url = $"https://nominatim.openstreetmap.org/search?format=json&q={item.Region} {item.City}";
 
             var response = "";

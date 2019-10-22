@@ -22,13 +22,13 @@ namespace ParseYad2
 
             //UpdateRepository(scraper);
 
-            //Scrape(scraper);
+            Scrape(scraper);
 
             GetExcelFile(scraper);
 
             PrintSaveStatus(scraper);
 
-            //SaveDomainModel(scraper);
+            SaveDomainModel(scraper);
         }
 
         static void SaveDomainModel(ScraperYad2 scraper)
