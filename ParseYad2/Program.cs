@@ -1,4 +1,5 @@
-﻿using ScraperRepositories.Repositories;
+﻿using Newtonsoft.Json;
+using ScraperRepositories.Repositories;
 using ScraperServices.Models.Yad2;
 using ScraperServices.Scrapers;
 using ScraperServices.Services;
@@ -15,7 +16,7 @@ namespace ParseYad2
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
-            var state = new ScraperYad2StateModel() { IsNew = false, };
+            var state = new ScraperYad2StateModel() { IsNew = true, };
 
             var scraper = new ScraperYad2(state);
 
@@ -26,6 +27,16 @@ namespace ParseYad2
             GetExcelFile(scraper);
 
             PrintSaveStatus(scraper);
+
+            //SaveDomainModel(scraper);
+        }
+
+        static void SaveDomainModel(ScraperYad2 scraper)
+        {
+            var model = scraper.GetDomainModel();
+
+            var filename = "domain-model.json";
+            File.WriteAllText(filename, JsonConvert.SerializeObject(model, Formatting.Indented));
         }
 
         static void UpdateRepository(ScraperYad2 scraper)

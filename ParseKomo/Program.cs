@@ -17,13 +17,13 @@ namespace ParseKomo
 
             var scraper = new ScraperKomo(state);
 
-            UpdateRepository(scraper);
+            //UpdateRepository(scraper);
 
             //Scrape(scraper);
 
-            //GetExcelFile(scraper);
+            GetExcelFile(scraper);
 
-            //PrintSaveStatus(scraper);
+            PrintSaveStatus(scraper);
         }
 
         static void UpdateRepository(ScraperKomo scraper)

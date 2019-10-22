@@ -259,7 +259,7 @@ namespace ScraperServices.Scrapers
                 }
                 catch (Exception exception)
                 {
-                    _log($"Error-g1. Wait 1 src. {exception.Message}");
+                    _log($"Error-g1. Wait 1 sec. {exception.Message}");
                     needReplay = true;
                     Thread.Sleep(1000 * 1);
                 }
@@ -439,7 +439,7 @@ namespace ScraperServices.Scrapers
             try
             {
                 var adDetails = _getAdDetailsFromService(item);
-                var coordinates = _getCoordinatesFromService(item);
+                var coordinates = _getCoordinatesFromServiceAsync(item);
                 var phones = _getPhonesFromService(item);
                 var details = _getDetailsFromService(item);
 
@@ -583,16 +583,60 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private async Task<List<CoordinateDtoModel>> _getCoordinatesFromService(AdDtoModel item)
+        private async Task<List<CoordinateDtoModel>> _getCoordinatesFromServiceAsync(AdDtoModel item)
+        {
+            List<CoordinateDtoModel> coordinates = await _getCoordinatesFromService_WebClientAsync(item);
+            if (coordinates is null) coordinates = await _getCoordinatesFromService_ProxyAsync(item);
+
+            return coordinates;
+        }
+
+        private async Task<List<CoordinateDtoModel>> _getCoordinatesFromService_WebClientAsync(AdDtoModel item)
+        {
+            List<CoordinateDtoModel> coordinates = null;
+
+            var url = $"https://nominatim.openstreetmap.org/search?format=json&q={item.Region} {item.City}";
+
+            var response = "";
+            var needRepeat = false;
+            var indexRepeat=0;
+
+            do
+            {
+                needRepeat = false;
+
+                try
+                {
+                    response = await url
+                        .WithHeaders(new {
+                            User_Agent = "PostmanRuntime/7.18.0",
+                        })
+                        .GetStringAsync();
+                    coordinates = JsonConvert.DeserializeObject<List<CoordinateDtoModel>>(response);
+                }
+                catch (Exception exception)
+                {
+                    indexRepeat++;
+                    _log($"Error g1. Coordinates wo proxy. Wait 120 sec. indexRepeat {indexRepeat} {exception.Message} / URL: {url}");
+                    if (indexRepeat<10) needRepeat = true;
+                    Thread.Sleep(1000 * 120);
+                }
+            } while (needRepeat);
+
+            return coordinates;
+        }
+
+        private async Task<List<CoordinateDtoModel>> _getCoordinatesFromService_ProxyAsync(AdDtoModel item)
         {
             List<CoordinateDtoModel> coordinates = null;
 
             var client = new WebClient();
+            var indexRepeat = 0;
 
             ICredentials credentials = new NetworkCredential("lum-customer-hl_89055c51-zone-static", "y7ic12hyfl9b");
             client.Proxy = new WebProxy(new Uri("http://zproxy.lum-superproxy.io:22225"), true, null, credentials);
             client.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20100101 Firefox/69.0");
-            var url = $"https://nominatim.openstreetmap.org/search?q={item.Region} {item.City}&format=json";
+            var url = $"https://nominatim.openstreetmap.org/search?format=json&q={item.Region} {item.City}";
 
             var response = "";
             var needRepeat = false;
@@ -608,9 +652,10 @@ namespace ScraperServices.Scrapers
                 }
                 catch (Exception exception)
                 {
-                    _log($"Error g1. Coordinates. Wait 20 sec. {exception.Message} / URL: {url}");
-                    needRepeat = true;
-                    Thread.Sleep(1000 * 20);
+                    _log($"Error g1. Coordinates. Wait 120 sec. indexRepeat {indexRepeat} {exception.Message} / URL: {url}");
+                    indexRepeat++;
+                    if (indexRepeat < 10) needRepeat = true;
+                    Thread.Sleep(1000 * 120);
                 }
             } while (needRepeat);
 

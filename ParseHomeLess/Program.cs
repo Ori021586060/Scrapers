@@ -13,13 +13,13 @@ namespace ParseHomeLess
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
-            var state = new ScraperHomeLessStateModel() { IsNew= false, };
+            var state = new ScraperHomeLessStateModel() { IsNew= true, };
 
             var scraper = new ScraperHomeLess(state);
 
-            UpdateRepository(scraper);
+            //UpdateRepository(scraper);
 
-            //Scrape(scraper);
+            Scrape(scraper);
 
             //GetExcelFile(scraper);
 

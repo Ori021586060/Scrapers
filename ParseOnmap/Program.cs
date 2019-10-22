@@ -21,13 +21,13 @@ namespace ParseOnmap
 
             var scraper = new ScraperOnmap(state);
 
-            UpdateRepository(scraper);
+            //UpdateRepository(scraper);
 
             //Scrape(scraper);
 
-            //GetExcelFile(scraper);
+            GetExcelFile(scraper);
 
-            //PrintSaveStatus(scraper);
+            PrintSaveStatus(scraper);
         }
 
         static void UpdateRepository(ScraperOnmap scraper)

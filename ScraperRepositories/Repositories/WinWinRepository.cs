@@ -20,7 +20,7 @@ namespace ScraperRepositories.Repositories
             foreach (var item in items)
             {
                 var itemDb = new AdItemWinWinDbModel().FromDomain(item);
-                _context.DataWinWin.Add(itemDb);
+                //_context.DataWinWin.Add(itemDb);
             }
             _context.SaveChanges();
 

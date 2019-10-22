@@ -13,17 +13,17 @@ namespace ParseWinWin
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
-            var state = new ScraperWinWinStateModel() { IsNew = false, };
+            var state = new ScraperWinWinStateModel() { IsNew = true, };
 
             var scraper = new ScraperWinWin(state);
 
-            UpdateRepository(scraper);
+            //UpdateRepository(scraper);
 
             //Scrape(scraper);
 
-            //GetExcelFile(scraper);
+            GetExcelFile(scraper);
 
-            //PrintSaveStatus(scraper);
+            PrintSaveStatus(scraper);
         }
 
         static void UpdateRepository(ScraperWinWin scraper)
