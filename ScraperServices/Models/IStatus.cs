@@ -4,6 +4,7 @@ namespace ScraperServices.Models
 {
     public interface IStatus
     {
+        WorkStatusModel WorkStatus { get; set; }
         DateTime ScrapeDate { get; set; }
         int AmountItemsFromPath { get; set; }
         int AmountPages { get; set; }

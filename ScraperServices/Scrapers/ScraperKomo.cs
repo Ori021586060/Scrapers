@@ -145,7 +145,7 @@ namespace ScraperServices.Scrapers
 
         private void ScrapePhase4_GenerateListItems(ScraperKomoStateModel state)
         {
-            state.WorkPhase = "phase-4";
+            SetWorkPhaseBase($"phase-4", state);
 
             var duplacates = 0;
             var pageFiles = new DirectoryInfo(state.PagesPath).GetFiles();
@@ -196,6 +196,8 @@ namespace ScraperServices.Scrapers
             }
             _log($"Added {addedFiles}, fixed {fixedFiles} items");
             _saveListItems(listItems, state);
+
+            LogDone(state);
         }
 
         private void ScrapePhase5_DownloadItems(ScraperKomoStateModel state)
@@ -441,9 +443,7 @@ namespace ScraperServices.Scrapers
             var state = (ScraperKomoStateModel)_state;
             ScraperKomoStatusModel status = null;
 
-            state.WorkPhase = "StatusWorkspace";
-
-            _log("Start");
+            SetWorkPhaseBase("StatusWorkspace", state);
 
             try
             {
@@ -470,7 +470,7 @@ namespace ScraperServices.Scrapers
                 _log($"Error-3. {exception.Message}");
             }
 
-            _log("End");
+            LogDone(state);
 
             return status;
         }
@@ -594,7 +594,7 @@ namespace ScraperServices.Scrapers
                 } while (!isDone);
             }catch(Exception exception)
             {
-                _log($"Error-j1. {exception.Message} / {exception.StackTrace}");
+                _log($"Error-j2. {exception.Message} / {exception.StackTrace}");
             }
 
             ReadOnlyCollection<object> networkRequests = null;
@@ -603,16 +603,16 @@ namespace ScraperServices.Scrapers
                 var script1 = $"var geocoder = new google.maps.Geocoder();" +
                           $"var addr = decodeURIComponent(\"{content.GooglePlaceId}\");" +
                           "geocoder.geocode( { 'address': addr}, function(results, status) { _results_ = results; return results; });";
-            //"do { console.log(_results_); } while (_results_===\"123\")" +
-            //$"return _results_";
-            var network = "var performance = window.performance || window.mozPerformance || window.msPerformance || window.webkitPerformance || {}; var network = performance.getEntries() || {}; return network;";
-            string res1 = (string)_selenoidState.WindowMain.ExecuteScript(script1);
-            Thread.Sleep(1000);
-            networkRequests = (ReadOnlyCollection<object>)_selenoidState.WindowMain.ExecuteScript(network);
+                //"do { console.log(_results_); } while (_results_===\"123\")" +
+                //$"return _results_";
+                var network = "var performance = window.performance || window.mozPerformance || window.msPerformance || window.webkitPerformance || {}; var network = performance.getEntries() || {}; return network;";
+                string res1 = (string)_selenoidState.WindowMain.ExecuteScript(script1);
+                Thread.Sleep(1000);
+                networkRequests = (ReadOnlyCollection<object>)_selenoidState.WindowMain.ExecuteScript(network);
             }
             catch (Exception exception)
             {
-                _log($"Error-j2. {exception.Message} / {exception.StackTrace}");
+                _log($"Error-j3. {exception.Message} / {exception.StackTrace}");
             }
 
             //var urlCoordinates = name.Split(",")[1].Trim();
@@ -633,7 +633,7 @@ namespace ScraperServices.Scrapers
             }
             catch (Exception exception)
             {
-                _log($"Error-j3. {exception.Message} / {exception.StackTrace}");
+                _log($"Error-j4. {exception.Message} / {exception.StackTrace}");
             }
 
             try
@@ -643,7 +643,7 @@ namespace ScraperServices.Scrapers
             }
             catch (Exception exception)
             {
-                _log($"Error-j4. {exception.Message} / {exception.StackTrace}");
+                _log($"Error-j5. {exception.Message} / {exception.StackTrace}");
             }
 
             return result;
@@ -712,18 +712,27 @@ namespace ScraperServices.Scrapers
         private DataContactsDtoModel _downloadItemContacts(string itemId, ScraperKomoStateModel state)
         {
             DataContactsDtoModel result = null;
+            DataContactsDtoModel resultData = null;
 
             if (!string.IsNullOrEmpty(state.SessionSerial))
             {
                 var url = "https://www.komo.co.il/api/modaotActions/showPhone.api.asp";
 
-                var resultData = url
-                    .WithCookie(new Cookie("sessionSerial", state.SessionSerial))
-                    .WithHeader("Content-Type", "application/x-www-form-urlencoded")
-                    .PostStringAsync($"luachNum=2&modaaNum={itemId}")
-                    .ReceiveJson<DataContactsDtoModel>();
+                try
+                {
+                    resultData = url
+                        .WithCookie(new Cookie("sessionSerial", state.SessionSerial))
+                        .WithHeader("Content-Type", "application/x-www-form-urlencoded")
+                        .PostStringAsync($"luachNum=2&modaaNum={itemId}")
+                        .ReceiveJson<DataContactsDtoModel>()
+                        .Result;
+                }
+                catch (Exception exception)
+                {
+                    _log($"Error j1. {exception.Message}");
+                }
 
-                result = resultData.Result;
+                result = resultData;
             }
             else
             {
@@ -889,6 +898,7 @@ namespace ScraperServices.Scrapers
         private void ScrapePhase3_DownloadPages(ScraperKomoStateModel state)
         {
             SetWorkPhaseBase($"Phase-3", state);
+
             var files = new DirectoryInfo(state.CitiesPath).GetFiles(); // cities/city-[id]-streets.json
             List<Task> tasks = new List<Task>();
             var countTask = 0;
@@ -912,11 +922,21 @@ namespace ScraperServices.Scrapers
                     countTask = 0;
                 }
             }
+
+            LogDone(state);
         }
 
         private string _getCityIdFromFilename(string filename)
         {
-            var cityId = filename.Split("-")[1];
+            var cityId = "";
+            try
+            {
+                cityId = filename.Split("-")[1];
+            }
+            catch (Exception exception)
+            {
+                _log($"Error ex-1. {exception.Message}");
+            }
 
             return cityId;
         }
@@ -927,7 +947,8 @@ namespace ScraperServices.Scrapers
             var cityId = _getCityIdFromFilename(filename);
 
             var listStreets = await _loadListStreetsByCityAsync(cityId, state);
-            var needToDo = listStreets.Where(x => !x.Value.Scraped).Select(x => x.Value).ToList();
+
+            var needToDo = GetNeedToDoListStreets(listStreets, state); //listStreets.Where(x => !x.Value.Scraped).Select(x => x.Value).ToList();
 
             foreach (var street in needToDo)
             {
@@ -946,18 +967,32 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
+        private List<StreetsDataDtoModel> GetNeedToDoListStreets(Dictionary<string, StreetsDataDtoModel> listStreets, ScraperKomoStateModel state)
+        {
+            List<StreetsDataDtoModel> needToDo = null;
+
+            try
+            {
+                needToDo = listStreets.Where(x => !x.Value.Scraped).Select(x => x.Value).ToList();
+            } catch (Exception exception)
+            {
+                _log($"Error d1. {exception.Message}");
+            }
+
+            return needToDo;
+        }
+
         private async Task<bool> _downloadItemsByStreetIdCityIdAsync(string cityId, string streetId, ScraperKomoStateModel state)
         {
             var result = true;
             var page = 1;
             var pageTotal = 0;
 
-            var webGet = new HtmlWeb();
-
             do
             {
-                var url = $"https://www.komo.co.il/code/nadlan/apartments-for-rent.asp?cityNum={cityId}&streetNum={streetId}&&currPage={page}&subLuachNum=1";
-                if (await webGet.LoadFromWebAsync(url) is HtmlDocument document)
+                var pageHtml = GetPageByCityStreetAsync(cityId, streetId, page, state);
+                //var url = $"https://www.komo.co.il/code/nadlan/apartments-for-rent.asp?cityNum={cityId}&streetNum={streetId}&&currPage={page}&subLuachNum=1";
+                if (await pageHtml is HtmlDocument document)
                 {
                     pageTotal = _detectTotalPages(document);
 
@@ -978,6 +1013,23 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
+        private async Task<HtmlDocument> GetPageByCityStreetAsync(string cityId, string streetId, int page, ScraperKomoStateModel state)
+        {
+            HtmlDocument result = null;
+            var webGet = new HtmlWeb();
+            var url = $"https://www.komo.co.il/code/nadlan/apartments-for-rent.asp?cityNum={cityId}&streetNum={streetId}&&currPage={page}&subLuachNum=1";
+
+            try
+            {
+                result = await webGet.LoadFromWebAsync(url);
+            } catch(Exception exception)
+            {
+                _log($"Error g5. {exception.Message}");
+            }
+
+            return result;
+        }
+
         private void _logStat(string message)
         {
             lock (ScraperKomoStateModel.LockWriteToStatLog)
@@ -992,7 +1044,7 @@ namespace ScraperServices.Scrapers
 
             _log($"Save ads from {page} page city={cityId}, street={streetId}: {filename}");
 
-            await File.WriteAllTextAsync($"{filename}", JsonConvert.SerializeObject(list, Newtonsoft.Json.Formatting.Indented));
+            await File.WriteAllTextAsync($"{filename}", JsonConvert.SerializeObject(list, Formatting.Indented));
 
             //_log($"Save as done");
         }
@@ -1001,11 +1053,17 @@ namespace ScraperServices.Scrapers
         {
             var result = new Dictionary<string, bool>();
 
-            var nodes = document.DocumentNode.CssSelect(".tblModaa").ToList();
-            foreach (var node in nodes)
+            try
             {
-                var id = node.Attributes["id"].Value.Replace("modaaRow","");
-                result.Add(id, false);
+                var nodes = document.DocumentNode.CssSelect(".tblModaa").ToList();
+                foreach (var node in nodes)
+                {
+                    var id = node.Attributes["id"].Value.Replace("modaaRow", "");
+                    result.Add(id, false);
+                }
+            } catch(Exception exception)
+            {
+                _log($"Error j2. {exception.Message}");
             }
 
             return result;
@@ -1015,11 +1073,17 @@ namespace ScraperServices.Scrapers
         {
             var result = 1;
 
-            var pager = document.DocumentNode.CssSelect("#paging").FirstOrDefault().ChildNodes;
-
-            if (pager.Count>0)
+            try
             {
-                result = pager.Count - 1;
+                var pager = document.DocumentNode.CssSelect("#paging").FirstOrDefault().ChildNodes;
+
+                if (pager.Count > 0)
+                {
+                    result = pager.Count - 1;
+                }
+            } catch(Exception exception)
+            {
+                _log($"Error x2. {exception.Message}");
             }
 
             return result;
@@ -1110,12 +1174,19 @@ namespace ScraperServices.Scrapers
         private async Task<Dictionary<string, StreetsDataDtoModel>> _loadListStreetsByCityAsync(string cityId, ScraperKomoStateModel state)
         {
             var filename = $"{state.CitiesPath}/city-{cityId}-streets.json";
+            Dictionary<string, StreetsDataDtoModel> listStreets = null;
 
-            _log($"Load list-streets: {filename}");
+            //_log($"Load list-streets: {filename}");
+            try
+            {
+                listStreets = JsonConvert.DeserializeObject<Dictionary<string, StreetsDataDtoModel>>(await File.ReadAllTextAsync(filename));
 
-            var listStreets = JsonConvert.DeserializeObject<Dictionary<string, StreetsDataDtoModel>>(await File.ReadAllTextAsync(filename));
-
-            //_log($"Load list-streets {filename} done");
+                _log($"Load list-streets {filename} done");
+            }
+            catch (Exception exception)
+            {
+                _log($"Error ex-2. {exception.Message}");
+            }
 
             return listStreets;
         }

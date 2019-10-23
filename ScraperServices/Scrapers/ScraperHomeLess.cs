@@ -583,9 +583,9 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private async Task<List<CoordinateDtoModel>> _getCoordinatesFromServiceAsync(AdDtoModel item, ScraperHomeLessStateModel state)
+        private async Task<List<ScraperModels.Models.HomeLess.CoordinateDtoModel>> _getCoordinatesFromServiceAsync(AdDtoModel item, ScraperHomeLessStateModel state)
         {
-            List<CoordinateDtoModel> coordinates = await _getCoordinatesFromService_WebClientAsync(item);
+            List<ScraperModels.Models.HomeLess.CoordinateDtoModel> coordinates = await _getCoordinatesFromService_WebClientAsync(item);
             if (coordinates is null) coordinates = await _getCoordinatesFromService_ProxyAsync(item);
 
             _log($"Wait 10 secs", state);
@@ -594,9 +594,9 @@ namespace ScraperServices.Scrapers
             return coordinates;
         }
 
-        private async Task<List<CoordinateDtoModel>> _getCoordinatesFromService_WebClientAsync(AdDtoModel item)
+        private async Task<List<ScraperModels.Models.HomeLess.CoordinateDtoModel>> _getCoordinatesFromService_WebClientAsync(AdDtoModel item)
         {
-            List<CoordinateDtoModel> coordinates = null;
+            List<ScraperModels.Models.HomeLess.CoordinateDtoModel> coordinates = null;
 
             var url = $"https://nominatim.openstreetmap.org/search?format=json&q={item.Region} {item.City}";
 
@@ -615,7 +615,7 @@ namespace ScraperServices.Scrapers
                             User_Agent = "PostmanISC/Israel",
                         })
                         .GetStringAsync();
-                    coordinates = JsonConvert.DeserializeObject<List<CoordinateDtoModel>>(response);
+                    coordinates = JsonConvert.DeserializeObject<List<ScraperModels.Models.HomeLess.CoordinateDtoModel>>(response);
                 }
                 catch (Exception exception)
                 {
@@ -629,9 +629,9 @@ namespace ScraperServices.Scrapers
             return coordinates;
         }
 
-        private async Task<List<CoordinateDtoModel>> _getCoordinatesFromService_ProxyAsync(AdDtoModel item)
+        private async Task<List<ScraperModels.Models.HomeLess.CoordinateDtoModel>> _getCoordinatesFromService_ProxyAsync(AdDtoModel item)
         {
-            List<CoordinateDtoModel> coordinates = null;
+            List<ScraperModels.Models.HomeLess.CoordinateDtoModel> coordinates = null;
 
             var client = new WebClient();
             var indexRepeat = 0;
@@ -651,7 +651,7 @@ namespace ScraperServices.Scrapers
                 try
                 {
                     response = await client.DownloadStringTaskAsync(new Uri(url));
-                    coordinates = JsonConvert.DeserializeObject<List<CoordinateDtoModel>>(response);
+                    coordinates = JsonConvert.DeserializeObject<List<ScraperModels.Models.HomeLess.CoordinateDtoModel>>(response);
                 }
                 catch (Exception exception)
                 {

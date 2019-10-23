@@ -631,6 +631,11 @@ namespace ScraperServices.Scrapers
                 isOk = _parseItemPage_GetCoordinates2(iframe, coordinates);
             }
 
+            if (!isOk)
+            {
+                isOk = await GetCoordinates_WebClientAsync(city, area, coordinates);
+            }
+
             var images = _parseItemPage_GetImages(iframe);
 
             var result = new AdItemWinWinDtoModel() {
@@ -658,6 +663,59 @@ namespace ScraperServices.Scrapers
             };
 
             return result;
+        }
+
+        private async Task<bool> GetCoordinates_WebClientAsync(string city, string area, DataCoordinatesLatLng coordinates)
+        {
+            var result = false;
+
+            List<CoordinateDtoModel> coord = await GetCoordinates_Service_WebClientAsync(city, area);
+
+            if (coord.Count() > 0)
+            {
+                coordinates.lat = coord.FirstOrDefault().lat;
+                coordinates.lng = coord.FirstOrDefault().lon;
+
+                result = true;
+            }
+
+            return result;
+        }
+
+        private async Task<List<CoordinateDtoModel>> GetCoordinates_Service_WebClientAsync(string city, string area)
+        {
+            List<CoordinateDtoModel> coordinates = null;
+
+            var url = $"https://nominatim.openstreetmap.org/search?format=json&q={area} {city}";
+
+            var response = "";
+            var needRepeat = false;
+            var indexRepeat = 0;
+
+            do
+            {
+                needRepeat = false;
+
+                try
+                {
+                    response = await url
+                        .WithHeaders(new
+                        {
+                            User_Agent = "PostmanISC/Israel",
+                        })
+                        .GetStringAsync();
+                    coordinates = JsonConvert.DeserializeObject<List<CoordinateDtoModel>>(response);
+                }
+                catch (Exception exception)
+                {
+                    indexRepeat++;
+                    _log($"Error g1. Coordinates wo proxy. Wait 120 sec. indexRepeat {indexRepeat} {exception.Message} / URL: {url}");
+                    if (indexRepeat < 10) needRepeat = true;
+                    Thread.Sleep(1000 * 120);
+                }
+            } while (needRepeat);
+
+            return coordinates;
         }
 
         private string _parseItemPage_GetPhone2_Agent(HtmlDocument page)
@@ -837,7 +895,7 @@ namespace ScraperServices.Scrapers
         {
             var result = false;
             string x = "", y = "";
-            MatchCollection matches;
+            MatchCollection matches = null;
 
             try
             {
@@ -861,7 +919,7 @@ namespace ScraperServices.Scrapers
             catch (Exception exception)
             {
                 //throw new Exception("iframe is null");
-                _log($"Error-v1. {exception.Message} / {exception.StackTrace}");
+                _log($"Error-v1. matches={matches?.FirstOrDefault()} / {exception.Message} / {exception.StackTrace}");
             }
 
             return result;
@@ -870,12 +928,13 @@ namespace ScraperServices.Scrapers
         private bool _parseItemPage_GetCoordinates(HtmlDocument page, DataCoordinatesLatLng coordinates)
         {
             var result = false;
+            MatchCollection matches = null;
 
             try
             {
                 Regex regex = new Regex(@"var addLatLng = new google(.*);");
 
-                MatchCollection matches = regex.Matches(page.ParsedText);
+                matches = regex.Matches(page.ParsedText);
 
                 var val = matches[0].Value;
                 regex = new Regex(@"\((.*)\)");
@@ -886,8 +945,8 @@ namespace ScraperServices.Scrapers
 
                 result = true;
             }
-            catch {
-                ;
+            catch (Exception exception) {
+                _log($"Error x8. matches[0]={matches?.FirstOrDefault()} {exception.Message}");
             }
 
             return result;

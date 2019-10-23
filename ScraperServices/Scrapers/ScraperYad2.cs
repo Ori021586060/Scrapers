@@ -586,22 +586,22 @@ namespace ScraperServices.Scrapers
             Dictionary<int, bool> result = null;
 
             _log($"Load list-pre-loads starting");
+            var filename = $"{state.PathListPreLoads}";
 
-            try
+            if (File.Exists(filename))
             {
-                if (File.Exists(state.PathListPreLoads))
+                try
                 {
-                    result = JsonConvert.DeserializeObject<Dictionary<int, bool>>(await File.ReadAllTextAsync(state.PathListPreLoads));
+                    result = JsonConvert.DeserializeObject<Dictionary<int, bool>>(await File.ReadAllTextAsync(filename));
                     _log($"Load list-pre-loads is complete");
                 }
-                else
-                    throw new Exception();
+                catch (Exception exception)
+                {
+                    _log($"Load list-pre-loads is fail");
+                    _log($"Error L2. {exception.Message}");
+                }
             }
-            catch (Exception exception)
-            {
-                _log($"Load list-pre-loads is fail");
-                _log($"Error L2. {exception.Message}");
-            }
+            else _log($"no file {filename}");
 
             return result;
         }

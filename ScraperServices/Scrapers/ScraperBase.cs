@@ -235,11 +235,52 @@ namespace ScraperServices.Scrapers
             {
                 var filename = $"{state.StatusFilename}";
 
-                File.WriteAllText(filename, JsonConvert.SerializeObject(status, Newtonsoft.Json.Formatting.Indented));
+                File.WriteAllText(filename, JsonConvert.SerializeObject(status, Formatting.Indented));
 
                 result = true;
             }
             catch { }
+
+            return result;
+        }
+
+        protected async Task<T> LoadStatusBaseAsync<T>(IState state)
+        {
+            var json = await LoadStatusFileAsync(state);
+            var result = ConvertJson2Object<T>(json, state);
+
+            return result;
+        }
+
+        protected async Task<string> LoadStatusFileAsync(IState state)
+        {
+            var json = "";
+
+            try
+            {
+                var filename = $"{state.StatusFilename}";
+                json = await File.ReadAllTextAsync(filename);
+            }
+            catch (Exception exception)
+            {
+                _logBase($"Error e1. {exception.Message}", state);
+            }
+
+            return json;
+        }
+
+        protected T ConvertJson2Object<T>(string json, IState state)
+        {
+            T result = default(T);
+
+            try
+            {
+                result = JsonConvert.DeserializeObject<T>(json);
+            }
+            catch (Exception exception)
+            {
+                _logBase($"Error e2. {exception.Message}", state);
+            }
 
             return result;
         }
