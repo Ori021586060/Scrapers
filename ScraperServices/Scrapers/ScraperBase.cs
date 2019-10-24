@@ -1,4 +1,5 @@
-﻿using HtmlAgilityPack;
+﻿using Flurl.Http;
+using HtmlAgilityPack;
 using Newtonsoft.Json;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Remote;
@@ -424,5 +425,114 @@ namespace ScraperServices.Scrapers
 
             return model;
         }
+
+        protected async Task<List<CoordinateDtoModel>> GetCoordinatesFrom_OpenStreetMap_WebClientAsync(string q, IState state)
+        {
+            List<CoordinateDtoModel> coordinates = null;
+
+            var url = $"https://nominatim.openstreetmap.org/search?format=json&q={q}";
+
+            var response = "";
+            var needRepeat = false;
+            var indexRepeat = 0;
+
+            do
+            {
+                needRepeat = false;
+
+                try
+                {
+                    response = await url
+                        .WithHeaders(new
+                        {
+                            User_Agent = "PostmanISC/Israel",
+                        })
+                        .GetStringAsync();
+                    coordinates = JsonConvert.DeserializeObject<List<CoordinateDtoModel>>(response);
+                }
+                catch (Exception exception)
+                {
+                    indexRepeat++;
+                    _logBase($"Error gB1. Coordinates wo proxy. Wait 120 sec. indexRepeat {indexRepeat} {exception.Message} / URL: {url}", state);
+                    if (indexRepeat < 3) needRepeat = true;
+                    Thread.Sleep(1000 * 120);
+                }
+            } while (needRepeat);
+
+            return coordinates;
+        }
+
+        protected async Task<List<CoordinateDtoModel>> GetCoordinatesFrom_OpenStreetMap_WebClientProxyAsync(string q, IState state)
+        {
+            List<CoordinateDtoModel> coordinates = null;
+
+            var client = new WebClient();
+            var indexRepeat = 0;
+
+            ICredentials credentials = new NetworkCredential("lum-customer-hl_89055c51-zone-static", "y7ic12hyfl9b");
+            client.Proxy = new WebProxy(new Uri("http://zproxy.lum-superproxy.io:22225"), true, null, credentials);
+            client.Headers.Add("User-Agent", "Mozilla/6.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20200101 Firefox/89.0");
+            var url = $"https://nominatim.openstreetmap.org/search?format=json&q={q}";
+
+            var response = "";
+            var needRepeat = false;
+
+            do
+            {
+                needRepeat = false;
+
+                try
+                {
+                    response = await client.DownloadStringTaskAsync(new Uri(url));
+                    coordinates = JsonConvert.DeserializeObject<List<CoordinateDtoModel>>(response);
+                }
+                catch (Exception exception)
+                {
+                    _logBase($"Error gB2. Coordinates. Wait 120 sec. indexRepeat {indexRepeat} {exception.Message} / URL: {url}", state);
+                    indexRepeat++;
+                    if (indexRepeat < 3) needRepeat = true;
+                    Thread.Sleep(1000 * 120);
+                }
+            } while (needRepeat);
+
+            return coordinates;
+        }
+
+        protected async Task<List<CoordinateDtoModel>> GetCoordinatesFrom_GoogleMap_WebClientAsync(string q, IState state)
+        {
+            List<CoordinateDtoModel> coordinates = null;
+
+            var url = $"https://nominatim.openstreetmap.org/search?format=json&q={q}";
+
+            var response = "";
+            var needRepeat = false;
+            var indexRepeat = 0;
+
+            do
+            {
+                needRepeat = false;
+
+                try
+                {
+                    response = await url
+                        .WithHeaders(new
+                        {
+                            User_Agent = "PostmanISC/Israel",
+                        })
+                        .GetStringAsync();
+                    coordinates = JsonConvert.DeserializeObject<List<CoordinateDtoModel>>(response);
+                }
+                catch (Exception exception)
+                {
+                    indexRepeat++;
+                    _logBase($"Error gB1. Coordinates wo proxy. Wait 120 sec. indexRepeat {indexRepeat} {exception.Message} / URL: {url}", state);
+                    if (indexRepeat < 3) needRepeat = true;
+                    Thread.Sleep(1000 * 120);
+                }
+            } while (needRepeat);
+
+            return coordinates;
+        }
+
     }
 }

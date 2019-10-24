@@ -583,10 +583,12 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private async Task<List<ScraperModels.Models.HomeLess.CoordinateDtoModel>> _getCoordinatesFromServiceAsync(AdDtoModel item, ScraperHomeLessStateModel state)
+        private async Task<List<ScraperModels.Models.CoordinateDtoModel>> _getCoordinatesFromServiceAsync(AdDtoModel item, ScraperHomeLessStateModel state)
         {
-            List<ScraperModels.Models.HomeLess.CoordinateDtoModel> coordinates = await _getCoordinatesFromService_WebClientAsync(item);
-            if (coordinates is null) coordinates = await _getCoordinatesFromService_ProxyAsync(item);
+            List<ScraperModels.Models.CoordinateDtoModel> coordinates = await GetCoordinatesFrom_OpenStreetMap_WebClientProxyAsync($"{item.Region} {item.City}", state);
+            if (coordinates is null)
+                //coordinates = await _getCoordinatesFromService_ProxyAsync(item);
+                coordinates = await GetCoordinatesFrom_OpenStreetMap_WebClientProxyAsync($"{item.Region} {item.City}", state);
 
             _log($"Wait 10 secs", state);
             Thread.Sleep(1000 * 10);
@@ -594,76 +596,76 @@ namespace ScraperServices.Scrapers
             return coordinates;
         }
 
-        private async Task<List<ScraperModels.Models.HomeLess.CoordinateDtoModel>> _getCoordinatesFromService_WebClientAsync(AdDtoModel item)
-        {
-            List<ScraperModels.Models.HomeLess.CoordinateDtoModel> coordinates = null;
+        //private async Task<List<ScraperModels.Models.HomeLess.CoordinateDtoModel>> _getCoordinatesFromService_WebClientAsync(AdDtoModel item)
+        //{
+        //    List<ScraperModels.Models.HomeLess.CoordinateDtoModel> coordinates = null;
 
-            var url = $"https://nominatim.openstreetmap.org/search?format=json&q={item.Region} {item.City}";
+        //    var url = $"https://nominatim.openstreetmap.org/search?format=json&q={item.Region} {item.City}";
 
-            var response = "";
-            var needRepeat = false;
-            var indexRepeat=0;
+        //    var response = "";
+        //    var needRepeat = false;
+        //    var indexRepeat=0;
 
-            do
-            {
-                needRepeat = false;
+        //    do
+        //    {
+        //        needRepeat = false;
 
-                try
-                {
-                    response = await url
-                        .WithHeaders(new {
-                            User_Agent = "PostmanISC/Israel",
-                        })
-                        .GetStringAsync();
-                    coordinates = JsonConvert.DeserializeObject<List<ScraperModels.Models.HomeLess.CoordinateDtoModel>>(response);
-                }
-                catch (Exception exception)
-                {
-                    indexRepeat++;
-                    _log($"Error g1. Coordinates wo proxy. Wait 120 sec. indexRepeat {indexRepeat} {exception.Message} / URL: {url}");
-                    if (indexRepeat<10) needRepeat = true;
-                    Thread.Sleep(1000 * 120);
-                }
-            } while (needRepeat);
+        //        try
+        //        {
+        //            response = await url
+        //                .WithHeaders(new {
+        //                    User_Agent = "PostmanISC/Israel",
+        //                })
+        //                .GetStringAsync();
+        //            coordinates = JsonConvert.DeserializeObject<List<ScraperModels.Models.HomeLess.CoordinateDtoModel>>(response);
+        //        }
+        //        catch (Exception exception)
+        //        {
+        //            indexRepeat++;
+        //            _log($"Error g1. Coordinates wo proxy. Wait 120 sec. indexRepeat {indexRepeat} {exception.Message} / URL: {url}");
+        //            if (indexRepeat<10) needRepeat = true;
+        //            Thread.Sleep(1000 * 120);
+        //        }
+        //    } while (needRepeat);
 
-            return coordinates;
-        }
+        //    return coordinates;
+        //}
 
-        private async Task<List<ScraperModels.Models.HomeLess.CoordinateDtoModel>> _getCoordinatesFromService_ProxyAsync(AdDtoModel item)
-        {
-            List<ScraperModels.Models.HomeLess.CoordinateDtoModel> coordinates = null;
+        //private async Task<List<ScraperModels.Models.HomeLess.CoordinateDtoModel>> _getCoordinatesFromService_ProxyAsync(AdDtoModel item)
+        //{
+        //    List<ScraperModels.Models.HomeLess.CoordinateDtoModel> coordinates = null;
 
-            var client = new WebClient();
-            var indexRepeat = 0;
+        //    var client = new WebClient();
+        //    var indexRepeat = 0;
 
-            ICredentials credentials = new NetworkCredential("lum-customer-hl_89055c51-zone-static", "y7ic12hyfl9b");
-            client.Proxy = new WebProxy(new Uri("http://zproxy.lum-superproxy.io:22225"), true, null, credentials);
-            client.Headers.Add("User-Agent", "Mozilla/6.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20200101 Firefox/89.0");
-            var url = $"https://nominatim.openstreetmap.org/search?format=json&q={item.Region} {item.City}";
+        //    ICredentials credentials = new NetworkCredential("lum-customer-hl_89055c51-zone-static", "y7ic12hyfl9b");
+        //    client.Proxy = new WebProxy(new Uri("http://zproxy.lum-superproxy.io:22225"), true, null, credentials);
+        //    client.Headers.Add("User-Agent", "Mozilla/6.0 (Windows NT 10.0; Win64; x64; rv:69.0) Gecko/20200101 Firefox/89.0");
+        //    var url = $"https://nominatim.openstreetmap.org/search?format=json&q={item.Region} {item.City}";
 
-            var response = "";
-            var needRepeat = false;
+        //    var response = "";
+        //    var needRepeat = false;
 
-            do
-            {
-                needRepeat = false;
+        //    do
+        //    {
+        //        needRepeat = false;
 
-                try
-                {
-                    response = await client.DownloadStringTaskAsync(new Uri(url));
-                    coordinates = JsonConvert.DeserializeObject<List<ScraperModels.Models.HomeLess.CoordinateDtoModel>>(response);
-                }
-                catch (Exception exception)
-                {
-                    _log($"Error g1. Coordinates. Wait 120 sec. indexRepeat {indexRepeat} {exception.Message} / URL: {url}");
-                    indexRepeat++;
-                    if (indexRepeat < 10) needRepeat = true;
-                    Thread.Sleep(1000 * 120);
-                }
-            } while (needRepeat);
+        //        try
+        //        {
+        //            response = await client.DownloadStringTaskAsync(new Uri(url));
+        //            coordinates = JsonConvert.DeserializeObject<List<ScraperModels.Models.HomeLess.CoordinateDtoModel>>(response);
+        //        }
+        //        catch (Exception exception)
+        //        {
+        //            _log($"Error g2. Coordinates. Wait 120 sec. indexRepeat {indexRepeat} {exception.Message} / URL: {url}");
+        //            indexRepeat++;
+        //            if (indexRepeat < 10) needRepeat = true;
+        //            Thread.Sleep(1000 * 120);
+        //        }
+        //    } while (needRepeat);
 
-            return coordinates;
-        }
+        //    return coordinates;
+        //}
 
         private async Task _saveItemDetailsAsync(string id, DetailsItemDtoModel response, ScraperHomeLessStateModel state)
         {

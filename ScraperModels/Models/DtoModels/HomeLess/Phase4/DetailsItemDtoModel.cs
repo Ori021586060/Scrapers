@@ -6,7 +6,7 @@ namespace ScraperModels.Models.HomeLess
 {
     public class DetailsItemDtoModel
     {
-        public List<CoordinateDtoModel> Coordinates { get; set; }
+        public List<ScraperModels.Models.CoordinateDtoModel> Coordinates { get; set; }
         public string Phones { get; set; }
         public List<PostDetailsDDtoModel> Details { get; set; }
         public AdDetailsDtoModel AdDetails {get;set;}

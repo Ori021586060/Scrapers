@@ -594,7 +594,7 @@ namespace ScraperServices.Scrapers
                 } while (!isDone);
             }catch(Exception exception)
             {
-                _log($"Error-j2. {exception.Message} / {exception.StackTrace}");
+                _log($"Error-j2. url={url} / {exception.Message} / {exception.StackTrace}");
             }
 
             ReadOnlyCollection<object> networkRequests = null;
@@ -633,13 +633,13 @@ namespace ScraperServices.Scrapers
             }
             catch (Exception exception)
             {
-                _log($"Error-j4. {exception.Message} / {exception.StackTrace}");
+                _log($"Error-j4. ItemId={itemId} / {exception.Message} / {exception.StackTrace}");
             }
 
             try
             { 
                 var dataFromGoogle = url.GetStringAsync().Result;
-                result = _detectCoordinates(dataFromGoogle);
+                result = _detectCoordinates(dataFromGoogle, itemId);
             }
             catch (Exception exception)
             {
@@ -649,24 +649,24 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private DataCoordinatesDtoModel _detectCoordinates(string data)
+        private DataCoordinatesDtoModel _detectCoordinates(string data, string itemId)
         {
             DataCoordinatesDtoModel result = null;
 
-            var cleanData = _cleanDataFromGoogleCoordinates(data);
+            var cleanData = _cleanDataFromGoogleCoordinates(data, itemId);
 
             try
             {
                 result = JsonConvert.DeserializeObject<DataCoordinatesDtoModel>(cleanData);
             }
             catch(Exception exception) {
-                _log($"Error-4. {exception.Message}");
+                _log($"Error-4. itemId={itemId} / {exception.Message}");
             }
 
             return result;
         }
 
-        private string _cleanDataFromGoogleCoordinates(string data)
+        private string _cleanDataFromGoogleCoordinates(string data, string itemId)
         {
             var result = "";
 
@@ -678,7 +678,7 @@ namespace ScraperServices.Scrapers
                 result = data.Substring(p1, p2 - p1);
             }catch (Exception exception)
             {
-                _log($"Error-e1. {exception.Message} / {exception.StackTrace}");
+                _log($"Error-e1. data={data} / itemId={itemId} / {exception.Message} / {exception.StackTrace}");
             }
 
             return result;
