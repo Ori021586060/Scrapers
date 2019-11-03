@@ -482,9 +482,16 @@ namespace ScraperServices.Scrapers
 
             foreach (var itemFile in files)
             {
-                var dto = LoadDtoItemFromPathAsync(itemFile);
-                var rowDomainModel = new AdItemOnmapDomainModel().FromDto(await dto);
-                listRowsDomainModel.Add(rowDomainModel);
+                var dto = await LoadDtoItemFromPathAsync(itemFile);
+                if (dto != null)
+                {
+                    var rowDomainModel = new AdItemOnmapDomainModel().FromDto(dto);
+                    listRowsDomainModel.Add(rowDomainModel);
+                }
+                else
+                {
+                    _log($"Error dto is null. File: {itemFile.Name}");
+                }
             }
 
             return listRowsDomainModel;

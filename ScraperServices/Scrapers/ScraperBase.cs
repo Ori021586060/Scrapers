@@ -291,8 +291,17 @@ namespace ScraperServices.Scrapers
 
         protected FileInfo[] GetListItemFiles(IState state)
         {
-            var path = $"{state.ItemsPath}";
-            var itemFiles = new DirectoryInfo(path).GetFiles();
+            FileInfo[] itemFiles = null;
+
+            try
+            {
+                var path = $"{state.ItemsPath}";
+                itemFiles = new DirectoryInfo(path).GetFiles();
+            }
+            catch(Exception exception)
+            {
+                _logBase($"Error. {exception.Message}", state);
+            }
 
             return itemFiles;
         }
