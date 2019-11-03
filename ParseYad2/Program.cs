@@ -22,21 +22,27 @@ namespace ParseYad2
 
             //UpdateRepository(scraper);
 
-            Scrape(scraper);
+            //Scrape(scraper);
 
             GetExcelFile(scraper);
 
-            PrintSaveStatus(scraper);
+            //PrintSaveStatus(scraper);
 
-            SaveDomainModel(scraper);
+            //SaveDomainModel(scraper);
+
+            //LoadDomainModelFromFile(scraper);
+        }
+
+        private static void LoadDomainModelFromFile(ScraperYad2 scraper)
+        {
+            var model = scraper.GetDomainModelFromFile();
         }
 
         static void SaveDomainModel(ScraperYad2 scraper)
         {
             var model = scraper.GetDomainModel();
 
-            var filename = "domain-model.json";
-            File.WriteAllText(filename, JsonConvert.SerializeObject(model, Formatting.Indented));
+            scraper.SaveDomainModel(model);
         }
 
         static void UpdateRepository(ScraperYad2 scraper)

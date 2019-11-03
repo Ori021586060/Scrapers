@@ -120,114 +120,6 @@ namespace ScraperServices.Scrapers
             Console.WriteLine(logMessage);
         }
 
-        protected void _initSelenoidBase(SelenoidStateModel selenoidState, IState state)
-        {
-            if (selenoidState is null) selenoidState = new SelenoidStateModel();
-
-            var options = new FirefoxOptions();
-
-            if (!selenoidState.ShowPictures)
-                options.SetPreference("permissions.default.image", 2);
-
-            options.SetPreference("javascript.enabled", selenoidState.JavaScriptEnable);
-
-            bool doNeedRepeatRequest = false;
-            int countRepeat = 0;
-            int countRepeatMax = 10;
-
-            do
-            {
-                var selenoidService = _selectSelenoidServiceBase(state);
-                var selenoidUrl = $"{selenoidService.Protocol}://{selenoidService.Address}:4444/wd/hub";
-                _logBase($"\tInit Selenoid Service-{state.UsedSelenoidService}:{selenoidUrl}", state);
-
-                try
-                {
-                    if (selenoidState.WindowMain != null)
-                    {
-                        _logBase($"SelenoidService isnt null", state);
-                        selenoidState.WindowMain.Quit();
-                        _logBase($"Quit SelenoidService done", state);
-                    }
-
-                    _printSelenoidServiceParams(selenoidService, state);
-
-                    doNeedRepeatRequest = false;
-
-                    selenoidState.WindowMain = new RemoteWebDriver(new Uri(selenoidUrl), options.ToCapabilities(), TimeSpan.FromMinutes(5));
-
-                    selenoidState.WaitMain = new WebDriverWait(selenoidState.WindowMain, TimeSpan.FromSeconds(120));
-                }
-                catch
-                {
-                    countRepeat++;
-                    if (countRepeat < countRepeatMax)
-                    {
-                        doNeedRepeatRequest = true;
-                        _logBase($"\t!!! Need change Selenoid Service !!!", state);
-                        _logBase($"\tBad config Selenoid Service-{state.UsedSelenoidService}:", state);
-                        _printSelenoidServiceParams(selenoidService, state);
-                    }
-                    else
-                        _logBase($"Try is out. Error", state);
-                }
-
-                if (doNeedRepeatRequest)
-                {
-                    _logBase($"\tcountRepeat:{countRepeat}", state);
-                    state.UsedSelenoidService++;
-                    Thread.Sleep(TimeSpan.FromMinutes(10));
-                }
-
-            } while (doNeedRepeatRequest);
-        }
-
-        private SelenoidConfigModel _selectSelenoidServiceBase(IState state)
-        {
-            var config = _loadConfigSelenoidSectionBase(state);
-
-            Func<SelenoidConfigModel> GetSelenoidService = () => config.Selenoid
-                        .Where(x => x.Enabled)
-                        .Skip(state.UsedSelenoidService)
-                        .FirstOrDefault();
-
-            var selenoidService = GetSelenoidService();
-
-            if (selenoidService is null)
-            {
-                state.UsedSelenoidService = 0;
-                selenoidService = GetSelenoidService();
-            }
-
-            return selenoidService;
-        }
-
-        private ParamsSelenoidConfigModel _loadConfigSelenoidSectionBase(IState state)
-        {
-            ParamsSelenoidConfigModel result = null;
-            var filename = state.ConfigFilename;
-            _logBase($"Load selenoid config: {filename}", state);
-
-            if (File.Exists(filename))
-            {
-                result = JsonConvert.DeserializeObject<ParamsSelenoidConfigModel>(File.ReadAllText(filename));
-                _logBase($"file exists", state);
-            }
-            else
-                _logBase($"no config file", state);
-
-            return result;
-        }
-
-        private void _printSelenoidServiceParams(SelenoidConfigModel service, IState state)
-        {
-            _logBase($"\tParams Selenoid:", state);
-            _logBase($"\t\tDns:{service.Address}", state);
-            _logBase($"\t\tIp:{Dns.GetHostAddresses(service.Address).FirstOrDefault()}", state);
-            _logBase($"\t\tProtocol:{service.Protocol}", state);
-            _logBase($"\t\tIndex:{state.UsedSelenoidService}", state);
-        }
-
         protected bool SaveStatusBase(object status, IState state)
         {
             var result = false;
@@ -415,10 +307,10 @@ namespace ScraperServices.Scrapers
 
         public abstract Task<DataDomainModel> GetDomainModelAsync();
 
-        public DataDomainModel SaveDomainModel()
+        public DataDomainModel SaveDomainModel(DataDomainModel model)
         {
             var state = _state;
-            var model = GetDomainModelAsync().Result;
+            //var model = GetDomainModelAsync().Result;
             var filename = $"{state.RootPath}/domain-model.json";
 
             File.WriteAllText(filename, JsonConvert.SerializeObject(model, Formatting.Indented));
@@ -534,5 +426,155 @@ namespace ScraperServices.Scrapers
             return coordinates;
         }
 
+        #region Selenoid methods
+
+        protected void _initSelenoidBase(SelenoidStateModel selenoidState, IState state)
+        {
+            if (selenoidState is null)
+            {
+                throw new Exception("Selenoidstate is null");
+            }
+
+            var options = new FirefoxOptions();
+
+            if (!selenoidState.ShowPictures)
+                options.SetPreference("permissions.default.image", 2);
+
+            options.SetPreference("javascript.enabled", selenoidState.JavaScriptEnable);
+
+            bool doNeedRepeatRequest = false;
+            int countRepeat = 0;
+            int countRepeatMax = 10;
+
+            do
+            {
+                var selenoidService = _selectSelenoidServiceBase(state);
+                var selenoidUrl = $"{selenoidService.Protocol}://{selenoidService.Address}:4444/wd/hub";
+                _logBase($"\tInit Selenoid Service-{state.UsedSelenoidService}:{selenoidUrl}", state);
+
+                try
+                {
+                    if (selenoidState.WindowMain != null)
+                    {
+                        _logBase($"SelenoidService isnt null", state);
+                        selenoidState.WindowMain.Quit();
+                        _logBase($"Quit SelenoidService done", state);
+                    }
+
+                    _printSelenoidServiceParams(selenoidService, state);
+
+                    doNeedRepeatRequest = false;
+
+                    selenoidState.WindowMain = new RemoteWebDriver(new Uri(selenoidUrl), options.ToCapabilities(), TimeSpan.FromMinutes(5));
+
+                    selenoidState.WaitMain = new WebDriverWait(selenoidState.WindowMain, TimeSpan.FromSeconds(120));
+                }
+                catch (Exception exception)
+                {
+                    _logBase($"Exception e1. {exception.Message}", state);
+                    countRepeat++;
+                    if (countRepeat < countRepeatMax)
+                    {
+                        doNeedRepeatRequest = true;
+                        _logBase($"\t!!! Need change Selenoid Service !!!", state);
+                        _logBase($"\tBad config Selenoid Service-{state.UsedSelenoidService}:", state);
+                        _printSelenoidServiceParams(selenoidService, state);
+                    }
+                    else
+                        _logBase($"Try is out. Error", state);
+                }
+
+                if (doNeedRepeatRequest)
+                {
+                    _logBase($"\tcountRepeat:{countRepeat}", state);
+                    state.UsedSelenoidService++;
+                    Thread.Sleep(TimeSpan.FromMinutes(10));
+                }
+
+            } while (doNeedRepeatRequest);
+        }
+
+        private ParamsSelenoidConfigModel _loadConfigSelenoidSectionBase(IState state)
+        {
+            ParamsSelenoidConfigModel result = null;
+            var filename = state.ConfigFilename;
+            _logBase($"Load selenoid config: {filename}", state);
+
+            if (File.Exists(filename))
+            {
+                result = JsonConvert.DeserializeObject<ParamsSelenoidConfigModel>(File.ReadAllText(filename));
+                _logBase($"file exists", state);
+            }
+            else
+                _logBase($"no config file", state);
+
+            return result;
+        }
+
+        private SelenoidConfigModel _selectSelenoidServiceBase(IState state)
+        {
+            var config = _loadConfigSelenoidSectionBase(state);
+
+            Func<SelenoidConfigModel> GetSelenoidService = () => config.Selenoid
+                        .Where(x => x.Enabled)
+                        .Skip(state.UsedSelenoidService)
+                        .FirstOrDefault();
+
+            var selenoidService = GetSelenoidService();
+
+            if (selenoidService is null)
+            {
+                state.UsedSelenoidService = 0;
+                selenoidService = GetSelenoidService();
+            }
+
+            return selenoidService;
+        }
+
+        private void _printSelenoidServiceParams(SelenoidConfigModel service, IState state)
+        {
+            var ipAddress = GetIpAddressFromDns(service.Address, state);  
+
+            _logBase($"\tParams Selenoid:", state);
+            _logBase($"\t\tDns:{service.Address}", state);
+            _logBase($"\t\tIp:{ipAddress}", state);
+            _logBase($"\t\tProtocol:{service.Protocol}", state);
+            _logBase($"\t\tIndex:{state.UsedSelenoidService}", state);
+        }
+
+        private string GetIpAddressFromDns(string address, IState state)
+        {
+            var result = "unknown address";
+
+            try
+            {
+                result = Dns.GetHostAddresses(address)?.FirstOrDefault().ToString();
+            }
+            catch(Exception exception)
+            {
+                _logBase($"Exception m1. {exception.Message}", state);
+            }
+
+            return result;
+        }
+
+        protected bool Selenoid_GoToUrl_Base(string url, SelenoidStateModel selenoidState , IState state)
+        {
+            var result = false;
+
+            try
+            {
+                selenoidState.WindowMain.Navigate().GoToUrl(url);
+                result = true;
+            }
+            catch (Exception exception)
+            {
+                _logBase($"Error ff1. {exception.Message}", state);
+            }
+
+            return result;
+        }
+
+        #endregion
     }
 }

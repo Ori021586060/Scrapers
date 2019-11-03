@@ -81,7 +81,7 @@ namespace ScraperServices.Scrapers
 
                 ScrapePhase4_GenerateListItems(state);
 
-                ScrapePhase5_DownloadItems(state);
+                await ScrapePhase5_DownloadItems(state);
 
                 _log($"Scraper Komo done (isNew:{state.IsNew})");
 
@@ -200,11 +200,13 @@ namespace ScraperServices.Scrapers
             LogDone(state);
         }
 
-        private void ScrapePhase5_DownloadItems(ScraperKomoStateModel state)
+        private async Task ScrapePhase5_DownloadItems(ScraperKomoStateModel state)
         {
             state.WorkPhase = "phase-5";
             _log($"Start");
+
             _initSelenoid(state);
+
             if (string.IsNullOrEmpty(state.SessionSerial))
             {
                 _log($"Wait SessionSerial");
@@ -219,48 +221,50 @@ namespace ScraperServices.Scrapers
 
             foreach (var itemId in needToDo)
             {
-                string itemIdClear;
-                DataPageDtoModel content = null;
-                DataContactsDtoModel contacts = null;
-                DataCoordinatesDtoModel coordinates = null;
-                try
-                {
-                    itemIdClear = itemId.Replace("modaaRow", "");
-                    var page = GetKomoPageData_WebClient(itemIdClear, state).Result;
+                //string itemIdClear;
+                //DataPageDtoModel content = null;
+                //DataContactsDtoModel contacts = null;
+                //DataCoordinatesDtoModel coordinates = null;
+                //try
+                //{
+                //    itemIdClear = itemId.Replace("modaaRow", "");
+                //    var page = GetKomoPageData_WebClient(itemIdClear, state).Result;
 
-                    content = _downloadItemContent(itemIdClear, state);
-                    contacts = _downloadItemContacts(itemIdClear, state);
-                    coordinates = _downloadItemCoordinates_Selenoid(itemIdClear, content, state);
-                    //var coordinates2 = _downloadItemCoordinates_WebClient(page, state).Result;
-                }
-                catch (Exception exception)
-                {
-                    _log($"Error-x1. {exception.Message} / {exception.StackTrace}");
-                }
+                //    content = _downloadItemContent(itemIdClear, state);
+                //    contacts = _downloadItemContacts(itemIdClear, state);
+                //    coordinates = _downloadItemCoordinates_Selenoid(itemIdClear, content, state);
+                //    //var coordinates2 = _downloadItemCoordinates_WebClient(page, state).Result;
+                //}
+                //catch (Exception exception)
+                //{
+                //    _log($"Error-x1. {exception.Message} / {exception.StackTrace}");
+                //}
 
-                if (contacts.response == "Captcha not match")
-                {
-                    ;
-                }
+                //if (contacts.response == "Captcha not match")
+                //{
+                //    ;
+                //}
 
-                ItemKomoDtoModel itemModel = null;
+                //ItemKomoDtoModel itemModel = null;
 
-                try
-                {
-                    itemModel = new ItemKomoDtoModel()
-                    {
-                        Id = itemId.Replace("modaaRow", ""),
-                        DataPage = content,
-                        DataContacts = contacts,
-                        DataCoordinates = coordinates,
-                    };
-                }
-                catch (Exception exception)
-                {
-                    _log($"Error-x2. {exception.Message} / {exception.StackTrace}");
-                }
+                //try
+                //{
+                //    itemModel = new ItemKomoDtoModel()
+                //    {
+                //        Id = itemId.Replace("modaaRow", ""),
+                //        DataPage = content,
+                //        DataContacts = contacts,
+                //        DataCoordinates = coordinates,
+                //    };
+                //}
+                //catch (Exception exception)
+                //{
+                //    _log($"Error-x2. {exception.Message} / {exception.StackTrace}");
+                //}
 
-                var isOk = _saveItemDtoModelAsync(itemModel, state).Result;
+                ItemKomoDtoModel itemModel = await GetItemDtoAsync(itemId, state);
+
+                var isOk = await _saveItemDtoModelAsync(itemModel, state);
 
                 if (isOk)
                 {
@@ -278,10 +282,63 @@ namespace ScraperServices.Scrapers
             _log($"End");
         }
 
+        public async Task<ItemKomoDtoModel> GetItemDtoAsync(string itemId, ScraperKomoStateModel state=null)
+        {
+            ItemKomoDtoModel result = null;
+
+            if (state is null) state = (ScraperKomoStateModel)_state;
+            _initSelenoid(state);
+
+            string itemIdClear;
+            DataPageDtoModel content = null;
+            DataContactsDtoModel contacts = null;
+            DataCoordinatesDtoModel coordinates = null;
+
+            try
+            {
+                itemIdClear = itemId.Replace("modaaRow", "");
+                var page = await GetKomoPageData_WebClientAsync(itemIdClear, state);
+
+                content = await _downloadItemContentAsync(itemIdClear, state);
+                contacts = await _downloadItemContactsAsync(itemIdClear, state);
+                coordinates = _downloadItemCoordinates_Selenoid(itemIdClear, content, state);
+                //var coordinates2 = _downloadItemCoordinates_WebClient(page, state).Result;
+            }
+            catch (Exception exception)
+            {
+                _log($"Error-x1. {exception.Message} / {exception.StackTrace}");
+            }
+
+            if (contacts?.response == "Captcha not match")
+            {
+                ;
+            }
+
+            try
+            {
+                result = new ItemKomoDtoModel()
+                {
+                    Id = itemId.Replace("modaaRow", ""),
+                    DataPage = content,
+                    DataContacts = contacts,
+                    DataCoordinates = coordinates,
+                };
+            }
+            catch (Exception exception)
+            {
+                _log($"Error-x2. {exception.Message} / {exception.StackTrace}");
+            }
+
+            return result;
+        }
+
         private void _initSelenoid(ScraperKomoStateModel state)
         {
-            if (_selenoidState is null) _selenoidState = new SelenoidStateModel();
-            _initSelenoidBase(_selenoidState, state);
+            if (_selenoidState is null)
+            {
+                _selenoidState = new SelenoidStateModel();
+                _initSelenoidBase(_selenoidState, state);
+            }
         }
 
         private async Task<DataCoordinatesDtoModel> _downloadItemCoordinates_WebClient(HtmlDocument page, ScraperKomoStateModel state)
@@ -324,7 +381,7 @@ namespace ScraperServices.Scrapers
             return apiKey;
         }
 
-        private async Task<HtmlDocument> GetKomoPageData_WebClient(string itemId, ScraperKomoStateModel state)
+        private async Task<HtmlDocument> GetKomoPageData_WebClientAsync(string itemId, ScraperKomoStateModel state)
         {
             var url = $"https://www.komo.co.il/code/nadlan/?modaaNum={itemId}";
             var result = await GetPageData_WebClient(url, state);
@@ -560,22 +617,21 @@ namespace ScraperServices.Scrapers
         private DataCoordinatesDtoModel _downloadItemCoordinates_Selenoid(string itemId, DataPageDtoModel content, ScraperKomoStateModel state)
         {
             var result = new DataCoordinatesDtoModel();
+            
             //var googlePlaceId = content.GooglePlaceId;
             //_log($"Download coordinates for item {googlePlaceId}");
 
             //https://maps.googleapis.com/maps/api/js/GeocodeService.Search?4s{googleplaceId}&7sIL&9siw&callback=_xdc_._937pm9&key=AIzaSyAWn5wP5WSqdLkiy2HuOFHezXXHG3RAcpQ&token=18641
-
             //var url = $"https://maps.googleapis.com/maps/api/js/GeocodeService.Search?4s{googlePlaceId}&7sIL&9siw&callback=_xdc_._937pm9&key=AIzaSyAWn5wP5WSqdLkiy2HuOFHezXXHG3RAcpQ&token=18641";
-
             var url = $"https://www.komo.co.il/code/nadlan/?modaaNum={itemId}";
-
             //var dataFromGoogle = await url.GetStringAsync();
 
             var isDone = false;
             int count=0, countMax = 30;
             try
             {
-                _selenoidState.WindowMain.Navigate().GoToUrl(url);
+                //_selenoidState.WindowMain.Navigate().GoToUrl(url);
+                var isOk = Selenoid_GoToUrl_Base(url, _selenoidState, state);
 
                 do
                 {
@@ -709,38 +765,38 @@ namespace ScraperServices.Scrapers
             //return sessionSerial;
         }
 
-        private DataContactsDtoModel _downloadItemContacts(string itemId, ScraperKomoStateModel state)
-        {
-            DataContactsDtoModel result = null;
-            DataContactsDtoModel resultData = null;
+        //private DataContactsDtoModel _downloadItemContacts(string itemId, ScraperKomoStateModel state)
+        //{
+        //    DataContactsDtoModel result = null;
+        //    DataContactsDtoModel resultData = null;
 
-            if (!string.IsNullOrEmpty(state.SessionSerial))
-            {
-                var url = "https://www.komo.co.il/api/modaotActions/showPhone.api.asp";
+        //    if (!string.IsNullOrEmpty(state.SessionSerial))
+        //    {
+        //        var url = "https://www.komo.co.il/api/modaotActions/showPhone.api.asp";
 
-                try
-                {
-                    resultData = url
-                        .WithCookie(new Cookie("sessionSerial", state.SessionSerial))
-                        .WithHeader("Content-Type", "application/x-www-form-urlencoded")
-                        .PostStringAsync($"luachNum=2&modaaNum={itemId}")
-                        .ReceiveJson<DataContactsDtoModel>()
-                        .Result;
-                }
-                catch (Exception exception)
-                {
-                    _log($"Error j1. {exception.Message}");
-                }
+        //        try
+        //        {
+        //            resultData = url
+        //                .WithCookie(new Cookie("sessionSerial", state.SessionSerial))
+        //                .WithHeader("Content-Type", "application/x-www-form-urlencoded")
+        //                .PostStringAsync($"luachNum=2&modaaNum={itemId}")
+        //                .ReceiveJson<DataContactsDtoModel>()
+        //                .Result;
+        //        }
+        //        catch (Exception exception)
+        //        {
+        //            _log($"Error j1. {exception.Message}");
+        //        }
 
-                result = resultData;
-            }
-            else
-            {
-                _log($"SessionSerial is null");
-            }
+        //        result = resultData;
+        //    }
+        //    else
+        //    {
+        //        _log($"SessionSerial is null");
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
 
         private async Task<DataContactsDtoModel> _downloadItemContactsAsync(string itemId, ScraperKomoStateModel state)
         {
@@ -783,27 +839,9 @@ namespace ScraperServices.Scrapers
             await File.WriteAllTextAsync($"{filename}", JsonConvert.SerializeObject(list, Newtonsoft.Json.Formatting.Indented));
         }
 
-        private DataPageDtoModel _downloadItemContent(string itemId, ScraperKomoStateModel state)
-        {
-            //_log($"Download item {itemId}");
-
-            DataPageDtoModel result = null;
-            // https://www.komo.co.il/code/nadlan/?modaaNum=3033580
-
-            var webGet = new HtmlWeb();
-
-            var url = $"https://www.komo.co.il/code/nadlan/?modaaNum={itemId}";
-            if (webGet.Load(url) is HtmlDocument document)
-            {
-                result = _scrapeDataPage2Dto(document);
-            }
-
-            return result;
-        }
-
         private async Task<DataPageDtoModel> _downloadItemContentAsync(string itemId, ScraperKomoStateModel state)
         {
-            _log($"Download item {itemId}");
+            //_log($"Download item {itemId}");
 
             DataPageDtoModel result = null;
             // https://www.komo.co.il/code/nadlan/?modaaNum=3033580
@@ -818,6 +856,24 @@ namespace ScraperServices.Scrapers
 
             return result;
         }
+
+        //private async Task<DataPageDtoModel> _downloadItemContentAsync(string itemId, ScraperKomoStateModel state)
+        //{
+        //    _log($"Download item {itemId}");
+
+        //    DataPageDtoModel result = null;
+        //    // https://www.komo.co.il/code/nadlan/?modaaNum=3033580
+
+        //    var webGet = new HtmlWeb();
+
+        //    var url = $"https://www.komo.co.il/code/nadlan/?modaaNum={itemId}";
+        //    if (await webGet.LoadFromWebAsync(url) is HtmlDocument document)
+        //    {
+        //        result = _scrapeDataPage2Dto(document);
+        //    }
+
+        //    return result;
+        //}
 
         private DataPageDtoModel _scrapeDataPage2Dto(HtmlDocument document)
         {

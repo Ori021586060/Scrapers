@@ -44,16 +44,16 @@ namespace ScraperModels.Models.Domain
             var heNeighborhood = item?.neighborhood;
             var heStreetName = item?.street;
             var ariaBase = item?.square_meters;
-            var balconies = item?.balconies?.Replace("0", "false");
+            var balconies = item?.balconies;
             var pets = item?.additional_info_items_v2?.Where(x => x.key == "pets" && x.value == "true")
-                        .Select(x => x.value).FirstOrDefault();
+                        .Select(x => x.value).FirstOrDefault()?? "false";
             var elevators = item?.additional_info_items_v2?.Where(x => x.key == "elevator" && x.value == "true")
-                        .Select(x => x.value).FirstOrDefault();
+                        .Select(x => x.value).FirstOrDefault()?? "false";
             var floorOn = item?.info_bar_items?.Where(x => x.key == "floor").Select(x => x.titleWithoutLabel).FirstOrDefault();
             var floorOf = item?.TotalFloor_text;
             var rooms = item?.info_bar_items?.Where(x => x.key == "rooms").Select(x => x.titleWithoutLabel).FirstOrDefault();
             var parking = item?.additional_info_items_v2?.Where(x => x.key == "parking" && x.value == "true")
-                        .Select(x => x.value).FirstOrDefault();
+                        .Select(x => x.value).FirstOrDefault()??"false";
             var contactEmail = itemContacts?.data.email;
             var contactName = itemContacts?.data.contact_name;
             var contactPhone = itemContacts?.data.phone_numbers?.FirstOrDefault()?.title;

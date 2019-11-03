@@ -21,9 +21,11 @@ namespace ParseKomo
 
             //Scrape(scraper);
 
-            GetExcelFile(scraper);
+            //GetExcelFile(scraper);
 
-            PrintSaveStatus(scraper);
+            //PrintSaveStatus(scraper);
+
+            var itemDto = scraper.GetItemDtoAsync("3075172").Result;
         }
 
         static void UpdateRepository(ScraperKomo scraper)

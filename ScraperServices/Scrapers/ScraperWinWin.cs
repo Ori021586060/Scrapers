@@ -850,7 +850,7 @@ namespace ScraperServices.Scrapers
 
             var result = $"{floor} {floorsTxt} {floors}";
 
-            return floor;
+            return result;
         }
 
         private string _parseItemPage_GetRooms(HtmlDocument page)
@@ -1292,6 +1292,18 @@ namespace ScraperServices.Scrapers
             var result = new WinWinRepository();
 
             return result;
+        }
+
+        public async Task<AdItemWinWinDtoModel> GetItemDtoAsync(string itemId)
+        {
+            var state = (ScraperWinWinStateModel)_state;
+
+            var shortItem = new ShortItemDtoModel(){ ItemId = itemId };
+            var itemPage = await _loadItemPageAsync(shortItem, state);
+
+            var itemDto = await _parseItemPageAsync(itemPage, shortItem);
+
+            return itemDto;
         }
     }
 }

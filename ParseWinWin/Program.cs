@@ -13,7 +13,7 @@ namespace ParseWinWin
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
-            var state = new ScraperWinWinStateModel() { IsNew = true, };
+            var state = new ScraperWinWinStateModel() { IsNew = false, };
 
             var scraper = new ScraperWinWin(state);
 
@@ -21,9 +21,11 @@ namespace ParseWinWin
 
             //Scrape(scraper);
 
-            GetExcelFile(scraper);
+            //GetExcelFile(scraper);
 
-            PrintSaveStatus(scraper);
+            //PrintSaveStatus(scraper);
+
+            var itemDto = scraper.GetItemDtoAsync("4389448").Result;
         }
 
         static void UpdateRepository(ScraperWinWin scraper)

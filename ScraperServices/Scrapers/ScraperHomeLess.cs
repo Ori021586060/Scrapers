@@ -47,13 +47,6 @@ namespace ScraperServices.Scrapers
             _checkDirectory(_state.RootPath);
         }
 
-        private void _initSelenoid(ScraperHomeLessStateModel state)
-        {
-            if (_selenoidState is null) _selenoidState = new SelenoidStateModel();
-
-            _initSelenoidBase(_selenoidState, state);
-        }
-
         public ExcelHomeLessService GetExcelService()
         {
             return new ExcelHomeLessService((ScraperHomeLessStateModel)_state);
@@ -1106,45 +1099,6 @@ namespace ScraperServices.Scrapers
             _log($"Close Selenoid Service done");
         }
 
-        private bool _getPage_Selenoid(int page, ScraperHomeLessStateModel state)
-        {
-            var result = false;
-            var doNeedRepeatRequest = false;
-            var count = 0;
-            var countMax = 10;
-
-            do
-            {
-                doNeedRepeatRequest = false;
-                var url = $"https://homeless.co.il/rent/{page}";
-
-                try
-                {
-                    _selenoidState.WindowMain.Navigate().GoToUrl(url);
-
-                    _selenoidState.WaitMain.Until(ExpectedConditions.ElementIsVisible(By.ClassName("pagingdisplay")));
-                    //Thread.Sleep(1000 * 5);
-                    result = true;
-                }
-                catch (Exception exception)
-                {
-                    count++;
-                    if (count < countMax)
-                    {
-                        _log($"!!! Need Reinit Selenoid (try {count}) !!!");
-                        _initSelenoid(state);
-                        doNeedRepeatRequest = true;
-                    }
-                    else
-                    {
-                        _log($"Try is out. Error Selenoid");
-                    }
-                }
-            } while (doNeedRepeatRequest);
-
-            return result;
-        }
-
         private void _loadScraperConfig(ScraperHomeLessStateModel state)
         {
             var configFilename = state.ConfigFilename;
@@ -1297,5 +1251,54 @@ namespace ScraperServices.Scrapers
 
             return result;
         }
+
+        #region Selenoid methods
+        private bool _getPage_Selenoid(int page, ScraperHomeLessStateModel state)
+        {
+            var result = false;
+            var doNeedRepeatRequest = false;
+            var count = 0;
+            var countMax = 10;
+
+            do
+            {
+                doNeedRepeatRequest = false;
+                var url = $"https://homeless.co.il/rent/{page}";
+
+                try
+                {
+                    _selenoidState.WindowMain.Navigate().GoToUrl(url);
+
+                    _selenoidState.WaitMain.Until(ExpectedConditions.ElementIsVisible(By.ClassName("pagingdisplay")));
+                    //Thread.Sleep(1000 * 5);
+                    result = true;
+                }
+                catch (Exception exception)
+                {
+                    count++;
+                    if (count < countMax)
+                    {
+                        _log($"!!! Need Reinit Selenoid (try {count}) !!!");
+                        _initSelenoid(state);
+                        doNeedRepeatRequest = true;
+                    }
+                    else
+                    {
+                        _log($"Try is out. Error Selenoid");
+                    }
+                }
+            } while (doNeedRepeatRequest);
+
+            return result;
+        }
+
+        private void _initSelenoid(ScraperHomeLessStateModel state)
+        {
+            if (_selenoidState is null) _selenoidState = new SelenoidStateModel();
+
+            _initSelenoidBase(_selenoidState, state);
+        }
+
+        #endregion
     }
 }

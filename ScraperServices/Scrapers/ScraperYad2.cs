@@ -30,7 +30,6 @@ namespace ScraperServices.Scrapers
 {
     public class ScraperYad2: ScraperBase
     {
-        //private ScraperYad2StateModel _state { get; set; }
         private ScraperYad2ConfigModel _config { get; set; }
 
         public ScraperYad2(ScraperYad2StateModel state = null)
@@ -46,7 +45,27 @@ namespace ScraperServices.Scrapers
         {
             return new ExcelYad2Service((ScraperYad2StateModel)_state);
         }
-        private ScraperYad2ConfigModel _loadConfig(ScraperYad2StateModel state)
+
+        public DataDomainModel<List<AdItemYad2DomainModel>> GetDomainModelFromFile()
+        {
+            var model = GetDomainModelFromFileAsync();
+            var result = model.Result;
+
+            return result;
+        }
+
+        protected async Task<DataDomainModel<List<AdItemYad2DomainModel>>> GetDomainModelFromFileAsync()
+        {
+            var state = _state;
+            var filename = $"{state.RootPath}/domain-model.json";
+
+            var json = await File.ReadAllTextAsync(filename);
+            var model = JsonConvert.DeserializeObject<DataDomainModel<List<AdItemYad2DomainModel>>>(json);
+
+            return model;
+        }
+
+    private ScraperYad2ConfigModel _loadConfig(ScraperYad2StateModel state)
         {
             ScraperYad2ConfigModel result = null;
             var filename = state.ConfigFilename;

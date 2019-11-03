@@ -44,7 +44,19 @@ namespace ScraperModels.Models.Excel
             Latitude = item.Latitude;
             Longitude = item.Longitude;
             AriaBase = item.AriaBase;
-            Balconies = item.Balconies;
+
+            var balconies = item.Balconies;
+            switch (item.Balconies)
+            {
+                case "0":
+                    balconies = "false";
+                    break;
+                case "1":
+                    balconies = "true";
+                    break;
+            }
+            Balconies = balconies;
+
             Pets = item.Pets;
             Elevators = item.Elevators;
             FloorOn = item.FloorOn;
