@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,10 +15,10 @@
     <PackageReference Include="Flurl" Version="2.8.2" />
     <PackageReference Include="Flurl.Http" Version="2.4.2" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.16" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.0.0" />
     <PackageReference Include="NLog" Version="4.6.7" />
     <PackageReference Include="NLog.Config" Version="4.6.7" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="1.5.4" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="1.6.1" />
     <PackageReference Include="ScrapySharp" Version="3.0.0" />
     <PackageReference Include="Selenium.Support" Version="3.141.0" />
   </ItemGroup>
