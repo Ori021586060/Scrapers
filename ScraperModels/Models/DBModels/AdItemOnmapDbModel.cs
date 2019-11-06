@@ -24,27 +24,25 @@ namespace ScraperModels.Models.Db
         public string HeHouseNumber { get; set; }
         public string HeNeighborhood { get; set; }
         public string HeStreetName { get; set; }
-        public string Latitude { get; set; }
-        public string Longitude { get; set; }
-        public string AriaBase { get; set; }
-        public string Balconies { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public float? AriaBase { get; set; }
+        public int? Balconies { get; set; }
         public string Bathrooms { get; set; }
         public string Elevators { get; set; }
-        public string FloorOn { get; set; }
-        public string FloorOf { get; set; }
-        public string Rooms { get; set; }
+        public int? FloorOn { get; set; }
+        public int? FloorOf { get; set; }
+        public int? Rooms { get; set; }
         public string Toilets { get; set; }
         public string ContactEmail { get; set; }
         public string ContactName { get; set; }
         public string ContactPhone { get; set; }
         public string Description { get; set; }
-        public string Price { get; set; }
+        public float? Price { get; set; }
         public string PropertyType { get; set; }
         public string Section { get; set; }
-        [NotMapped]
-        public List<ExcelImageModel> Images { get; set; }
-        [NotMapped]
-        public List<ExcelVideoModel> Videos { get; set; }
+        public List<string> Images { get; set; }
+        //public List<string> Videos { get; set; }
 
         public AdItemOnmapDbModel FromDomain(AdItemOnmapDomainModel item)
         {
@@ -59,25 +57,25 @@ namespace ScraperModels.Models.Db
             HeHouseNumber = item.HeHouseNumber;
             HeNeighborhood = item.HeNeighborhood;
             HeStreetName = item.HeStreetName;
-            Latitude = item.Latitude;
-            Longitude = item.Longitude;
-            AriaBase = item.AriaBase;
-            Balconies = item.Balconies;
+            Latitude = (double)item.Latitude.ConvertToDouble();
+            Longitude = (double)item.Longitude.ConvertToDouble();
+            AriaBase = item.AriaBase.ConvertToFloat();
+            Balconies = item.Balconies.ConvertToInt();
             Bathrooms = item.Bathrooms;
             Elevators = item.Elevators;
-            FloorOn = item.FloorOn;
-            FloorOf = item.FloorOf;
-            Rooms = item.Rooms;
+            FloorOn = item.FloorOn.ConvertToInt();
+            FloorOf = item.FloorOf.ConvertToInt();
+            Rooms = item.Rooms.ConvertToInt();
             Toilets = item.Toilets;
             ContactEmail = item.ContactEmail;
             ContactName = item.ContactName;
             ContactPhone = item.ContactPhone;
             Description = item.Description;
-            Price = item.Price;
+            Price = item.Price.ConvertToFloat();
             PropertyType = item.PropertyType;
             Section = item.Section;
-            Images = item.Images;
-            Videos = item.Videos;
+            Images = item.Images.Select(x=>x.Full).ToList();
+            //Videos = item.Videos.Select(x => x.Source).ToList();
 
             return this;
         }

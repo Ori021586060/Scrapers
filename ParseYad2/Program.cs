@@ -7,6 +7,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Threading;
+using Update;
 
 namespace ParseYad2
 {
@@ -20,11 +21,11 @@ namespace ParseYad2
 
             var scraper = new ScraperYad2(state);
 
-            //UpdateRepository(scraper);
+            UpdateRepository();
 
             //Scrape(scraper);
 
-            GetExcelFile(scraper);
+            //GetExcelFile(scraper);
 
             //PrintSaveStatus(scraper);
 
@@ -45,13 +46,10 @@ namespace ParseYad2
             scraper.SaveDomainModel(model);
         }
 
-        static void UpdateRepository(ScraperYad2 scraper)
+        static void UpdateRepository()
         {
-            var repository = scraper.GetRepository();
-
-            var model = scraper.GetDomainModel();
-
-            var isOk = repository.UpdateData(model);
+            IUpdater updater = new UpdaterYad2();
+            updater.Update();
         }
 
         static void Scrape(ScraperYad2 scraper)

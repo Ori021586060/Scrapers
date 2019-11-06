@@ -19,11 +19,21 @@ namespace ScraperRepositories.Repositories
             Truncate();
 
             var items = (List<AdItemKomoDomainModel>)data.Data;
-
+            var index = 0;
             foreach(var item in items)
             {
-                var itemDb = new AdItemKomoDbModel().FromDomain(item);
-                //_context.DataKomo.Add(itemDb);
+                if (item.IsValidForDbModel)
+                {
+                    var itemDb = new AdItemKomoDbModel().FromDomain(item);
+                    _context.DataKomo.Add(itemDb);
+
+                    index++;
+                    if (index % 300 == 0)
+                    {
+                        Console.WriteLine($"index={index}");
+                        _context.SaveChanges();
+                    }
+                }
             }
             _context.SaveChanges();
 

@@ -19,11 +19,18 @@ namespace ScraperRepositories.Repositories
             Truncate();
 
             var items = (List<AdItemOnmapDomainModel>)data.Data;
-
+            var index = 0;
             foreach(var item in items)
             {
                 var itemDb = new AdItemOnmapDbModel().FromDomain(item);
-                //_context.DataOnmap.Add(itemDb);
+                _context.DataOnmap.Add(itemDb);
+
+                index++;
+                if (index % 300 == 0)
+                {
+                    Console.WriteLine($"index={index}");
+                    _context.SaveChanges();
+                }
             }
             _context.SaveChanges();
 

@@ -20,24 +20,24 @@ namespace ScraperModels.Models.Db
         public string DateCreate { get; set; }
         public string DateUpdate { get; set; }
         public string HeCity { get; set; }
-        public string HeHouseNumber { get; set; }
-        public string HeNeighborhood { get; set; }
-        public string HeStreetName { get; set; }
-        public string Latitude { get; set; }
-        public string Longitude { get; set; }
-        public string AriaBase { get; set; }
-        public string Balconies { get; set; }
+        public int? HouseNumber { get; set; }
+        public string Neighborhood { get; set; }
+        public string StreetName { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+        public int? AriaBase { get; set; }
+        public int? Balconies { get; set; }
         public string Pets { get; set; }
         public string Elevators { get; set; }
-        public string FloorOn { get; set; }
-        public string FloorOf { get; set; }
-        public string Rooms { get; set; }
+        public int? FloorOn { get; set; }
+        public int? FloorOf { get; set; }
+        public float? Rooms { get; set; }
         public string Parking { get; set; }
-        public string ContactEmail { get; set; }
+        //public string ContactEmail { get; set; }
         public string ContactName { get; set; }
         public string ContactPhone { get; set; }
         public string Description { get; set; }
-        public string Price { get; set; }
+        public float? Price { get; set; }
         public string PropertyType { get; set; }
         public string AirConditioner { get; set; }
         public List<string> Images { get; set; }
@@ -48,24 +48,24 @@ namespace ScraperModels.Models.Db
             DateCreate = item.DateCreate;
             DateUpdate = item.DateUpdate;
             HeCity = item.HeCity;
-            HeHouseNumber = item.HeHouseNumber;
-            HeNeighborhood = item.HeNeighborhood;
-            HeStreetName = item.HeStreetName;
-            Latitude = item.Latitude;
-            Longitude = item.Longitude;
-            AriaBase = item.AriaBase;
-            Balconies = item.Balconies;
+            HouseNumber = item.HeHouseNumber.ConvertToInt();
+            Neighborhood = item.HeNeighborhood;
+            StreetName = item.HeStreetName;
+            Latitude = item.Latitude.ConvertToDouble();
+            Longitude = item.Longitude.ConvertToDouble();
+            AriaBase = item.AriaBase.ConvertToInt();
+            Balconies = item.Balconies.ConvertToInt();
             Pets = item.Pets;
             Elevators = item.Elevators;
-            FloorOn = item.FloorOn;
-            FloorOf = item.FloorOf;
-            Rooms = item.Rooms;
+            FloorOn = item.FloorOn.ConvertToInt();
+            FloorOf = item.FloorOf.ConvertToInt();
+            Rooms = item.Rooms.ConvertToFloat();
             Parking = item.Parking;
-            ContactEmail = item.ContactEmail;
+            //ContactEmail = item.ContactEmail;
             ContactName = item.ContactName;
             ContactPhone = item.ContactPhone;
             Description = item.Description;
-            Price = item.Price;
+            Price = item.Price.ClearDigits().ConvertToFloat();
             PropertyType = item.PropertyType;
             AirConditioner = item.AirConditioner;
             Images = item.Images;

@@ -15,40 +15,39 @@ namespace ScraperModels.Models.Db
         public int Id { get; set; }
         public string AdItemId { get; set; }
         public string Updated { get; set; }
-        public string Latitude { get; set; }
-        public string Longitude { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
         public string ContactName { get; set; }
         public string Phone1 { get; set; }
         public string Phone2 { get; set; }
         public string Description { get; set; }
-        public string Price { get; set; }
+        public float? Price { get; set; }
         public string PropertyType { get; set; }
-        public string Rooms { get; set; }
-        public string Floor { get; set; }
-        public string Square { get; set; }
+        public int? Rooms { get; set; }
+        public int? Floor { get; set; }
+        public int? Square { get; set; }
         public string CheckHour { get; set; }
         public string Extras { get; set; }
-        [NotMapped]
-        public List<ExcelImageModel> Images { get; set; }
+        public List<string> Images { get; set; }
 
         public AdItemKomoDbModel FromDomain(AdItemKomoDomainModel item)
         {
             AdItemId = item.Id;
             Updated = item.Updated;
-            Latitude = item.Latitude;
-            Longitude = item.Longitude;
+            Latitude = (double)item.Latitude.ConvertToDouble();
+            Longitude = (double)item.Longitude.ConvertToDouble();
             ContactName = item.ContactName;
             Phone1 = item.Phone1;
             Phone2 = item.Phone2;
             Description = item.Description;
-            Price = item.Price;
+            Price = item.Price.ConvertToFloat();
             PropertyType = item.PropertyType;
-            Rooms = item.Rooms;
-            Floor = item.Floor;
-            Square = item.Square;
+            Rooms = item.Rooms.ConvertToInt();
+            Floor = item.Floor.ConvertToInt();
+            Square = item.Square.ConvertToInt();
             CheckHour = item.CheckHour;
             Extras = item.Extras;
-            Images = item.Images;
+            Images = item.Images.Select(x=>x.Full).ToList();
 
             return this;
         }

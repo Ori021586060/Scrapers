@@ -19,11 +19,18 @@ namespace ScraperRepositories.Repositories
             Truncate();
 
             var items = (List<AdItemYad2DomainModel>)data.Data;
-
+            var index = 0;
             foreach(var item in items)
             {
                 var itemDb = new AdItemYad2DbModel().FromDomain(item);
                 _context.DataYad2.Add(itemDb);
+
+                index++;
+                if (index % 100 == 0)
+                {
+                    Console.WriteLine($"index={index}");
+                    _context.SaveChanges();
+                }
             }
             _context.SaveChanges();
 

@@ -19,11 +19,22 @@ namespace ScraperRepositories.Repositories
             Truncate();
 
             var items = (List<AdItemHomeLessDomainModel>)data.Data;
-
+            Console.WriteLine($"Need update items: {items.Count()}");
+            var index = 0;
             foreach(var item in items)
             {
-                var itemDb = new AdItemHomeLessDbModel().FromDomain(item);
-                //_context.DataHomeLess.Add(itemDb);
+                if (item.IsValidForDbModel)
+                {
+                    var itemDb = new AdItemHomeLessDbModel().FromDomain(item);
+                    _context.DataHomeLess.Add(itemDb);
+
+                    index++;
+                    if (index % 300 == 0)
+                    {
+                        Console.WriteLine($"index={index}");
+                        _context.SaveChanges();
+                    }
+                }
             }
             _context.SaveChanges();
 

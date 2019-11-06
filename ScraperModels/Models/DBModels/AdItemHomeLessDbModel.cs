@@ -18,25 +18,25 @@ namespace ScraperModels.Models.Db
         public string City { get; set; }
         public string Region { get; set; }
         public string Phone { get; set; }
-        public string Latitude { get; set; }
-        public string Longitude { get; set; }
-        [NotMapped]
-        public List<ExcelImageModel> Images { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public List<string> Images { get; set; }
         public string Description { get; set; }
-        public string Field0 { get; set; }
-        public string Field1 { get; set; }
-        public string Field2 { get; set; }
-        public string Field3 { get; set; }
-        public string Field4 { get; set; }
-        public string Field5 { get; set; }
-        public string Field6 { get; set; }
-        public string Size { get; set; }
-        public string Floor { get; set; }
+        public string WindowBars { get; set; }      // Field0
+        public string RoomMatesAllow { get; set; }  // Field1
+        public string Furnitures { get; set; }      // Field2
+        public string Elevator { get; set; }        // Field3
+        public string Balcony { get; set; }         // Field4
+        public string Parking { get; set; }         // Field5
+        public string Conditioner { get; set; }     // Field6
+        public float? Size { get; set; }
+        public int? Floor { get; set; }
         public string Contact { get; set; }
         public string Phone1 { get; set; }
         public string Phone2 { get; set; }
         public string AgencyName { get; set; }
         public string Address { get; set; }
+        public float? Price { get; set; }
         public string LinkToProfile { get; set; }
 
         public AdItemHomeLessDbModel FromDomain(AdItemHomeLessDomainModel item)
@@ -46,24 +46,25 @@ namespace ScraperModels.Models.Db
             City = item.City;
             Region = item.Region;
             Phone = item.Phone;
-            Latitude = item.Latitude;
-            Longitude = item.Longitude;
-            Images = item.Images;
+            Latitude = (double)item.Latitude.ConvertToDouble();
+            Longitude = (double)item.Longitude.ConvertToDouble();
+            Images = item.Images.Select(x=>x.Full).ToList();
             Description = item.Description;
-            Field0 = item.Field0;
-            Field1 = item.Field1;
-            Field2 = item.Field2;
-            Field3 = item.Field3;
-            Field4 = item.Field4;
-            Field5 = item.Field5;
-            Field6 = item.Field6;
-            Size = item.Size;
-            Floor = item.Floor;
+            WindowBars = item.Field0;
+            RoomMatesAllow = item.Field1;
+            Furnitures = item.Field2;
+            Elevator = item.Field3;
+            Balcony = item.Field4;
+            Parking = item.Field5;
+            Conditioner = item.Field6;
+            Size = item.Size.ConvertToFloat();
+            Floor = item.Floor.GetFirstDigit().ConvertToInt();
             Contact = item.Contact;
             Phone1 = item.Phone1;
             Phone2 = item.Phone2;
             AgencyName = item.AgencyName;
             Address = item.Address;
+            Price = 1;
             LinkToProfile = item.LinkToProfile;
 
             return this;

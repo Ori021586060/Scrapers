@@ -32,6 +32,7 @@ namespace ScraperModels.Models.Domain
         public string AgencyName { get; set; }
         public string Address { get; set; }
         public string LinkToProfile { get; set; }
+        public bool IsValidForDbModel { get => !string.IsNullOrWhiteSpace(Latitude) && !string.IsNullOrWhiteSpace(Longitude); }
 
         public AdItemHomeLessDomainModel FromDto(DetailsItemDtoModel dto)
         {

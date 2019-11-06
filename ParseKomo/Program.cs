@@ -4,6 +4,7 @@ using ScraperServices.Services;
 using System;
 using System.Globalization;
 using System.Threading;
+using Update;
 
 namespace ParseKomo
 {
@@ -17,7 +18,7 @@ namespace ParseKomo
 
             var scraper = new ScraperKomo(state);
 
-            //UpdateRepository(scraper);
+            UpdateRepository();
 
             //Scrape(scraper);
 
@@ -25,16 +26,12 @@ namespace ParseKomo
 
             //PrintSaveStatus(scraper);
 
-            var itemDto = scraper.GetItemDtoAsync("3075172").Result;
         }
 
-        static void UpdateRepository(ScraperKomo scraper)
+        static void UpdateRepository()
         {
-            var repository = scraper.GetRepository();
-
-            var model = scraper.GetDomainModel();
-
-            var isOk = repository.UpdateData(model);
+            IUpdater updater = new UpdaterKomo();
+            updater.Update();
         }
 
         static void Scrape(ScraperKomo scraper)

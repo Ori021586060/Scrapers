@@ -17,6 +17,7 @@
     <ProjectReference Include="..\ScraperModels\ScraperModels.csproj" />
     <ProjectReference Include="..\ScraperServices\ScraperServices.csproj" />
     <ProjectReference Include="..\ScraperCore\ScraperCore.csproj" />
+    <ProjectReference Include="..\Update\Update.csproj" />
   </ItemGroup>
 
 </Project>

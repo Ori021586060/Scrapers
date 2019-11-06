@@ -4,6 +4,7 @@ using ScraperServices.Services;
 using System;
 using System.Globalization;
 using System.Threading;
+using Update;
 
 namespace ParseHomeLess
 {
@@ -17,22 +18,19 @@ namespace ParseHomeLess
 
             var scraper = new ScraperHomeLess(state);
 
-            //UpdateRepository(scraper);
+            UpdateRepository();
 
-            Scrape(scraper);
+            //Scrape(scraper);
 
             //GetExcelFile(scraper);
 
             //PrintSaveStatus(scraper);
         }
 
-        static void UpdateRepository(ScraperHomeLess scraper)
+        static void UpdateRepository()
         {
-            var repository = scraper.GetRepository();
-
-            var model = scraper.GetDomainModel();
-
-            var isOk = repository.UpdateData(model);
+            IUpdater updater = new UpdaterHomeLess();
+            updater.Update();
         }
 
         static void Scrape(ScraperHomeLess scraper)

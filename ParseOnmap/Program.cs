@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using ScraperServices.Models.Onmap;
 using ScraperServices.Scrapers;
 using ScraperServices.Services;
+using Update;
 
 namespace ParseOnmap
 {
@@ -21,22 +22,19 @@ namespace ParseOnmap
 
             var scraper = new ScraperOnmap(state);
 
-            //UpdateRepository(scraper);
+            UpdateRepository();
 
             //Scrape(scraper);
 
-            GetExcelFile(scraper);
+            //GetExcelFile(scraper);
 
-            PrintSaveStatus(scraper);
+            //PrintSaveStatus(scraper);
         }
 
-        static void UpdateRepository(ScraperOnmap scraper)
+        static void UpdateRepository()
         {
-            var repository = scraper.GetRepository();
-
-            var model = scraper.GetDomainModel();
-
-            var isOk = repository.UpdateData(model);
+            IUpdater updater = new UpdaterOnmap();
+            updater.Update();
         }
 
         static void Scrape(ScraperOnmap scraper)

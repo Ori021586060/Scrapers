@@ -33,7 +33,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScraperRepositories", "Scra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScraperDAL", "ScraperDAL\ScraperDAL.csproj", "{178330EC-9715-4549-9A7E-251B22A34A95}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestUpdateContext", "TestUpdateContext\TestUpdateContext.csproj", "{B2C32A0A-8E50-4DD8-A7EE-4A571F27A29F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestUpdateContext", "TestUpdateContext\TestUpdateContext.csproj", "{B2C32A0A-8E50-4DD8-A7EE-4A571F27A29F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Update", "Update\Update.csproj", "{6D1CF341-29D3-4EFA-917E-45E825BBE8AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -101,6 +103,10 @@ Global
 		{B2C32A0A-8E50-4DD8-A7EE-4A571F27A29F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2C32A0A-8E50-4DD8-A7EE-4A571F27A29F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2C32A0A-8E50-4DD8-A7EE-4A571F27A29F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D1CF341-29D3-4EFA-917E-45E825BBE8AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D1CF341-29D3-4EFA-917E-45E825BBE8AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D1CF341-29D3-4EFA-917E-45E825BBE8AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D1CF341-29D3-4EFA-917E-45E825BBE8AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

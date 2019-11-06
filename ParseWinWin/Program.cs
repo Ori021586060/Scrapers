@@ -4,6 +4,7 @@ using ScraperServices.Services;
 using System;
 using System.Globalization;
 using System.Threading;
+using Update;
 
 namespace ParseWinWin
 {
@@ -17,7 +18,7 @@ namespace ParseWinWin
 
             var scraper = new ScraperWinWin(state);
 
-            //UpdateRepository(scraper);
+            UpdateRepository();
 
             //Scrape(scraper);
 
@@ -28,13 +29,10 @@ namespace ParseWinWin
             var itemDto = scraper.GetItemDtoAsync("4389448").Result;
         }
 
-        static void UpdateRepository(ScraperWinWin scraper)
+        static void UpdateRepository()
         {
-            var repository = scraper.GetRepository();
-
-            var model = scraper.GetDomainModel();
-
-            var isOk = repository.UpdateData(model);
+            IUpdater updater = new UpdaterWinWin();
+            updater.Update();
         }
 
         static void Scrape(ScraperWinWin scraper)

@@ -25,6 +25,7 @@ namespace ScraperModels.Models.Domain
         public string CheckHour { get; set; }
         public string Extras { get; set; }
         public List<ExcelImageModel> Images { get; set; }
+        public bool IsValidForDbModel { get => !string.IsNullOrWhiteSpace(Latitude) && !string.IsNullOrWhiteSpace(Longitude); } 
 
         public AdItemKomoDomainModel FromDto(ItemKomoDtoModel itemDto)
         {

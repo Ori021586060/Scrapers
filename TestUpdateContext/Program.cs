@@ -6,6 +6,7 @@ using ScraperModels.Models.Domain;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Update;
 
 namespace TestUpdateContext
 {
@@ -15,19 +16,22 @@ namespace TestUpdateContext
         {
             Console.WriteLine("Start update context");
 
-            var model = LoadDomainModel();
-            var listItems = model.Data;
+            IUpdater updater;
 
-            using (var context = new ScrapersContext())
-            {
-                foreach(var item in listItems)
-                {
-                    var itemDb = new AdItemYad2DbModel().FromDomain(item);
-                    context.DataYad2.Add(itemDb);
-                }
+            updater = new UpdaterYad2();
+            updater.Update();
 
-                context.SaveChanges();
-            }
+            updater = new UpdaterWinWin();
+            updater.Update();
+
+            updater = new UpdaterHomeLess();
+            updater.Update();
+
+            updater = new UpdaterOnmap();
+            updater.Update();
+
+            //updater = new UpdaterKomo();
+            //updater.Update();
 
             Console.WriteLine($"Done");
         }
