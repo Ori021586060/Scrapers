@@ -26,62 +26,82 @@ using HtmlAgilityPack;
 using ScraperModels;
 using ScraperRepositories.Repositories;
 using ScraperModels.Models.Domain;
+using ScraperModels.Models.DtoModels.Airdna;
 using ScraperServices.Models.Airdna;
 
 namespace ScraperServices.Scrapers
 {
-    public class ScraperHomeLess : ScraperBase
+    public class ScraperAirdna : ScraperBase
     {
-        //private ScraperHomeLessStateModel _state { get; set; }
+        //private ScraperAirdnaStateModel _state { get; set; }
         private int _usedSelenoidService { get; set; } = 0;
-        private ScraperHomeLessConfigModel _config { get; set; }
+        private ScraperAirdnaConfigModel _config { get; set; }
         private SelenoidStateModel _selenoidState { get; set; }
+        private string _token { get; set; }
 
-        public ScraperHomeLess(ScraperHomeLessStateModel state = null)
+        public ScraperAirdna(ScraperAirdnaStateModel state = null)
         {
-            if (state is null) state = new ScraperHomeLessStateModel();
+            if (state is null) state = new ScraperAirdnaStateModel();
 
-            _state = (ScraperHomeLessStateModel)state;
+            _state = (ScraperAirdnaStateModel)state;
 
-            _loadScraperConfig((ScraperHomeLessStateModel)_state);
+            _loadScraperConfig((ScraperAirdnaStateModel)_state);
 
             _checkDirectory(_state.RootPath);
         }
 
-        public ExcelHomeLessService GetExcelService()
+        public ExcelAirdnaService GetExcelService()
         {
-            return new ExcelHomeLessService((ScraperHomeLessStateModel)_state);
+            return new ExcelAirdnaService((ScraperAirdnaStateModel)_state);
         }
 
         protected override async Task<bool> ScrapeInnerAsync()
         {
             var result = true;
-            var state = (ScraperHomeLessStateModel)_state;
+            var state = (ScraperAirdnaStateModel)_state;
 
-            SetWorkPhaseBase("Scrape", state, $"Start scraper HomeLess (isNew:{_state.IsNew})");
+            SetWorkPhaseBase("Scrape", state, $"Start scraper AirDna (isNew:{_state.IsNew})");
 
             if (state.IsNew) _clearWorkspace(state);
 
             _checkWorkspace(state);
 
-            ScrapePhase1_GenerateListPages(state);
+            ScrapePhase1_GenerateListCities(state);
 
-            await ScrapePhase1_DownloadPages_Scrapy(state);
+            ScrapePhase2_DownloadCities(state);
 
-            ScrapePhase2_GenerateListItems(state);
+            //ScrapePhase2_DownloadItems(state);
 
-            ScrapePhase2_DownloadItems(state);
-
-            _log($"Scraper HomeLess done (isNew:{_state.IsNew})");
+            _log($"Scraper AirDna done (isNew:{_state.IsNew})");
 
             return result;
         }
 
-        private async Task ScrapePhase1_DownloadPages_Scrapy(ScraperHomeLessStateModel state)
+        private void ScrapePhase2_DownloadCities(ScraperAirdnaStateModel state)
+        {
+            if (state.IsNew)
+            {
+                var filename = $"{state.RootPath}/cities.json";
+                var cities = JsonConvert.DeserializeObject<ItemDto>(File.ReadAllText(filename));
+
+                foreach (var city in cities.items)
+                {
+                    var url = $"https://api.airdna.co/v1/market/property_list?access_token={_token}&city_id={city.city.id}&currency=native";
+
+                    var dto = url.GetJsonAsync<AirdnaScrapeDataModel>().Result;
+
+                    var filename2 = $"{state.ItemsPath}/{city.city.id}.json";
+
+                    File.WriteAllText(filename2, JsonConvert.SerializeObject(dto, Newtonsoft.Json.Formatting.Indented));
+                }
+            }
+        }
+
+        private async Task ScrapePhase1_DownloadPages_Scrapy(ScraperAirdnaStateModel state)
         {
             SetWorkPhaseBase("DownloadPages", state);
 
-            var listPages = _loadListPages(state);
+            var listPages = _loadListCities(state);
             fixListPages(listPages, state);
 
             var needToDo = listPages.Where(x => x.Value == false).Select(x => x.Key).ToList();
@@ -93,7 +113,7 @@ namespace ScraperServices.Scrapers
                 foreach (var page in needToDo)
                     tasks.Add(Task.Run(async() => listPages[page] = await GetPageAsync(page, state)));
 
-                await _saveListPagesAsync(listPages, state);
+                //await _saveListCitiesAsync(listPages, state);
             }
 
             Task.WaitAll(tasks.ToArray());
@@ -101,7 +121,7 @@ namespace ScraperServices.Scrapers
             _log($"Phase done");
         }
 
-        private async Task<bool> GetPageAsync(int page, ScraperHomeLessStateModel state)
+        private async Task<bool> GetPageAsync(int page, ScraperAirdnaStateModel state)
         {
             var result = false;
             try
@@ -122,7 +142,7 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private List<AdDtoModel> ParseAdsFromPage(HtmlDocument html, ScraperHomeLessStateModel state)
+        private List<AdDtoModel> ParseAdsFromPage(HtmlDocument html, ScraperAirdnaStateModel state)
         {
             var result = new List<AdDtoModel>();
 
@@ -238,7 +258,7 @@ namespace ScraperServices.Scrapers
             return idBlock;
         }
 
-        private async Task<HtmlDocument> GetPage_ScrappyAsync(int pageNumber, ScraperHomeLessStateModel state)
+        private async Task<HtmlDocument> GetPage_ScrappyAsync(int pageNumber, ScraperAirdnaStateModel state)
         {
             HtmlDocument result = null;
             var needReplay = false;
@@ -264,9 +284,9 @@ namespace ScraperServices.Scrapers
 
         public override async Task<DataDomainModel> GetDomainModelAsync()
         {
-            var state = (ScraperHomeLessStateModel)_state;
+            var state = (ScraperAirdnaStateModel)_state;
             SetWorkPhaseBase($"DomainModel", state);
-            var listDomainItems = ScrapePhase4Async(state);
+            var listDomainItems = ScrapeAllItems(state);
 
             var result = new DataDomainModel(){
                 Scraper = state.TypeScraper,
@@ -278,7 +298,7 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private void ScrapePhase2_GenerateListItems(ScraperHomeLessStateModel state)
+        private void ScrapePhase2_GenerateListItems(ScraperAirdnaStateModel state)
         {
             SetWorkPhaseBase("GenerateListItems", state);
 
@@ -288,7 +308,7 @@ namespace ScraperServices.Scrapers
             {
                 _log($"Start generate list-items");
 
-                var listPages = _loadListPages(state);
+                var listPages = _loadListCities(state);
                 listItems = new Dictionary<string, AdDtoModel>();
                 var listItemDublicate = new List<string>();
 
@@ -320,7 +340,7 @@ namespace ScraperServices.Scrapers
                 _log($"Generate list-item skipped (isNew:{state.IsNew})");
         }
 
-        private void _saveListItemsDublicates(List<string> list, ScraperHomeLessStateModel state)
+        private void _saveListItemsDublicates(List<string> list, ScraperAirdnaStateModel state)
         {
             var filename = state.ListItemsDublicatesFilename;
 
@@ -331,7 +351,7 @@ namespace ScraperServices.Scrapers
             _log($"Save list-items done");
         }
 
-        private void _saveListItems(Dictionary<string, AdDtoModel> list, ScraperHomeLessStateModel state)
+        private void _saveListItems(Dictionary<string, AdDtoModel> list, ScraperAirdnaStateModel state)
         {
             var filename = state.ListItemsFilename;
 
@@ -342,7 +362,7 @@ namespace ScraperServices.Scrapers
             _log($"Save list-items done");
         }
 
-        private Dictionary<string, AdDtoModel> _loadListItems(ScraperHomeLessStateModel state)
+        private Dictionary<string, AdDtoModel> _loadListItems(ScraperAirdnaStateModel state)
         {
             Dictionary<string, AdDtoModel> result = null;
 
@@ -356,11 +376,11 @@ namespace ScraperServices.Scrapers
 
         protected override void _checkWorkspaceInner(IState state)
         {
-            _checkDirectory($"{state.PagesPath}");
+            //_checkDirectory($"{state.PagesPath}");
             _checkDirectory($"{state.ItemsPath}");
         }
 
-        private void ScrapePhase2_DownloadItems(ScraperHomeLessStateModel state)
+        private void ScrapePhase2_DownloadItems(ScraperAirdnaStateModel state)
         {
             SetWorkPhaseBase("DownloadItems", state);
 
@@ -407,7 +427,7 @@ namespace ScraperServices.Scrapers
             _log($"Download items done");
         }
 
-        private void _fixListItems(Dictionary<string, AdDtoModel> list, ScraperHomeLessStateModel state)
+        private void _fixListItems(Dictionary<string, AdDtoModel> list, ScraperAirdnaStateModel state)
         {
             var itemsFiles = new DirectoryInfo(state.ItemsPath).GetFiles();
             var amountFixed = 0;
@@ -425,7 +445,7 @@ namespace ScraperServices.Scrapers
             _log($"Fixed {amountFixed} files");
         }
 
-        private async Task<bool> _downloadItemAsync(AdDtoModel item, ScraperHomeLessStateModel state)
+        private async Task<bool> _downloadItemAsync(AdDtoModel item, ScraperAirdnaStateModel state)
         {
             var result = true;
             var id = item.Id;
@@ -577,7 +597,7 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private async Task<List<ScraperModels.Models.CoordinateDtoModel>> _getCoordinatesFromServiceAsync(AdDtoModel item, ScraperHomeLessStateModel state)
+        private async Task<List<ScraperModels.Models.CoordinateDtoModel>> _getCoordinatesFromServiceAsync(AdDtoModel item, ScraperAirdnaStateModel state)
         {
             List<ScraperModels.Models.CoordinateDtoModel> coordinates = await GetCoordinatesFrom_OpenStreetMap_WebClientProxyAsync($"{item.Region} {item.City}", state);
             if (coordinates is null)
@@ -661,7 +681,7 @@ namespace ScraperServices.Scrapers
         //    return coordinates;
         //}
 
-        private async Task _saveItemDetailsAsync(string id, DetailsItemDtoModel response, ScraperHomeLessStateModel state)
+        private async Task _saveItemDetailsAsync(string id, DetailsItemDtoModel response, ScraperAirdnaStateModel state)
         {
             var filename = $"{state.ItemsPath}/{id}.json";
 
@@ -670,7 +690,7 @@ namespace ScraperServices.Scrapers
             _log($"Save json file {filename}");
         }
 
-        private async Task _saveItemAsync(string id, string response, ScraperHomeLessStateModel state)
+        private async Task _saveItemAsync(string id, string response, ScraperAirdnaStateModel state)
         {
             var filename = $"{state.ItemsPath}/{id}.xml";
 
@@ -679,7 +699,7 @@ namespace ScraperServices.Scrapers
             _log($"Save xml-data file {filename}");
         }
 
-        private List<AdDtoModel> _loadPage(int page, ScraperHomeLessStateModel state)
+        private List<AdDtoModel> _loadPage(int page, ScraperAirdnaStateModel state)
         {
             List<AdDtoModel> result = null;
 
@@ -691,20 +711,21 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private async Task<List<AdItemHomeLessDomainModel>> ScrapePhase4Async(ScraperHomeLessStateModel state)
+        private async Task<List<AdItemAirdnaDomainModel>> ScrapeAllItems(ScraperAirdnaStateModel state)
         {
-            var listDomainItems = new List<AdItemHomeLessDomainModel>();
-            var files = GetListItemFiles(state);
-            var listPages = _loadPagesAsync(state);
+            var listDomainItems = new List<AdItemAirdnaDomainModel>();
+            var files = new DirectoryInfo($"{state.ItemsPath}").GetFiles();
 
             foreach(var file in files)
             {
-                var itemDto = await LoadItemDtoFromStoreAsync<DetailsItemDtoModel>(file, state);
+                var itemsDto = await LoadItemDtoFromStoreAsync<AirdnaScrapeDataModel>(file, state);
 
-                itemDto.RowDataFromPage = GetRowDataFromPage(await listPages, file);
-
-                var itemDomain = new AdItemHomeLessDomainModel().FromDto(itemDto);
-                listDomainItems.Add(itemDomain);
+                foreach(var item in itemsDto.Properties)
+                {
+                    var itemDomain = new AdItemAirdnaDomainModel().FromDto(item);
+                    itemDomain.Location = itemsDto.AreaInfo.Geom.Name.City;
+                    listDomainItems.Add(itemDomain);
+                }
             }
 
             return listDomainItems;
@@ -718,7 +739,7 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private async Task<Dictionary<string, AdDtoModel>> _loadPagesAsync(ScraperHomeLessStateModel state)
+        private async Task<Dictionary<string, AdDtoModel>> _loadPagesAsync(ScraperAirdnaStateModel state)
         {
             var result = new Dictionary<string, AdDtoModel>();
 
@@ -777,11 +798,11 @@ namespace ScraperServices.Scrapers
             return xmlDoc;
         }
 
-        private void ScrapePhase1_DownloadPages_Selenoid(ScraperHomeLessStateModel state)
+        private void ScrapePhase1_DownloadPages_Selenoid(ScraperAirdnaStateModel state)
         {
             SetWorkPhaseBase("DownloadPages", state);
 
-            var listPages = _loadListPages(state);
+            var listPages = _loadListCities(state);
             fixListPages(listPages, state);
 
             var needToDo = listPages.Where(x => x.Value == false).Select(x=>x.Key).ToList();
@@ -827,7 +848,7 @@ namespace ScraperServices.Scrapers
                         listPages[page] = true;
                         if (needSaveListPages)
                         {
-                            _saveListPagesAsync(listPages, state).Wait();
+                            //_saveListCitiesAsync(listPages, state).Wait();
                             needSaveListPages = false;
                         }
 
@@ -842,7 +863,7 @@ namespace ScraperServices.Scrapers
 
                 }
 
-                _saveListPagesAsync(listPages, state).Wait();
+                //_saveListCitiesAsync(listPages, state).Wait();
 
                 _closeSelenoid();
             }
@@ -850,7 +871,7 @@ namespace ScraperServices.Scrapers
             _log($"Phase-2 done");
         }
 
-        private void fixListPages(Dictionary<int, bool> listPages, ScraperHomeLessStateModel state)
+        private void fixListPages(Dictionary<int, bool> listPages, ScraperAirdnaStateModel state)
         {
             var path = $"{state.PagesPath}";
             var listFiles = new DirectoryInfo(path).GetFiles();
@@ -875,7 +896,7 @@ namespace ScraperServices.Scrapers
             Environment.Exit(1);
         }
 
-        private async Task _savePageAsync(int page, List<AdDtoModel> listAdFromPage, ScraperHomeLessStateModel state)
+        private async Task _savePageAsync(int page, List<AdDtoModel> listAdFromPage, ScraperAirdnaStateModel state)
         {
             var filename = $"{state.PagesPath}/page-{page}.json";
 
@@ -884,7 +905,7 @@ namespace ScraperServices.Scrapers
             _log($"Save file {filename}");
         }
 
-        private void _savePage(int page, List<AdDtoModel> listAdFromPage, ScraperHomeLessStateModel state)
+        private void _savePage(int page, List<AdDtoModel> listAdFromPage, ScraperAirdnaStateModel state)
         {
             var filename = $"{state.PagesPath}/page-{page}.json";
 
@@ -893,7 +914,7 @@ namespace ScraperServices.Scrapers
             _log($"Save file {filename}");
         }
 
-        private List<AdDtoModel> _parsePage(int page, ScraperHomeLessStateModel state)
+        private List<AdDtoModel> _parsePage(int page, ScraperAirdnaStateModel state)
         {
             List<AdDtoModel> result = new List<AdDtoModel>();
 
@@ -954,37 +975,101 @@ namespace ScraperServices.Scrapers
             }
         }
 
-        private void ScrapePhase1_GenerateListPages(ScraperHomeLessStateModel state)
+        private void ScrapePhase1_GenerateListCities(ScraperAirdnaStateModel state)
         {
-            SetWorkPhaseBase("GenerateListPages", state);
+            SetWorkPhaseBase("GenerateListcities", state);
 
-            var listPages = _loadListPages(state);
+            var listCities = _loadListCities(state);
 
-            if (listPages == null || listPages.Count == 0 || state.IsNew)
+            if (/*listCities == null || listCities.Count == 0 || */state.IsNew)
             {
-                //var amountPages = ScrapePhase1_GetAmountPages_Selenoid(state);
-                var amountPages = ScrapePhase1_GetAmountPages_WebClientAsync(state);
-                var list = ScrapePhase1_GenerateListPages(amountPages.Result);
-                _saveListPagesAsync(list, state).Wait();
+                //var list = ScrapePhase1_GenerateListCities_Selenoid(state);
+                var list = ScrapePhase1_GenerateListCities_WebClient(state);
+                
+                //_saveListCitiesAsync(list, state).Wait();
             }
             else
-                _log($"Generate list page not need (missing, isNew:{state.IsNew})");
+                _log($"Generate list city not need (missing, isNew:{state.IsNew})");
         }
 
-        private Dictionary<int, bool> ScrapePhase1_GenerateListPages(int amountPages)
+        private List<string> ScrapePhase1_GenerateListCities_WebClient(ScraperAirdnaStateModel state)
         {
-            var list = new Dictionary<int, bool>();
+            var list = new List<string>();
+            //https://api.airdna.co/v1/market/search?access_token=MTg4Njkx|6534a37a5f8f4a1e9a8e6139fda32153&term=Israel
 
-            //amountPages = 2; // for debug
+            var loginUrl = "https://www.airdna.co/api/v1/account/login";
+            var loginPost = loginUrl
+                .PostUrlEncodedAsync(new { username = "goodluckori@gmail.com", password = "021586060", remember_me = "true" })
+                .ReceiveJson<ResponseLogin>();
 
-            foreach (var i in Enumerable.Range(1, amountPages)) list.Add(i, false);
+            var loginResult = loginPost.Result;
+
+            if (loginResult.Status == null || loginResult.Status.ToLower() != "success")
+            {
+                Console.WriteLine($"Error authorizations on airdna.co site.");
+            }
+
+            var token = loginResult.Token;
+            _token = token;
+            var cities22 = $"https://api.airdna.co/v1/market/search?access_token={token}&term=Israel";
+
+            var data = cities22.GetAsync().ReceiveJson().Result;
+
+            var filename = $"{state.RootPath}/cities.json";
+            File.WriteAllText(filename, JsonConvert.SerializeObject(data, Newtonsoft.Json.Formatting.Indented));
+
+            return list;
+        }
+
+        private List<string> ScrapePhase1_GenerateListCities_Selenoid(ScraperAirdnaStateModel state)
+        {
+            var list = new List<string>();
+
+            _initSelenoid(state);
+
+            LogonToSite();
+
+            var url = $"https://airdna.co";
+
+            //var isOk = Selenoid_GoToUrl_Base(url, _selenoidState, state);
+
+            //(string)_selenoidState.WindowMain.Ex
 
             _log($"Generate new list of pages done");
 
             return list;
         }
 
-        private async Task<int> ScrapePhase1_GetAmountPages_WebClientAsync(ScraperHomeLessStateModel state)
+        private void LogonToSite()
+        {
+            //_selenoidState.WindowMain
+            var url = "https://airdna.co";
+            _selenoidState.WindowMain.Navigate().GoToUrl(url);
+
+            _selenoidState.WaitMain.Until(ExpectedConditions.ElementIsVisible(By.Id("main-header")));
+
+            _selenoidState.WindowMain.FindElementById("menu-item-107")
+                .FindElement(By.TagName("a"))
+                .Click();
+
+            _selenoidState.WaitMain.Until(ExpectedConditions.ElementIsVisible(By.Id("remember_me")));
+
+            var username = _selenoidState.WindowMain.FindElementByName("_username");
+            username.SendKeys("goodluckori@gmail.com");
+
+            var password = _selenoidState.WindowMain.FindElementByName("_password");
+            password.SendKeys("021586060");
+
+            var inputs = _selenoidState.WindowMain.FindElementsByTagName("input");
+            foreach(var input in inputs)
+            {
+                var value = input.GetAttribute("value").ToLower();
+                if (value == "log in") input.Click();
+            }
+            
+        }
+
+        private async Task<int> ScrapePhase1_GetAmountPages_WebClientAsync(ScraperAirdnaStateModel state)
         {
             var result = 0;
 
@@ -1018,7 +1103,7 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private async Task<string> GetPage_WebClientAsync(int page, ScraperHomeLessStateModel state)
+        private async Task<string> GetPage_WebClientAsync(int page, ScraperAirdnaStateModel state)
         {
             var result = "";
             try
@@ -1038,14 +1123,14 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private async Task _saveListPagesAsync(Dictionary<int, bool> list, ScraperHomeLessStateModel state)
+        private async Task _saveListCitiesAsync(List<string> list, ScraperAirdnaStateModel state)
         {
             await File.WriteAllTextAsync($"{state.ListPagesFilename}", JsonConvert.SerializeObject(list, Newtonsoft.Json.Formatting.Indented));
 
-            _log($"Save list pages {state.ListPagesFilename} done");
+            _log($"Save list cities {state.ListPagesFilename} done");
         }
 
-        private int ScrapePhase1_GetAmountPages_Selenoid(ScraperHomeLessStateModel state)
+        private int ScrapePhase1_GetAmountPages_Selenoid(ScraperAirdnaStateModel state)
         {
             var result = 0;
             
@@ -1100,27 +1185,27 @@ namespace ScraperServices.Scrapers
             _log($"Close Selenoid Service done");
         }
 
-        private void _loadScraperConfig(ScraperHomeLessStateModel state)
+        private void _loadScraperConfig(ScraperAirdnaStateModel state)
         {
             var configFilename = state.ConfigFilename;
 
             if (File.Exists(configFilename))
-                _config = JsonConvert.DeserializeObject<ScraperHomeLessConfigModel>(File.ReadAllText(configFilename));
+                _config = JsonConvert.DeserializeObject<ScraperAirdnaConfigModel>(File.ReadAllText(configFilename));
             else
             {
-                _config = new ScraperHomeLessConfigModel();
+                _config = new ScraperAirdnaConfigModel();
                 _saveScraperConfig(_config, configFilename);
             }
         }
 
-        private void _saveScraperConfig(ScraperHomeLessConfigModel config, string configFilename)
+        private void _saveScraperConfig(ScraperAirdnaConfigModel config, string configFilename)
         {
             File.WriteAllText(configFilename, JsonConvert.SerializeObject(config, Newtonsoft.Json.Formatting.Indented));
 
             _log($"Save config:{configFilename} is done");
         }
 
-        private Dictionary<int,bool> _loadListPages(ScraperHomeLessStateModel state)
+        private Dictionary<int,bool> _loadListCities(ScraperAirdnaStateModel state)
         {
             Dictionary<int, bool> result = null;
 
@@ -1165,7 +1250,7 @@ namespace ScraperServices.Scrapers
 
         public ScraperHomeLessStatusModel StatusWorkspace()
         {
-            var state = (ScraperHomeLessStateModel)_state;
+            var state = (ScraperAirdnaStateModel)_state;
 
             state.WorkPhase = "StatusWorkspace";
 
@@ -1192,7 +1277,7 @@ namespace ScraperServices.Scrapers
             return status;
         }
 
-        private int _statusWorkspace_AmountItemUniquesFromPages(ScraperHomeLessStateModel state)
+        private int _statusWorkspace_AmountItemUniquesFromPages(ScraperAirdnaStateModel state)
         {
             var list = _statusWorkspace_AmountItemsFromPages_GetItems(state);
 
@@ -1201,7 +1286,7 @@ namespace ScraperServices.Scrapers
             return dups.Count();
         }
 
-        private int _statusWorkspace_AmountItemsFromPages(ScraperHomeLessStateModel state)
+        private int _statusWorkspace_AmountItemsFromPages(ScraperAirdnaStateModel state)
         {
             var list = _statusWorkspace_AmountItemsFromPages_GetItems(state);
 
@@ -1210,7 +1295,7 @@ namespace ScraperServices.Scrapers
             return list.Count();
         }
 
-        private List<ItemTest> _statusWorkspace_AmountItemsFromPages_GetItems(ScraperHomeLessStateModel state)
+        private List<ItemTest> _statusWorkspace_AmountItemsFromPages_GetItems(ScraperAirdnaStateModel state)
         {
             var listPages = _statusWorkspace_AmountPages_GetFilesBase(state);
 
@@ -1246,15 +1331,15 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        public HomeLessRepository GetRepository()
+        public AirdnaRepository GetRepository()
         {
-            var result = new HomeLessRepository();
+            var result = new AirdnaRepository();
 
             return result;
         }
 
         #region Selenoid methods
-        private bool _getPage_Selenoid(int page, ScraperHomeLessStateModel state)
+        private bool _getPage_Selenoid(int page, ScraperAirdnaStateModel state)
         {
             var result = false;
             var doNeedRepeatRequest = false;
@@ -1293,9 +1378,12 @@ namespace ScraperServices.Scrapers
             return result;
         }
 
-        private void _initSelenoid(ScraperHomeLessStateModel state)
+        private void _initSelenoid(ScraperAirdnaStateModel state)
         {
-            if (_selenoidState is null) _selenoidState = new SelenoidStateModel();
+            if (_selenoidState is null) _selenoidState = new SelenoidStateModel() {
+                JavaScriptEnable = true,
+                ShowPictures = true,
+            };
 
             _initSelenoidBase(_selenoidState, state);
         }

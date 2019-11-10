@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using ScraperModels.Models;
-using ScraperModels.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;

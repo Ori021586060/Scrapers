@@ -15,6 +15,7 @@ namespace ScraperDAL
         public DbSet<AdItemOnmapDbModel> DataOnmap { get; set; }
         public DbSet<AdItemYad2DbModel> DataYad2 { get; set; }
         public DbSet<AdItemWinWinDbModel> DataWinWin { get; set; }
+        public DbSet<AdItemAirdnaDbModel> DataAirdna { get; set; }
 
         public ScrapersContext()
         {
