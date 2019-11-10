@@ -16,9 +16,73 @@ namespace ScraperDAL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasAnnotation("Npgsql:PostgresExtension:postgis", ",,")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
                 .HasAnnotation("ProductVersion", "3.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            modelBuilder.Entity("ScraperModels.Models.Db.AdItemAirdnaDbModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("Accommodates")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AdItemId")
+                        .HasColumnType("text");
+
+                    b.Property<double?>("Adr")
+                        .HasColumnType("double precision");
+
+                    b.Property<float?>("Bathrooms")
+                        .HasColumnType("real");
+
+                    b.Property<float?>("Bedrooms")
+                        .HasColumnType("real");
+
+                    b.Property<byte[]>("Geometry")
+                        .HasColumnType("geometry (point)");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("LinkToProfile")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("text");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Occ")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PropertyType")
+                        .HasColumnType("text");
+
+                    b.Property<double?>("Rating")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Revenue")
+                        .HasColumnType("text");
+
+                    b.Property<float?>("Reviews")
+                        .HasColumnType("real");
+
+                    b.Property<string>("RoomType")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DataAirdna");
+                });
 
             modelBuilder.Entity("ScraperModels.Models.Db.AdItemHomeLessDbModel", b =>
                 {

@@ -1,15 +1,48 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace ScraperDAL.Migrations
 {
-    public partial class init : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
                 name: "public");
+
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:PostgresExtension:postgis", ",,");
+
+            migrationBuilder.CreateTable(
+                name: "DataAirdna",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Geometry = table.Column<byte[]>(type: "geometry (point)", nullable: true),
+                    AdItemId = table.Column<string>(nullable: true),
+                    Title = table.Column<string>(nullable: true),
+                    Location = table.Column<string>(nullable: true),
+                    Longitude = table.Column<double>(nullable: false),
+                    Latitude = table.Column<double>(nullable: false),
+                    Adr = table.Column<double>(nullable: true),
+                    Rating = table.Column<double>(nullable: true),
+                    Bathrooms = table.Column<float>(nullable: true),
+                    Bedrooms = table.Column<float>(nullable: true),
+                    Accommodates = table.Column<string>(nullable: true),
+                    Revenue = table.Column<string>(nullable: true),
+                    PropertyType = table.Column<string>(nullable: true),
+                    Occ = table.Column<string>(nullable: true),
+                    Reviews = table.Column<float>(nullable: true),
+                    RoomType = table.Column<string>(nullable: true),
+                    LinkToProfile = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DataAirdna", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "DataKomo",
@@ -192,6 +225,9 @@ namespace ScraperDAL.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "DataAirdna");
+
             migrationBuilder.DropTable(
                 name: "DataKomo");
 

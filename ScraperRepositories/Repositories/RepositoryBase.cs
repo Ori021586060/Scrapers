@@ -12,7 +12,8 @@ namespace ScraperRepositories.Repositories
 
         protected bool Truncate(string table)
         {
-            _context.Database.ExecuteSqlCommand($"TRUNCATE TABLE public.\"DataYad2\"");
+            var sql = $"TRUNCATE TABLE public.\"{table}\"";
+            _context.Database.ExecuteSqlCommand(sql);
 
             return true;
         }

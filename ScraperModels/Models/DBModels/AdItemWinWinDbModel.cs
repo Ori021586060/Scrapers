@@ -9,7 +9,7 @@ using System.Text;
 
 namespace ScraperModels.Models.Db
 {
-    public class AdItemWinWinDbModel
+    public class AdItemWinWinDbModel : BaseDbModel
     {
         [Required]
         [Key]

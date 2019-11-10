@@ -9,7 +9,7 @@ using ScraperModels.Models.HomeLess;
 
 namespace ScraperModels.Models.Db
 {
-    public class AdItemAirdnaDbModel
+    public class AdItemAirdnaDbModel: BaseDbModel
     {
         [Key]
         public int Id { get; set; }

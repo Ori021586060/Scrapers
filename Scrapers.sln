@@ -37,7 +37,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestUpdateContext", "TestUp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Update", "Update\Update.csproj", "{6D1CF341-29D3-4EFA-917E-45E825BBE8AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAirDna", "TestAirDna\TestAirDna.csproj", "{3D3B48D2-2DB3-4167-89F5-B692AD2D86AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestAirdna", "TestAirDna\TestAirdna.csproj", "{3D3B48D2-2DB3-4167-89F5-B692AD2D86AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

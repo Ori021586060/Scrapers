@@ -11,7 +11,7 @@ using System.Text;
 namespace ScraperModels.Models.Db
 {
     [Table("DataYad2")]
-    public class AdItemYad2DbModel
+    public class AdItemYad2DbModel : BaseDbModel
     {
         [Required]
         [Key]

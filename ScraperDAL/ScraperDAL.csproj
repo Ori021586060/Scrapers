@@ -6,12 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20191104173755_Yad2.cs" />
-    <Compile Remove="Migrations\20191104173755_Yad2.Designer.cs" />
-    <Compile Remove="Migrations\20191104173855_WinWin.cs" />
-    <Compile Remove="Migrations\20191104173855_WinWin.Designer.cs" />
-    <Compile Remove="Migrations\20191105000350_init.cs" />
-    <Compile Remove="Migrations\20191105000350_init.Designer.cs" />
+    <Compile Remove="Migrations\20191110140222_Init.cs" />
+    <Compile Remove="Migrations\20191110140222_Init.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,6 +36,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.0.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.0.1" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Design" Version="1.1.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite" Version="3.0.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -9,7 +9,7 @@ using System.Text;
 
 namespace ScraperModels.Models.Db
 {
-    public class AdItemOnmapDbModel
+    public class AdItemOnmapDbModel : BaseDbModel
     {
         [Key]
         public int Id { get; set; }
