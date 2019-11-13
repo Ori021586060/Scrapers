@@ -5,13 +5,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ScraperDAL;
 
 namespace ScraperDAL.Migrations
 {
     [DbContext(typeof(ScrapersContext))]
-    [Migration("20191110140856_Init")]
+    [Migration("20191113064555_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +26,7 @@ namespace ScraperDAL.Migrations
 
             modelBuilder.Entity("ScraperModels.Models.Db.AdItemAirdnaDbModel", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
@@ -44,9 +45,6 @@ namespace ScraperDAL.Migrations
 
                     b.Property<float?>("Bedrooms")
                         .HasColumnType("real");
-
-                    b.Property<byte[]>("Geometry")
-                        .HasColumnType("geometry (point)");
 
                     b.Property<double>("Latitude")
                         .HasColumnType("double precision");
@@ -81,14 +79,17 @@ namespace ScraperDAL.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.Property<Geometry>("geom")
+                        .HasColumnType("geometry (point)");
+
+                    b.HasKey("id");
 
                     b.ToTable("DataAirdna");
                 });
 
             modelBuilder.Entity("ScraperModels.Models.Db.AdItemHomeLessDbModel", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
@@ -153,8 +154,8 @@ namespace ScraperDAL.Migrations
                     b.Property<string>("Phone2")
                         .HasColumnType("text");
 
-                    b.Property<float?>("Price")
-                        .HasColumnType("real");
+                    b.Property<double?>("Price")
+                        .HasColumnType("double precision");
 
                     b.Property<string>("Region")
                         .HasColumnType("text");
@@ -168,14 +169,17 @@ namespace ScraperDAL.Migrations
                     b.Property<string>("WindowBars")
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.Property<Geometry>("geom")
+                        .HasColumnType("geometry (point)");
+
+                    b.HasKey("id");
 
                     b.ToTable("DataHomeLess","public");
                 });
 
             modelBuilder.Entity("ScraperModels.Models.Db.AdItemKomoDbModel", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
@@ -213,8 +217,8 @@ namespace ScraperDAL.Migrations
                     b.Property<string>("Phone2")
                         .HasColumnType("text");
 
-                    b.Property<float?>("Price")
-                        .HasColumnType("real");
+                    b.Property<double?>("Price")
+                        .HasColumnType("double precision");
 
                     b.Property<string>("PropertyType")
                         .HasColumnType("text");
@@ -228,14 +232,17 @@ namespace ScraperDAL.Migrations
                     b.Property<string>("Updated")
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.Property<Geometry>("geom")
+                        .HasColumnType("geometry (point)");
+
+                    b.HasKey("id");
 
                     b.ToTable("DataKomo");
                 });
 
             modelBuilder.Entity("ScraperModels.Models.Db.AdItemOnmapDbModel", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
@@ -312,8 +319,8 @@ namespace ScraperDAL.Migrations
                     b.Property<double>("Longitude")
                         .HasColumnType("double precision");
 
-                    b.Property<float?>("Price")
-                        .HasColumnType("real");
+                    b.Property<double?>("Price")
+                        .HasColumnType("double precision");
 
                     b.Property<string>("PropertyType")
                         .HasColumnType("text");
@@ -327,14 +334,17 @@ namespace ScraperDAL.Migrations
                     b.Property<string>("Toilets")
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.Property<Geometry>("geom")
+                        .HasColumnType("geometry (point)");
+
+                    b.HasKey("id");
 
                     b.ToTable("DataOnmap");
                 });
 
             modelBuilder.Entity("ScraperModels.Models.Db.AdItemWinWinDbModel", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
@@ -387,8 +397,8 @@ namespace ScraperDAL.Migrations
                     b.Property<string>("Phone2")
                         .HasColumnType("text");
 
-                    b.Property<float?>("Price")
-                        .HasColumnType("real");
+                    b.Property<double?>("Price")
+                        .HasColumnType("double precision");
 
                     b.Property<float?>("Rooms")
                         .HasColumnType("real");
@@ -402,14 +412,17 @@ namespace ScraperDAL.Migrations
                     b.Property<string>("StreetAddress")
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.Property<Geometry>("geom")
+                        .HasColumnType("geometry (point)");
+
+                    b.HasKey("id");
 
                     b.ToTable("DataWinWin","public");
                 });
 
             modelBuilder.Entity("ScraperModels.Models.Db.AdItemYad2DbModel", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
@@ -474,8 +487,8 @@ namespace ScraperDAL.Migrations
                     b.Property<string>("Pets")
                         .HasColumnType("text");
 
-                    b.Property<float?>("Price")
-                        .HasColumnType("real");
+                    b.Property<double?>("Price")
+                        .HasColumnType("double precision");
 
                     b.Property<string>("PropertyType")
                         .HasColumnType("text");
@@ -486,7 +499,10 @@ namespace ScraperDAL.Migrations
                     b.Property<string>("StreetName")
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.Property<Geometry>("geom")
+                        .HasColumnType("geometry (point)");
+
+                    b.HasKey("id");
 
                     b.ToTable("DataYad2","public");
                 });

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Scheduler.Models;
 using ScraperCore;
 using ScraperDAL;
@@ -16,6 +17,7 @@ namespace Update
         static void Main(string[] args)
         {
             IUpdater updater = default;
+            NpgsqlConnection.GlobalTypeMapper.UseNetTopologySuite();
 
             if (args.Count() > 0 || 1==1)
             {
@@ -34,6 +36,9 @@ namespace Update
                     var scraper = (EnumScrapers)System.Enum.Parse(typeof(EnumScrapers), parsedParam, true);
                     switch (scraper)
                     {
+                        case EnumScrapers.Airdna:
+                            updater = new UpdaterAirdna();
+                            break;
                         case EnumScrapers.WinWin:
                             updater = new UpdaterWinWin();
                             break;

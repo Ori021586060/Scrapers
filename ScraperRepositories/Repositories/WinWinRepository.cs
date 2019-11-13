@@ -9,6 +9,11 @@ namespace ScraperRepositories.Repositories
 {
     public class WinWinRepository: RepositoryBase
     {
+        public WinWinRepository()
+        {
+            _tableName = "DataWinWin";
+        }
+
         public bool UpdateData(DataDomainModel data)
         {
             var result = true;
@@ -30,14 +35,16 @@ namespace ScraperRepositories.Repositories
             }
             _context.SaveChanges();
 
-            return result;
-        }
-
-        public bool Truncate()
-        {
-            var result = Truncate("DataWinWin");
+            UpdateGeometry();
 
             return result;
         }
+
+        //public bool Truncate()
+        //{
+        //    var result = Truncate("DataWinWin");
+
+        //    return result;
+        //}
     }
 }

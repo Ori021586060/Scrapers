@@ -12,6 +12,11 @@ namespace ScraperRepositories.Repositories
 {
     public class Yad2Repository: RepositoryBase
     {
+        public Yad2Repository()
+        {
+            _tableName = "DataYad2";
+        }
+
         public bool UpdateData(DataDomainModel data)
         {
             var result = true;
@@ -34,14 +39,16 @@ namespace ScraperRepositories.Repositories
             }
             _context.SaveChanges();
 
-            return result;
-        }
-
-        public bool Truncate()
-        {
-            var result = Truncate("DataYad2");
+            UpdateGeometry();
 
             return result;
         }
+
+        //public bool Truncate()
+        //{
+        //    var result = Truncate("DataYad2");
+
+        //    return result;
+        //}
     }
 }

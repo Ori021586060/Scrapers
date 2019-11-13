@@ -12,6 +12,11 @@ namespace ScraperRepositories.Repositories
 {
     public class KomoRepository : RepositoryBase
     {
+        public KomoRepository()
+        {
+            _tableName = "DataKomo";
+        }
+
         public bool UpdateData(DataDomainModel data)
         {
             var result = true;
@@ -37,14 +42,16 @@ namespace ScraperRepositories.Repositories
             }
             _context.SaveChanges();
 
-            return result;
-        }
-
-        public bool Truncate()
-        {
-            var result = Truncate("DataKomo");
+            UpdateGeometry();
 
             return result;
         }
+
+        //public bool Truncate()
+        //{
+        //    var result = Truncate("DataKomo");
+
+        //    return result;
+        //}
     }
 }

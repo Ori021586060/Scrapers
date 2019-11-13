@@ -25,12 +25,22 @@ namespace ScraperDAL
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasPostgresExtension("postgis");
-            modelBuilder.Entity<AdItemHomeLessDbModel>().Property(u => u.Geometry).HasColumnType("geometry (point)");
-            modelBuilder.Entity<AdItemKomoDbModel>().Property(u => u.Geometry).HasColumnType("geometry (point)");
-            modelBuilder.Entity<AdItemOnmapDbModel>().Property(u => u.Geometry).HasColumnType("geometry (point)");
-            modelBuilder.Entity<AdItemYad2DbModel>().Property(u => u.Geometry).HasColumnType("geometry (point)");
-            modelBuilder.Entity<AdItemWinWinDbModel>().Property(u => u.Geometry).HasColumnType("geometry (point)");
-            modelBuilder.Entity<AdItemAirdnaDbModel>().Property(u => u.Geometry).HasColumnType("geometry (point)");
+            modelBuilder.Entity<AdItemHomeLessDbModel>()
+                .Property(u => u.geom)
+                .HasColumnType("geometry (point)");
+
+            modelBuilder.Entity<AdItemKomoDbModel>().Property(u => u.geom).HasColumnType("geometry (point)");
+
+            modelBuilder.Entity<AdItemOnmapDbModel>().Property(u => u.geom).HasColumnType("geometry (point)");
+
+            modelBuilder.Entity<AdItemYad2DbModel>().Property(u => u.geom).HasColumnType("geometry (point)");
+
+            modelBuilder.Entity<AdItemWinWinDbModel>().Property(u => u.geom).HasColumnType("geometry (point)");
+
+            modelBuilder.Entity<AdItemAirdnaDbModel>()
+                .Property(u => u.geom)
+                .HasColumnType("geometry (point)");
+                //.HasComputedColumnSql("ST_SetSRID(ST_MakePoint(public.\"DataAirdna.Longitude\", public.\"DataAirdna.Latitude\"), 4326)");
 
             modelBuilder.Entity<AdItemYad2DbModel>().ToTable("DataYad2", schema: "public");
             modelBuilder.Entity<AdItemWinWinDbModel>().ToTable("DataWinWin", schema: "public");
@@ -47,7 +57,6 @@ namespace ScraperDAL
             string connectionString = config.GetConnectionString("DefaultConnection");
 
             optionsBuilder.UseNpgsql(connectionString, o => o.UseNetTopologySuite());
-
             //optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=dev1-sonar;Username=dev1-sonar;Password=Zx123456");
         }
     }

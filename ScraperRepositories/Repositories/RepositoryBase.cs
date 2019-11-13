@@ -9,10 +9,16 @@ namespace ScraperRepositories.Repositories
     public class RepositoryBase
     {
         protected ScrapersContext _context { get; set; } = new ScrapersContext();
+        protected string _tableName { get; set; }
 
-        protected bool Truncate(string table)
+        protected void UpdateGeometry()
         {
-            var sql = $"TRUNCATE TABLE public.\"{table}\"";
+            _context.Database.ExecuteSqlCommand("call updateloc(\"{_tableName}\")");
+        }
+
+        protected bool Truncate()
+        {
+            var sql = $"TRUNCATE TABLE public.\"{_tableName}\"";
             _context.Database.ExecuteSqlCommand(sql);
 
             return true;

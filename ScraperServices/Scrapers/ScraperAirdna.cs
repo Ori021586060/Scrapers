@@ -1248,7 +1248,7 @@ namespace ScraperServices.Scrapers
             _logBase(message, state is null ? _state : state);
         }
 
-        public ScraperHomeLessStatusModel StatusWorkspace()
+        public ScraperAirdnaStatusModel StatusWorkspace()
         {
             var state = (ScraperAirdnaStateModel)_state;
 
@@ -1263,7 +1263,7 @@ namespace ScraperServices.Scrapers
             var amountItemsFromPages = _statusWorkspace_AmountItemsFromPages(state);
             var amountItemUniquesFromPages = _statusWorkspace_AmountItemUniquesFromPages(state);
 
-            var status = new ScraperHomeLessStatusModel()
+            var status = new ScraperAirdnaStatusModel()
             {
                 ScrapeDate = scrapeDate,
                 AmountItemsFromPath = amountItemsFromPath,
@@ -1314,7 +1314,7 @@ namespace ScraperServices.Scrapers
             return list;
         }
 
-        public void PrintStatus(ScraperHomeLessStatusModel status)
+        public void PrintStatus(ScraperAirdnaStatusModel status)
         {
             _log($"ScrapeDate: {status.ScrapeDate}");
             _log($"AmountItemsFromPath: {status.AmountItemsFromPath}");

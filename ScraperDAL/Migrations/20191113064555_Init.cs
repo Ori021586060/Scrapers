@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
+using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace ScraperDAL.Migrations
@@ -19,9 +19,9 @@ namespace ScraperDAL.Migrations
                 name: "DataAirdna",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
+                    id = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Geometry = table.Column<byte[]>(type: "geometry (point)", nullable: true),
+                    geom = table.Column<Geometry>(type: "geometry (point)", nullable: true),
                     AdItemId = table.Column<string>(nullable: true),
                     Title = table.Column<string>(nullable: true),
                     Location = table.Column<string>(nullable: true),
@@ -41,15 +41,16 @@ namespace ScraperDAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DataAirdna", x => x.Id);
+                    table.PrimaryKey("PK_DataAirdna", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "DataKomo",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
+                    id = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    geom = table.Column<Geometry>(type: "geometry (point)", nullable: true),
                     AdItemId = table.Column<string>(nullable: true),
                     Updated = table.Column<string>(nullable: true),
                     Latitude = table.Column<double>(nullable: false),
@@ -58,7 +59,7 @@ namespace ScraperDAL.Migrations
                     Phone1 = table.Column<string>(nullable: true),
                     Phone2 = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
-                    Price = table.Column<float>(nullable: true),
+                    Price = table.Column<double>(nullable: true),
                     PropertyType = table.Column<string>(nullable: true),
                     Rooms = table.Column<int>(nullable: true),
                     Floor = table.Column<int>(nullable: true),
@@ -69,15 +70,16 @@ namespace ScraperDAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DataKomo", x => x.Id);
+                    table.PrimaryKey("PK_DataKomo", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "DataOnmap",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
+                    id = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    geom = table.Column<Geometry>(type: "geometry (point)", nullable: true),
                     AdItemId = table.Column<string>(nullable: true),
                     DateCreate = table.Column<string>(nullable: true),
                     DateUpdate = table.Column<string>(nullable: true),
@@ -103,14 +105,14 @@ namespace ScraperDAL.Migrations
                     ContactName = table.Column<string>(nullable: true),
                     ContactPhone = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
-                    Price = table.Column<float>(nullable: true),
+                    Price = table.Column<double>(nullable: true),
                     PropertyType = table.Column<string>(nullable: true),
                     Section = table.Column<string>(nullable: true),
                     Images = table.Column<List<string>>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DataOnmap", x => x.Id);
+                    table.PrimaryKey("PK_DataOnmap", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -118,8 +120,9 @@ namespace ScraperDAL.Migrations
                 schema: "public",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
+                    id = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    geom = table.Column<Geometry>(type: "geometry (point)", nullable: true),
                     AdItemId = table.Column<string>(nullable: true),
                     DateUpdated = table.Column<string>(nullable: true),
                     City = table.Column<string>(nullable: true),
@@ -143,12 +146,12 @@ namespace ScraperDAL.Migrations
                     Phone2 = table.Column<string>(nullable: true),
                     AgencyName = table.Column<string>(nullable: true),
                     Address = table.Column<string>(nullable: true),
-                    Price = table.Column<float>(nullable: true),
+                    Price = table.Column<double>(nullable: true),
                     LinkToProfile = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DataHomeLess", x => x.Id);
+                    table.PrimaryKey("PK_DataHomeLess", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -156,8 +159,9 @@ namespace ScraperDAL.Migrations
                 schema: "public",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
+                    id = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    geom = table.Column<Geometry>(type: "geometry (point)", nullable: true),
                     AdItemId = table.Column<string>(nullable: true),
                     DateUpdate = table.Column<string>(nullable: true),
                     Longitude = table.Column<double>(nullable: true),
@@ -173,7 +177,7 @@ namespace ScraperDAL.Migrations
                     IsPartners = table.Column<string>(nullable: true),
                     AmountPayment = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
-                    Price = table.Column<float>(nullable: true),
+                    Price = table.Column<double>(nullable: true),
                     IsAgent = table.Column<string>(nullable: true),
                     ContactName = table.Column<string>(nullable: true),
                     Phone1 = table.Column<string>(nullable: true),
@@ -182,7 +186,7 @@ namespace ScraperDAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DataWinWin", x => x.Id);
+                    table.PrimaryKey("PK_DataWinWin", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -190,8 +194,9 @@ namespace ScraperDAL.Migrations
                 schema: "public",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
+                    id = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    geom = table.Column<Geometry>(type: "geometry (point)", nullable: true),
                     AdItemId = table.Column<string>(nullable: true),
                     DateCreate = table.Column<string>(nullable: true),
                     DateUpdate = table.Column<string>(nullable: true),
@@ -212,14 +217,14 @@ namespace ScraperDAL.Migrations
                     ContactName = table.Column<string>(nullable: true),
                     ContactPhone = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
-                    Price = table.Column<float>(nullable: true),
+                    Price = table.Column<double>(nullable: true),
                     PropertyType = table.Column<string>(nullable: true),
                     AirConditioner = table.Column<string>(nullable: true),
                     Images = table.Column<List<string>>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DataYad2", x => x.Id);
+                    table.PrimaryKey("PK_DataYad2", x => x.id);
                 });
         }
 

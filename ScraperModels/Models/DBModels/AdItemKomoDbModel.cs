@@ -12,7 +12,7 @@ namespace ScraperModels.Models.Db
     public class AdItemKomoDbModel : BaseDbModel
     {
         [Key]
-        public int Id { get; set; }
+        public int id { get; set; }
         public string AdItemId { get; set; }
         public string Updated { get; set; }
         public double Latitude { get; set; }
@@ -21,7 +21,7 @@ namespace ScraperModels.Models.Db
         public string Phone1 { get; set; }
         public string Phone2 { get; set; }
         public string Description { get; set; }
-        public float? Price { get; set; }
+        public double? Price { get; set; }
         public string PropertyType { get; set; }
         public int? Rooms { get; set; }
         public int? Floor { get; set; }

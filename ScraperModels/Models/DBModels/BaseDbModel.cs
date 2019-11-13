@@ -1,7 +1,11 @@
-﻿namespace ScraperModels.Models.Db
+﻿using Npgsql;
+using NpgsqlTypes;
+using NetTopologySuite.Geometries;
+
+namespace ScraperModels.Models.Db
 {
     public class BaseDbModel
     {
-        public byte[] Geometry { get; set; }
+        public NetTopologySuite.Geometries.Geometry geom { get; set; }
     }
 }

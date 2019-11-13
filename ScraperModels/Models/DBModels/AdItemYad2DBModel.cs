@@ -15,7 +15,7 @@ namespace ScraperModels.Models.Db
     {
         [Required]
         [Key]
-        public int Id { get; set; }
+        public int id { get; set; }
         public string AdItemId { get; set; }
         public string DateCreate { get; set; }
         public string DateUpdate { get; set; }
@@ -37,7 +37,7 @@ namespace ScraperModels.Models.Db
         public string ContactName { get; set; }
         public string ContactPhone { get; set; }
         public string Description { get; set; }
-        public float? Price { get; set; }
+        public double? Price { get; set; }
         public string PropertyType { get; set; }
         public string AirConditioner { get; set; }
         public List<string> Images { get; set; }

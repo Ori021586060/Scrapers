@@ -12,7 +12,7 @@ namespace ScraperModels.Models.Db
     public class AdItemHomeLessDbModel : BaseDbModel
     {
         [Key]
-        public int Id { get; set; }
+        public int id { get; set; }
         public string AdItemId { get; set; }
         public string DateUpdated { get; set; }
         public string City { get; set; }
@@ -36,7 +36,7 @@ namespace ScraperModels.Models.Db
         public string Phone2 { get; set; }
         public string AgencyName { get; set; }
         public string Address { get; set; }
-        public float? Price { get; set; }
+        public double? Price { get; set; }
         public string LinkToProfile { get; set; }
 
         public AdItemHomeLessDbModel FromDomain(AdItemHomeLessDomainModel item)

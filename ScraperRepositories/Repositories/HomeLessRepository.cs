@@ -12,6 +12,11 @@ namespace ScraperRepositories.Repositories
 {
     public class HomeLessRepository : RepositoryBase
     {
+        public HomeLessRepository()
+        {
+            _tableName = "DataHomeLess";
+        }
+
         public bool UpdateData(DataDomainModel data)
         {
             var result = true;
@@ -38,14 +43,16 @@ namespace ScraperRepositories.Repositories
             }
             _context.SaveChanges();
 
-            return result;
-        }
-
-        public bool Truncate()
-        {
-            var result = Truncate("DataHomeLess");
+            UpdateGeometry();
 
             return result;
         }
+
+        //public bool Truncate()
+        //{
+        //    var result = Truncate("DataHomeLess");
+
+        //    return result;
+        //}
     }
 }

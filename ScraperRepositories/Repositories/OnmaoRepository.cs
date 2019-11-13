@@ -12,6 +12,11 @@ namespace ScraperRepositories.Repositories
 {
     public class OnmapRepository : RepositoryBase
     {
+        public OnmapRepository()
+        {
+            _tableName = "DataOnmap";
+        }
+
         public bool UpdateData(DataDomainModel data)
         {
             var result = true;
@@ -34,14 +39,16 @@ namespace ScraperRepositories.Repositories
             }
             _context.SaveChanges();
 
-            return result;
-        }
-
-        public bool Truncate()
-        {
-            var result = Truncate("DataOnmap");
+            UpdateGeometry();
 
             return result;
         }
+
+        //public bool Truncate()
+        //{
+        //    var result = Truncate("DataOnmap");
+
+        //    return result;
+        //}
     }
 }

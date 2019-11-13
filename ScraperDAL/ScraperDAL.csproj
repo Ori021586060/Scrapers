@@ -8,6 +8,34 @@
   <ItemGroup>
     <Compile Remove="Migrations\20191110140222_Init.cs" />
     <Compile Remove="Migrations\20191110140222_Init.Designer.cs" />
+    <Compile Remove="Migrations\20191110155258_Init.cs" />
+    <Compile Remove="Migrations\20191110155258_Init.Designer.cs" />
+    <Compile Remove="Migrations\20191110155525_Init.cs" />
+    <Compile Remove="Migrations\20191110155525_Init.Designer.cs" />
+    <Compile Remove="Migrations\20191111015232_Init.cs" />
+    <Compile Remove="Migrations\20191111015232_Init.Designer.cs" />
+    <Compile Remove="Migrations\20191111015506_Init.cs" />
+    <Compile Remove="Migrations\20191111015506_Init.Designer.cs" />
+    <Compile Remove="Migrations\20191111021659_Init.cs" />
+    <Compile Remove="Migrations\20191111021659_Init.Designer.cs" />
+    <Compile Remove="Migrations\20191111023456_Init.cs" />
+    <Compile Remove="Migrations\20191111023456_Init.Designer.cs" />
+    <Compile Remove="Migrations\20191111025120_Init.cs" />
+    <Compile Remove="Migrations\20191111025120_Init.Designer.cs" />
+    <Compile Remove="Migrations\20191111025741_Init.cs" />
+    <Compile Remove="Migrations\20191111025741_Init.Designer.cs" />
+    <Compile Remove="Migrations\20191111030059_Init.cs" />
+    <Compile Remove="Migrations\20191111030059_Init.Designer.cs" />
+    <Compile Remove="Migrations\20191111030229_Init.cs" />
+    <Compile Remove="Migrations\20191111030229_Init.Designer.cs" />
+    <Compile Remove="Migrations\20191111031601_Init.cs" />
+    <Compile Remove="Migrations\20191111031601_Init.Designer.cs" />
+    <Compile Remove="Migrations\20191111031753_Init.cs" />
+    <Compile Remove="Migrations\20191111031753_Init.Designer.cs" />
+    <Compile Remove="Migrations\20191111031905_Init.cs" />
+    <Compile Remove="Migrations\20191111031905_Init.Designer.cs" />
+    <Compile Remove="Migrations\20191113064527_Init.cs" />
+    <Compile Remove="Migrations\20191113064527_Init.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,6 +65,8 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.0.1" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Design" Version="1.1.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite" Version="3.0.1" />
+    <PackageReference Include="Npgsql.LegacyPostgis" Version="4.1.1" />
+    <PackageReference Include="Npgsql.NetTopologySuite" Version="4.1.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -12,7 +12,7 @@ namespace ScraperModels.Models.Db
     public class AdItemAirdnaDbModel: BaseDbModel
     {
         [Key]
-        public int Id { get; set; }
+        public int id { get; set; }
         public string AdItemId { get; set; }
         public string Title { get; set; }
         public string Location { get; set; }

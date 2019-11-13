@@ -1,4 +1,5 @@
-﻿using ScraperServices.Models.Airdna;
+﻿using Npgsql;
+using ScraperServices.Models.Airdna;
 using ScraperServices.Models.HomeLess;
 using ScraperServices.Scrapers;
 using System;
@@ -13,6 +14,7 @@ namespace TestAirDna
         static void Main(string[] args)
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+            NpgsqlConnection.GlobalTypeMapper.UseNetTopologySuite();
 
             var state = new ScraperAirdnaStateModel() { IsNew = true, };
 

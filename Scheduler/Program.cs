@@ -21,6 +21,28 @@ namespace Scheduler
                 var schedulerService = new SchedulerService();
                 switch (config.Scraper)
                 {
+                    case EnumScrapers.Airdna:
+                        switch (config.Job)
+                        {
+                            case EnumJobs.ScrapeNewThenSaveStore:
+                                schedulerService.AirdnaScrapeNewThenSaveStore();
+                                break;
+
+                            case EnumJobs.ScrapeContinueThenSaveStore:
+                                schedulerService.AirdnaScrapeContinueThenSaveStore();
+                                break;
+
+                            case EnumJobs.GenerateExcelThenSaveStore:
+                                schedulerService.AirdnaGenerateExcelThenSaveStore();
+                                break;
+
+                            case EnumJobs.StatusWorkspace:
+                            default:
+                                schedulerService.AirdnaStatusWorkspace();
+                                break;
+                        }
+                        break;
+
                     case EnumScrapers.Onmap:
                         switch (config.Job)
                         {

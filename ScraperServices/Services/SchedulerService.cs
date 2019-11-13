@@ -12,12 +12,62 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using ScraperServices.Models.Airdna;
 
 namespace ScraperServices.Services
 {
     public class SchedulerService
     {
         private SchedulerStateModel _schedulerStateModel { get; set; } = new SchedulerStateModel();
+
+        public void AirdnaScrapeNewThenSaveStore()
+        {
+            _airdnaScrapeThenSaveStore(isNew: true);
+        }
+
+        public void AirdnaScrapeContinueThenSaveStore()
+        {
+            _airdnaScrapeThenSaveStore(isNew: false);
+        }
+
+        public void AirdnaGenerateExcelThenSaveStore()
+        {
+            _airdnaScrapeThenSaveStore(needScrape: false);
+        }
+
+        private void _airdnaScrapeThenSaveStore(bool isNew = false, bool needScrape = true)
+        {
+            _log($"Start AirdnaScrapeThenSaveStore (isNew={isNew})");
+
+            var state = new ScraperAirdnaStateModel() { IsNew = isNew, };
+
+            var scraper = new ScraperAirdna(state);
+
+            if (needScrape) scraper.Scrape();
+
+            var dataOfScrape = scraper.GetDomainModel();
+
+            var excelService = new ExcelAirdnaService(state);
+
+            var excelData = excelService.CreateExcel(dataOfScrape);
+
+            var pathToFile = excelService.SaveToFile(excelData);
+
+            var archive = new ArchiveRepository();
+
+            archive.Save(pathToFile, state.TypeScraper);
+
+            _log($"End AirdnaScrapeThenSaveStore (isNew={isNew}), Spent time {_calcSpentTime2String(state)}");
+        }
+
+        public void AirdnaStatusWorkspace()
+        {
+            var scraper = new ScraperAirdna();
+
+            var status = scraper.StatusWorkspace();
+            scraper.SaveStatus(status);
+            scraper.PrintStatus(status);
+        }
 
         public void OnmapScrapeNewThenSaveStore()
         {

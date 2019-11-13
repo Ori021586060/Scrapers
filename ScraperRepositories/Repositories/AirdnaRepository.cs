@@ -12,6 +12,11 @@ namespace ScraperRepositories.Repositories
 {
     public class AirdnaRepository : RepositoryBase
     {
+        public AirdnaRepository()
+        {
+            _tableName = "DataAirdna";
+        }
+
         public bool UpdateData(DataDomainModel data)
         {
             var result = true;
@@ -38,14 +43,21 @@ namespace ScraperRepositories.Repositories
             }
             _context.SaveChanges();
 
-            return result;
-        }
-
-        public bool Truncate()
-        {
-            var result = Truncate("DataAirdna");
+            UpdateGeometry();
 
             return result;
         }
+
+        //private void UpdateGeometry()
+        //{
+        //    _context.Database.ExecuteSqlCommand("updateloc(\"DataAirdna\")");
+        //}
+
+        //public bool Truncate()
+        //{
+        //    var result = Truncate("DataAirdna");
+
+        //    return result;
+        //}
     }
 }
