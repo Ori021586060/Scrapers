@@ -29,12 +29,18 @@ namespace ScraperModels.Models.Domain
 
         public AdItemKomoDomainModel FromDto(ItemKomoDtoModel itemDto)
         {
+            var hasError = false;
             ScraperModels.Models.KomoDto.DataCoordinatesLatLng location = null;
             try
             {
                 location = itemDto?.DataCoordinates?.results?.FirstOrDefault()?.geometry?.location;
             }
             catch
+            {
+                hasError = true;
+            }
+
+            if (hasError || location is null)
             {
                 Console.WriteLine($"Error detect location. Alert");
                 return null;
