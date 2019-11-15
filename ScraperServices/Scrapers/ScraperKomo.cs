@@ -105,7 +105,8 @@ namespace ScraperServices.Scrapers
                 var filename = file.FullName;
                 var data = JsonConvert.DeserializeObject<ItemKomoDtoModel>(await File.ReadAllTextAsync(filename));
                 var rowDomainModel = new AdItemKomoDomainModel().FromDto(data);
-                listRowsDomainModel.Add(rowDomainModel);
+                if (rowDomainModel != null)
+                    listRowsDomainModel.Add(rowDomainModel);
             }
 
             _log($"Done");

@@ -13,12 +13,19 @@ namespace ScraperRepositories.Repositories
 
         protected void UpdateGeometry()
         {
-            _context.Database.ExecuteSqlCommand("call updateloc(\"{_tableName}\")");
+            var sql = $"call updateloc('public.\"{_tableName}\"')";
+
+            Console.WriteLine($"call sql:{sql}");
+
+            _context.Database.ExecuteSqlCommand(sql);
         }
 
         protected bool Truncate()
         {
             var sql = $"TRUNCATE TABLE public.\"{_tableName}\"";
+
+            Console.WriteLine($"call sql:{sql}");
+
             _context.Database.ExecuteSqlCommand(sql);
 
             return true;

@@ -47,17 +47,5 @@ namespace ScraperRepositories.Repositories
 
             return result;
         }
-
-        //private void UpdateGeometry()
-        //{
-        //    _context.Database.ExecuteSqlCommand("updateloc(\"DataAirdna\")");
-        //}
-
-        //public bool Truncate()
-        //{
-        //    var result = Truncate("DataAirdna");
-
-        //    return result;
-        //}
     }
 }
